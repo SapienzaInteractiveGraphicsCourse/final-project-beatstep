@@ -1,27 +1,31 @@
 import { UniversalCamera } from "@babylonjs/core/Cameras/universalCamera"
 import { Tools } from "@babylonjs/core/Misc/tools";
 import { Vector3 } from "@babylonjs/core/Maths/math";
+import { PointerEventTypes } from "@babylonjs/core/Events/pointerEvents";
 
-class FPSCamera extends UniversalCamera{
+class FPSCamera extends UniversalCamera {
 
-    constructor(name, position, scene){
+    constructor(name, position, scene) {
         super(name, position, scene);
 
         this.inputs.clear();
-        this.inputs.add(new FPSCameraInput());
+        this.inputs.add(new FPSKeyboardCameraInput());
+        this.inputs.add(new FPSMouseCameraInput(true));
 
         this.minZ = 0.0001;
-        this.speed = 0.2;
-        this.angularSensibility = 6000;
+        this.speed = 0.12;
+        this.inertia = 0.7;
+        this.angularSensibility = 6500;
         this.angularSpeed = 0.05;
-        this.angle = Math.PI/2;
+        this.angle = Math.PI / 2;
         this.direction = new Vector3(Math.cos(this.angle), 0, Math.sin(this.angle));
+        this.canGetPointerLock = false;
     }
 
 }
 
-class FPSCameraInput{
-    constructor(){
+class FPSKeyboardCameraInput {
+    constructor() {
         this._keys = [];
         this.keysUp = [83];
         this.keysDown = [87];
@@ -30,13 +34,13 @@ class FPSCameraInput{
     }
 
     // Add attachment controls
-    attachControl(noPreventDefault){
+    attachControl(noPreventDefault) {
         var _this = this;
         var engine = this.camera.getEngine();
         var element = engine.getInputElement();
         if (!this._onKeyDown) {
             element.tabIndex = 1;
-            this._onKeyDown = function (evt) {                 
+            this._onKeyDown = function (evt) {
                 if (_this.keysUp.indexOf(evt.keyCode) !== -1 ||
                     _this.keysDown.indexOf(evt.keyCode) !== -1 ||
                     _this.keysLeft.indexOf(evt.keyCode) !== -1 ||
@@ -70,37 +74,39 @@ class FPSCameraInput{
     }
 
     // Keys movement control by checking inputs
-    checkInputs(){
+    checkInputs() {
         if (this._onKeyDown) {
             var camera = this.camera;
             for (var index = 0; index < this._keys.length; index++) {
                 var keyCode = this._keys[index];
                 var speed = camera.speed;
                 if (this.keysLeft.indexOf(keyCode) !== -1) {
-                    camera.rotation.y -= camera.angularSpeed;
-                    camera.direction.copyFromFloats(0, 0, 0);                
+                    camera.direction.copyFromFloats(-speed, 0, 0);
                 }
                 else if (this.keysUp.indexOf(keyCode) !== -1) {
-                    camera.direction.copyFromFloats(0, 0, speed);               
+                    camera.direction.copyFromFloats(0, 0, -speed);
                 }
                 else if (this.keysRight.indexOf(keyCode) !== -1) {
-                    camera.rotation.y += camera.angularSpeed;
-                    camera.direction.copyFromFloats(0, 0, 0);
+                    camera.direction.copyFromFloats(speed, 0, 0);
                 }
                 else if (this.keysDown.indexOf(keyCode) !== -1) {
-                    camera.direction.copyFromFloats(0, 0, -speed);
+                    camera.direction.copyFromFloats(0, 0, speed);
                 }
                 if (camera.getScene().useRightHandedSystem) {
                     camera.direction.z *= -1;
                 }
+                let rotx = camera.rotation.x
+                camera.rotation.x = 0;
                 camera.getViewMatrix().invertToRef(camera._cameraTransformMatrix);
                 Vector3.TransformNormalToRef(camera.direction, camera._cameraTransformMatrix, camera._transformedDirection);
-                camera.cameraDirection.addInPlace(camera._transformedDirection);
+                //camera.cameraDirection.addInPlace(camera._transformedDirection);
+                camera.cameraDirection.copyFrom(camera._transformedDirection);
+                camera.rotation.x = rotx;
             }
         }
     }
 
-    detachControl(){
+    detachControl() {
         var engine = this.camera.getEngine();
         var element = engine.getInputElement();
         if (this._onKeyDown) {
@@ -118,11 +124,80 @@ class FPSCameraInput{
     _onLostFocus(e) {
         this._keys = [];
     }
-    getClassName(){
-        return "FPSCameraInput";
+    getClassName() {
+        return "FPSKeyboardCameraInput";
     }
-    getSimpleName(){
-        return "fpsinput";
+    getSimpleName() {
+        return "FPSKeyboard";
+    }
+}
+
+class FPSMouseCameraInput {
+
+    constructor(touchEnabled) {
+        if (touchEnabled === void 0) { touchEnabled = true; }
+        this.touchEnabled = touchEnabled;
+        this.buttons = [0, 1, 2];
+        this.angularSensibility = 2000.0;
+        this.restrictionX = 1000;
+        this.restrictionY = 1000;
+    }
+
+    attachControl(noPreventDefault) {
+        var _this = this;
+        var camera = this.camera;
+        var engine = camera.getEngine();
+        var scene = camera.getScene();
+        var element = engine.getInputElement();
+        var angle = { x: 0, y: 0 };
+        if (!this._pointerInput) {
+            this._pointerInput = function (p, s) {
+                if(camera.canGetPointerLock){
+                    scene.getEngine().enterPointerlock();
+                }
+            }
+        }
+        this._onSearchMove = function (evt) {
+            if (!engine.isPointerLock) {
+                return;
+            }
+            var offsetX = evt.movementX || evt.mozMovementX || evt.webkitMovementX || evt.msMovementX || 0;
+            var offsetY = evt.movementY || evt.mozMovementY || evt.webkitMovementY || evt.msMovementY || 0;
+            if (_this.camera.getScene().useRightHandedSystem) {
+                _this.camera.cameraRotation.y -= offsetX / _this.angularSensibility;
+            }
+            else {
+                _this.camera.cameraRotation.y += offsetX / _this.angularSensibility;
+            }
+            _this.camera.cameraRotation.x += offsetY / _this.angularSensibility;
+            _this.previousPosition = null;
+            if (!noPreventDefault) {
+                evt.preventDefault();
+            }
+        };
+        this._observer = this.camera.getScene().onPointerObservable.add(this._pointerInput, PointerEventTypes.POINTERDOWN);
+        element.addEventListener("mousemove", this._onSearchMove, false);
+    }
+
+
+    detachControl() {
+        var engine = this.camera.getEngine();
+        var element = engine.getInputElement();
+        if (this._observer && element) {
+            this.camera.getScene().onPointerObservable.remove(this._observer);
+            element.removeEventListener("mousemove", this._onSearchMove);
+            this._observer = null;
+            this._onSearchMove = null;
+            this.previousPosition = null;
+        }
+    }
+
+    getClassName() {
+        return "FPSMouseCameraInput";
+    }
+
+    getSimpleName() {
+        return "FPSMouse";
     }
 }
 

@@ -25,20 +25,13 @@ const createScene = function () {
 
     //SceneLoader.ImportMeshAsync("", "https://assets.babylonjs.com/meshes/", "box.babylon",);
     let box = Mesh.CreateBox("box",1,scene);
+    let ground = Mesh.CreateGround("ground",100,100,2,scene);
+    ground.position.copyFromFloats(0,-3,0);
     const camera = new FPSCamera("camera", new Vector3(0, 0, -3), scene);
-    // camera.minZ = 0.0001;
-    // camera.speed = 0.2;
-    // camera.angularSensibility = 6000;
-    // camera.keysDown.push(83); // s
-    // camera.keysUp.push(87); // w
-    // camera.keysLeft.push(65); // a
-    // camera.keysRight.push(68); // d
-    // camera.direction = new Vector3(Math.cos(camera.angle), 0, Math.sin(camera.angle));
+    camera.canGetPointerLock = true;
 
     camera.attachControl(canvas, true);
     const light = new HemisphericLight("light", new Vector3(1, 1, 0), scene);
-
-    console.log(camera.inputs);
 
     return scene;
 };

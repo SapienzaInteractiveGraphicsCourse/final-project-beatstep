@@ -37,6 +37,11 @@ module.exports = {
     devtool: "eval-cheap-module-source-map",
     devServer: {
       contentBase: './dist',
+      liveReload: true,
+      watchContentBase: true,
+      watchOptions: {
+        poll: true,
+      },
     },
     // watch: true,
     // watchOptions: {
