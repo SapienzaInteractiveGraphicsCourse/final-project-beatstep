@@ -1,49 +1,38 @@
-//import {Engine, Scene, SceneLoader, ArcRotateCamera, HemisphericLight} from '@babylonjs/core';
-//const BABYLON = {Engine, Scene, SceneLoader, ArcRotateCamera, HemisphericLight};
+import * as THREE from 'three';
+import { Clock } from 'three';
+import FPSCamera from './components/FPSCamera';
 
-import { Engine } from "@babylonjs/core/Engines/engine";
-import { Scene } from "@babylonjs/core/scene";
-import { Vector3 } from "@babylonjs/core/Maths/math.vector";
-import { UniversalCamera } from "@babylonjs/core/Cameras/universalCamera";
-import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
-import { Mesh } from "@babylonjs/core/Meshes/mesh";
-import { GridMaterial } from "@babylonjs/materials/grid";
-// Required side effects to populate the Create methods on the mesh class. Without this, the bundle would be smaller but the createXXX methods from mesh would not be accessible.
-import "@babylonjs/core/Meshes/meshBuilder";
-import "@babylonjs/core/Materials/standardMaterial";
+const scene = new THREE.Scene();
+//const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const clock = new Clock()
 
-import FPSCamera from "./components/Camera";
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+window.addEventListener("resize",()=>{
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+})
+document.body.appendChild(renderer.domElement);
+
+const camera = new FPSCamera(renderer.domElement,window.innerWidth, window.innerHeight,[0,0,5],[0,0,0]);
 
 
-const canvas = document.getElementById("renderCanvas"); // Get the canvas element
-const engine = new Engine(canvas, true); // Generate the BABYLON 3D engine
 
-// Add your code here matching the playground format
-const createScene = function () {
+const geometry = new THREE.BoxGeometry();
+const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const cube = new THREE.Mesh(geometry, material);
+scene.add(cube);
 
-    const scene = new Scene(engine);
+const animate = function () {
+    requestAnimationFrame(animate);
+    let delta = clock.getDelta();
 
-    //SceneLoader.ImportMeshAsync("", "https://assets.babylonjs.com/meshes/", "box.babylon",);
-    let box = Mesh.CreateBox("box",1,scene);
-    let ground = Mesh.CreateGround("ground",100,100,2,scene);
-    ground.position.copyFromFloats(0,-3,0);
-    const camera = new FPSCamera("camera", new Vector3(0, 0, -3), scene);
-    camera.canGetPointerLock = true;
+    //cube.rotation.x += 0.01;
+    //cube.rotation.y += 0.01;
 
-    camera.attachControl(canvas, true);
-    const light = new HemisphericLight("light", new Vector3(1, 1, 0), scene);
-
-    return scene;
+    camera.controls.update(delta)
+    renderer.render(scene, camera);
 };
 
-const scene = createScene(); //Call the createScene function
-
-// Register a render loop to repeatedly render the scene
-engine.runRenderLoop(function () {
-    scene.render();
-});
-
-// Watch for browser/canvas resize events
-window.addEventListener("resize", function () {
-    engine.resize();
-});
+animate();
