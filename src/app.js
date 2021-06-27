@@ -31,7 +31,7 @@ const animate = function () {
     //cube.rotation.x += 0.01;
     //cube.rotation.y += 0.01;
 
-    camera.controls.update(delta)
+    camera.movementUpdate(delta)
     renderer.render(scene, camera);
 };
 
