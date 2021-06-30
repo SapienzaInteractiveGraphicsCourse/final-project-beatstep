@@ -14,5 +14,5 @@ To run the project, serve the __/dist__ folder
 
 # Library used
 
-- Babylon.js
+- Three.js
 - ?
