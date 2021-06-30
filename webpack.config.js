@@ -21,11 +21,17 @@ module.exports = {
             },
             {
                 test: /\.(png|svg|jpg|jpeg|gif)$/i,
-                type: 'asset/images',
+                type: 'asset/resource',
+                generator: {
+                    filename: 'textures/[hash][ext]'
+                },
             },
             {
                 test: /\.(obj|stl|gltf|babylon)$/i,
-                type: 'asset/models',
+                type: 'asset/resource',
+                generator: {
+                    filename: 'models/[hash][ext]'
+                },
             },
         ],
     },
