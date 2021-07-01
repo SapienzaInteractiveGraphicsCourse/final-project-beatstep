@@ -9,7 +9,7 @@ class Wall {
         this.texture.wrapT = THREE.RepeatWrapping;
         this.texture.magFilter = THREE.NearestFilter;
 
-        this.texture.repeat.set(width/8, width/8);
+        this.texture.repeat.set(3,3);
 
         this.geometry = new THREE.PlaneGeometry(width,height);
         this.material = new THREE.MeshPhongMaterial({
@@ -17,7 +17,9 @@ class Wall {
             side: THREE.DoubleSide,
         });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
+
         this.mesh.receiveShadow = true;
+        this.mesh.castShadow = false;
 
         // Apply position
         this.mesh.position.set(x,y+height/2,z);

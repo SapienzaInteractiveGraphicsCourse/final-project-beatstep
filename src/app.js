@@ -51,7 +51,7 @@ scene.add(genFloor(40));
 
 // Adding wall to scene
 let wall_1 = new Wall(wall1,0,0,-20, 40,20);
-let wall_2 = new Wall(wall1,-20,0,0, 40,10,0.5);
+let wall_2 = new Wall(wall1,-20,0,0, 40,20,0.5);
 scene.add(wall_1.obj);
 scene.add(wall_2.obj);
 
