@@ -64,6 +64,7 @@ const animate = function () {
 
     camera.movementUpdate(delta)
     renderer.render(scene, camera);
+    player.update(delta);
 };
 
 animate();

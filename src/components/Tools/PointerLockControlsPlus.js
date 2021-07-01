@@ -49,6 +49,10 @@ class PointerLockControlsPlus extends EventDispatcher {
         function onMouseDown(event) {
             if (scope.shouldLock && event.button == 0)
                 scope.lock();
+
+            if(event.button == 0){ // shoot
+
+            }
         }
 
         function onKeyDown ( event ) {
