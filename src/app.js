@@ -7,6 +7,8 @@ import './style.css';
 
 import { genFloor } from './components/TempFloor';
 import { addRifle } from './components/TempRifle';
+import Wall from './components/Wall';
+import wall1 from './asset/textures/wall1.png';
 
 const scene = new THREE.Scene();
 //const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -46,6 +48,12 @@ cube.castShadow = true;
 scene.add(cube);
 
 scene.add(genFloor(40));
+
+// Adding wall to scene
+let wall_1 = new Wall(wall1,0,0,-20, 40,20);
+let wall_2 = new Wall(wall1,-20,0,0, 40,10,0.5);
+scene.add(wall_1.obj);
+scene.add(wall_2.obj);
 
 const animate = function () {
     requestAnimationFrame(animate);
