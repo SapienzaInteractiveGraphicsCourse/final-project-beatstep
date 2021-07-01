@@ -91,6 +91,8 @@ class PointerLockControlsPlus extends EventDispatcher {
 				case 'ArrowRight':
 				case 'KeyD': scope.shouldMoveRight = false; break;
 
+                case 'Space': scope.shouldJump = false; break;
+
 			}
 
 		}

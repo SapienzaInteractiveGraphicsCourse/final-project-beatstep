@@ -1,0 +1,80 @@
+* {
+    margin: 0;padding: 0;
+    box-sizing: border-box;
+}
+html,body {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+}
+
+.overlay {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    width: 30%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.stat_bar{
+    margin-bottom: 10px;
+    width: 100%;
+    height: 30px;
+    background-color: #eee;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
+}
+
+.stat_bar .bar{
+    transition-duration: 500ms;
+    z-index: 10;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: black;
+}
+
+.stat_bar .sub_bar{
+    transition-duration: 2200ms;
+    z-index: 9;
+    background-color: rgb(88, 88, 88);
+}
+
+
+/* Colors */
+.stat_bar.green .bar{
+    background-color: green;
+}
+
+.stat_bar.green .sub_bar{
+    background-color: rgb(93, 192, 93);
+}
+
+
+
+
+.stat_bar.blue .bar{
+    background-color: rgb(37, 157, 255);
+}
+
+.stat_bar.blue .sub_bar{
+    background-color: rgb(137, 202, 255);
+}
+
+
+
+
+.stat_bar.red .bar{
+    background-color: red;
+}
+
+.stat_bar.red .sub_bar{
+    background-color: rgb(250, 134, 134);
+}

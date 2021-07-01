@@ -3,6 +3,8 @@ import { Clock } from 'three';
 import FPSCamera from './components/player/FPSCamera';
 import Player from './components/player/Player';
 
+import './style.css';
+
 import { genFloor } from './components/TempFloor';
 import { addRifle } from './components/TempRifle';
 
@@ -24,7 +26,7 @@ document.body.appendChild(renderer.domElement);
 const camera = new FPSCamera(renderer.domElement, window.innerWidth, window.innerHeight, [0, 2, 5], [0, 0, 0]);
 scene.add(camera);
 let player = new Player(camera);
-window.camera = camera;
+window.player = player;
 
 const color = 0xFFFFFF;
 
