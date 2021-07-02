@@ -74,6 +74,8 @@ class HUD {
         this.healthBar.setPercentage(100);
         this.createBar("shieldBar","blue");
         this.shieldBar.setPercentage(100);
+        this.createBar("ammoBar","red");
+        this.ammoBar.setPercentage(100);
 
 
     }

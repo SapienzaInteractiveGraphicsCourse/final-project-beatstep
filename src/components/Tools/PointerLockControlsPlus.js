@@ -10,6 +10,9 @@ const _vector = new Vector3();
 const _changeEvent = { type: 'change' };
 const _lockEvent = { type: 'lock' };
 const _unlockEvent = { type: 'unlock' };
+const _moveForwardEvent = { type: 'moveforward', distance: 0 };
+const _moveRightEvent = { type: 'moveright', distance: 0 };
+const _moveUpEvent = { type: 'moveup', distance: 0 };
 
 const _PI_2 = Math.PI / 2;
 
@@ -49,10 +52,6 @@ class PointerLockControlsPlus extends EventDispatcher {
         function onMouseDown(event) {
             if (scope.shouldLock && event.button == 0)
                 scope.lock();
-
-            if(event.button == 0){ // shoot
-
-            }
         }
 
         function onKeyDown ( event ) {
@@ -191,6 +190,10 @@ class PointerLockControlsPlus extends EventDispatcher {
 
             camera.position.addScaledVector(_vector, distance);
 
+            let evt = Object.assign({},_moveForwardEvent);
+            evt.distance = distance
+            scope.dispatchEvent(evt);
+
         };
 
         this.moveRight = function (distance) {
@@ -199,10 +202,18 @@ class PointerLockControlsPlus extends EventDispatcher {
 
             camera.position.addScaledVector(_vector, distance);
 
+            let evt = Object.assign({},_moveRightEvent);
+            evt.distance = distance
+            scope.dispatchEvent(evt);
+
         };
 
         this.moveUp = function (distance) {
             camera.position.addScaledVector(camera.up, distance);
+            
+            let evt = Object.assign({},_moveUpEvent);
+            evt.distance = distance
+            scope.dispatchEvent(evt);
         }
 
         this.lock = function () {

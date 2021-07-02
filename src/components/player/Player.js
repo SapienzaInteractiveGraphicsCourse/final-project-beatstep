@@ -10,6 +10,34 @@ class Player {
         this.camera = camera;
         this.hud = new HUD(camera);
         
+        let _health = 100;
+        let _shield = 0;
+        let _ammo = 1000;
+        
+        this.topHealth = 100;
+        this.topShield = 0;
+        this.topAmmo = 1000;
+        
+        Object.defineProperties(this,{
+            position: {
+                get: function() { return this.camera.position; }
+            },
+            health: {
+                get: function() {return _health},
+                set: function(d) {_health = d; this.hud.healthBar.setPercentage(_health/(this.topHealth*100))}
+            },
+            shield: {
+                get: function() {return _shield},
+                set: function(d) {_shield = d; this.hud.shieldBar.setPercentage(_shield/(this.topShield*100))}
+            },
+            ammo: {
+                get: function() {return _ammo},
+                set: function(d) {_ammo = d; this.hud.ammoBar.setPercentage(_ammo/(this.topAmmo*100))}
+            }
+        });
+
+
+        
 
         addRifle((obj) => {
             //obj.scale(0.5,0.5,0.5);
@@ -68,10 +96,6 @@ class Player {
         if(this.mixer){
             this.mixer.update(delta);
         }
-    }
-
-    get position() {
-        return camera.position;
     }
 
 }
