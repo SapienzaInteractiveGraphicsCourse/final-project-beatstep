@@ -14,10 +14,8 @@ class Pickup {
         });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
 
-        this.castShadow = true;
-
-        this.mesh.receiveShadow = true;
-        this.mesh.castShadow = false;
+        this.mesh.receiveShadow = false;
+        this.mesh.castShadow = true;
 
         // Apply position
         this.mesh.position.set(x,y+dimension/2,z);

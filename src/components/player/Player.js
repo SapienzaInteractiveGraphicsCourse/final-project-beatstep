@@ -41,8 +41,8 @@ class Player {
 
         addRifle((obj) => {
             //obj.scale(0.5,0.5,0.5);
-            let initAngle = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.05, Math.PI/20, 0, "XYZ"));
-            let shootAngle = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.05+(Math.PI/12), Math.PI/20, 0, "XYZ"));
+            let initAngle = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.05, Math.PI/14, 0, "XYZ"));
+            let shootAngle = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.05+(Math.PI/12), Math.PI/14, 0, "XYZ"));
 
             obj.position.set(0.3, -0.25, -1);
             obj.quaternion.set(initAngle.x, initAngle.y, initAngle.z, initAngle.w);

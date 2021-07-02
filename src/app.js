@@ -20,7 +20,7 @@ const scene = new THREE.Scene();
 //const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const clock = new Clock()
 
-const renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -44,7 +44,13 @@ scene.add(ambientLight);
 const pointLight = new THREE.PointLight(color);
 pointLight.position.set(0,30,0);
 pointLight.castShadow = true;
+pointLight.shadow.mapSize.set(4192,4192);
+pointLight.shadow.radius = 2;
 scene.add(pointLight);
+
+//TODO: DEBUG, just to see the point light
+const helper = new THREE.CameraHelper( pointLight.shadow.camera );
+scene.add( helper );
 
 const geometry = new THREE.BoxGeometry();
 const material = new THREE.MeshToonMaterial({ color: 0x00ff00 });
