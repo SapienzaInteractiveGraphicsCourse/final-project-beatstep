@@ -15,6 +15,13 @@ import wall1 from './asset/textures/wall1.png';
 // Pickups
 import Pickup from './components/Pickup';
 import pickup_health from './asset/textures/pickup_health.png';
+import pickup_shield from './asset/textures/pickup_shield.png';
+import pickup_ammo from './asset/textures/pickup_ammo.png';
+
+// Gas Cylinder
+import GasCylinder from './components/GasCylinder';
+import gas_top from './asset/textures/gas_top.png';
+import gas_side from './asset/textures/gas_side.png';
 
 const scene = new THREE.Scene();
 //const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -69,7 +76,15 @@ scene.add(wall_2.obj);
 
 // Adding pickups to scene
 let healthPickup = new Pickup(pickup_health,-6,0.5,-6,()=>{});
+let shieldPickup = new Pickup(pickup_shield,-4.5,0.5,-6,()=>{});
+let ammoPickup = new Pickup(pickup_ammo,-3,0.5,-6,()=>{});
 scene.add(healthPickup.obj);
+scene.add(shieldPickup.obj);
+scene.add(ammoPickup.obj);
+
+// Adding gas cylinder to scene
+let gasCylinder = new GasCylinder(gas_top,gas_top,gas_side,6,0,6,0.5,()=>{});
+scene.add(gasCylinder.obj);
 
 const animate = function () {
     requestAnimationFrame(animate);
@@ -82,6 +97,8 @@ const animate = function () {
     renderer.render(scene, camera);
     player.update(delta);
     healthPickup.update(delta);
+    shieldPickup.update(delta);
+    ammoPickup.update(delta);
 };
 
 animate();
