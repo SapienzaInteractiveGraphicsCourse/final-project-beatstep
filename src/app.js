@@ -7,8 +7,14 @@ import './style.css';
 
 import { genFloor } from './components/TempFloor';
 import { addRifle } from './components/TempRifle';
+
+// Walls
 import Wall from './components/Wall';
 import wall1 from './asset/textures/wall1.png';
+
+// Pickups
+import Pickup from './components/Pickup';
+import pickup_health from './asset/textures/pickup_health.png';
 
 const scene = new THREE.Scene();
 //const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -49,11 +55,15 @@ scene.add(cube);
 
 scene.add(genFloor(40));
 
-// Adding wall to scene
+// Adding walls to scene
 let wall_1 = new Wall(wall1,0,0,-20, 40,20);
 let wall_2 = new Wall(wall1,-20,0,0, 40,20,0.5);
 scene.add(wall_1.obj);
 scene.add(wall_2.obj);
+
+// Adding pickups to scene
+let healthPickup = new Pickup(pickup_health,-6,0.5,-6,()=>{});
+scene.add(healthPickup.obj);
 
 const animate = function () {
     requestAnimationFrame(animate);
@@ -65,6 +75,7 @@ const animate = function () {
     camera.movementUpdate(delta)
     renderer.render(scene, camera);
     player.update(delta);
+    healthPickup.update(delta);
 };
 
 animate();

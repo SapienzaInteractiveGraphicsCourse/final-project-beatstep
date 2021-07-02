@@ -41,35 +41,31 @@ class Player {
 
         addRifle((obj) => {
             //obj.scale(0.5,0.5,0.5);
+            let initAngle = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.05, Math.PI/20, 0, "XYZ"));
+            let shootAngle = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.05+(Math.PI/12), Math.PI/20, 0, "XYZ"));
+
             obj.position.set(0.3, -0.25, -1);
-            obj.rotation.y = Math.PI / 13;
-            obj.rotation.x = 0.05;
-
-
-            // obj.position.set(0,-0.5,-1);
-            // obj.rotation.y = 0;
-            // obj.rotation.x = 0.35;
+            obj.quaternion.set(initAngle.x, initAngle.y, initAngle.z, initAngle.w);
 
             // Load animations
             const shootRotation = new THREE.QuaternionKeyframeTrack(
                 '.quaternion',
                 [0, 0.1, 0.3],
-                [obj.quaternion.x, obj.quaternion.y, obj.quaternion.z, obj.quaternion.w,
-                obj.rotation.x+0.1 * Math.PI, obj.rotation.y, obj.rotation.z, obj.quaternion.w,
-                obj.rotation.x, obj.rotation.y, obj.rotation.z, obj.quaternion.w],
+                [initAngle.x, initAngle.y, initAngle.z, initAngle.w,
+                shootAngle.x, shootAngle.y, shootAngle.z, shootAngle.w,
+                initAngle.x, initAngle.y, initAngle.z, initAngle.w],
             );
             const shootClip = new THREE.AnimationClip('shoot-1', -1, [
                 shootRotation
             ]);
 
-
+            // We need one mixer for each animated object in the scene
             this.mixer = new THREE.AnimationMixer(obj);
             this.shootAnimation = this.mixer.clipAction(shootClip);
-            this.shootAnimation.clampWhenFinished = true;
+            // this.shootAnimation.clampWhenFinished = true;
             this.shootAnimation.loop = THREE.LoopOnce;
-            this.shootAnimation.enable = false;
+            this.shootAnimation.enabled = false;
             this.repetitions = 1;
-            this.shootAnimation.stop();
 
             // TODO: DEBUG (toremove)
             document.addEventListener("mousedown",((event)=>{

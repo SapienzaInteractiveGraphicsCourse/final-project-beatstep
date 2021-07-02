@@ -1,0 +1,41 @@
+import * as THREE from 'three';
+
+class Pickup {
+    constructor(texturePath,x,y,z, onTouch = ()=>{}){
+        const dimension = 0.8;
+
+        const loader = new THREE.TextureLoader();
+        this.texture = loader.load(texturePath);
+
+        this.geometry = new THREE.BoxGeometry(dimension,dimension,dimension);
+        this.material = new THREE.MeshPhongMaterial({
+            map: this.texture,
+            side: THREE.DoubleSide,
+        });
+        this.mesh = new THREE.Mesh(this.geometry, this.material);
+
+        this.castShadow = true;
+
+        this.mesh.receiveShadow = true;
+        this.mesh.castShadow = false;
+
+        // Apply position
+        this.mesh.position.set(x,y+dimension/2,z);
+
+        // Apply event touching
+        this.onTouch = onTouch;
+
+        this.mesh.rotation.y = 0;
+    }
+
+    get obj(){
+        return this.mesh;
+    }
+
+    update(delta){
+        this.mesh.rotation.y += (Math.PI/2)*delta;
+    }
+
+}
+
+export default Pickup;
