@@ -1,10 +1,11 @@
 import * as THREE from 'three';
+import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 
 class Pickup {
     constructor(texturePath,x,y,z, onTouch = ()=>{}){
         const dimension = 0.8;
 
-        const loader = new THREE.TextureLoader();
+        const loader = DefaultGeneralLoadingManager.getHandler("texture");
         this.texture = loader.load(texturePath);
 
         this.geometry = new THREE.BoxGeometry(dimension,dimension,dimension);

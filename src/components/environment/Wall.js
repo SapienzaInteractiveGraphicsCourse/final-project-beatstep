@@ -1,8 +1,9 @@
 import * as THREE from 'three';
+import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 
 class Wall {
     constructor(texturePath,x,y,z,width,height,rotationRadians=0){
-        const loader = new THREE.TextureLoader();
+        const loader = DefaultGeneralLoadingManager.getHandler("texture");
         this.texture = loader.load(texturePath);
         // Apply repetition
         this.texture.wrapS = THREE.RepeatWrapping;

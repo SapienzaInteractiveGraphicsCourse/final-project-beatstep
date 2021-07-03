@@ -1,4 +1,7 @@
-import { LoadingManager } from 'three';
+import { LoadingManager , TextureLoader } from 'three';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
 
 class GeneralLoadingManager extends LoadingManager {
 
@@ -8,6 +11,11 @@ class GeneralLoadingManager extends LoadingManager {
         this.onStartList = [];
         this.onProgressList = [];
         this.onErrorList = [];
+
+        this.addHandler(/(png|svg|jpg|jpeg|gif|texture)$/i, new TextureLoader(this));
+        this.addHandler(/obj$/i, new OBJLoader(this));
+        this.addHandler(/gltf$/i, new GLTFLoader(this));
+        this.addHandler(/fbx$/i, new FBXLoader(this));
 
         if (onLoad) this.onLoadList.push(onLoad);
         if (onProgress) this.onProgressList.push(onProgress);
@@ -56,4 +64,7 @@ class GeneralLoadingManager extends LoadingManager {
 
 }
 
+const DefaultGeneralLoadingManager = new GeneralLoadingManager();
+
+export { DefaultGeneralLoadingManager }
 export default GeneralLoadingManager;

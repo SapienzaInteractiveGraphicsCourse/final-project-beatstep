@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 
 class GasCylinder {
     constructor(texturePathTop,texturePathBottom,texturePathSide,x,y,z,rotationRadians=0, onCollision = ()=>{}){
@@ -7,7 +8,7 @@ class GasCylinder {
         const radius = 0.5;
         const height = 2;
 
-        const loader = new THREE.TextureLoader();
+        const loader = DefaultGeneralLoadingManager.getHandler("texture");
         this.textures = [
             loader.load(texturePathSide),
             loader.load(texturePathTop),

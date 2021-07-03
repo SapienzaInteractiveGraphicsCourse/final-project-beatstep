@@ -6,22 +6,25 @@ import Player from './components/player/Player';
 import './style.css';
 
 import { genFloor } from './components/TempFloor';
-import { addRifle } from './components/TempRifle';
 
 // Walls
-import Wall from './components/Wall';
+import Wall from './components/environment/Wall';
 import wall1 from './asset/textures/wall1.png';
 
 // Pickups
-import Pickup from './components/Pickup';
+import Pickup from './components/environment/Pickup';
 import pickup_health from './asset/textures/pickup_health.png';
 import pickup_shield from './asset/textures/pickup_shield.png';
 import pickup_ammo from './asset/textures/pickup_ammo.png';
 
 // Gas Cylinder
-import GasCylinder from './components/GasCylinder';
+import GasCylinder from './components/environment/GasCylinder';
 import gas_top from './asset/textures/gas_top.png';
 import gas_side from './asset/textures/gas_side.png';
+
+
+
+
 
 const scene = new THREE.Scene();
 //const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -38,13 +41,17 @@ window.addEventListener("resize", () => {
 })
 document.body.appendChild(renderer.domElement);
 
+// Player and camera setup
 const camera = new FPSCamera(renderer.domElement, window.innerWidth, window.innerHeight, [0, 2, 5], [0, 0, 0]);
 scene.add(camera);
 let player = new Player(camera);
 window.player = player;
 
-const color = 0xFFFFFF;
 
+scene.add(genFloor(40));
+
+// Lighting
+const color = 0xFFFFFF;
 const ambientLight = new THREE.AmbientLight(color, 0.2);
 scene.add(ambientLight);
 
@@ -65,8 +72,6 @@ const cube = new THREE.Mesh(geometry, material);
 cube.position.y = 4;
 cube.castShadow = true;
 scene.add(cube);
-
-scene.add(genFloor(40));
 
 // Adding walls to scene
 let wall_1 = new Wall(wall1,0,0,-20, 40,20);
@@ -90,15 +95,14 @@ const animate = function () {
     requestAnimationFrame(animate);
     let delta = clock.getDelta();
 
-    //cube.rotation.x += 0.01;
-    //cube.rotation.y += 0.01;
-
-    camera.movementUpdate(delta)
-    renderer.render(scene, camera);
+    camera.movementUpdate(delta);
     player.update(delta);
     healthPickup.update(delta);
     shieldPickup.update(delta);
     ammoPickup.update(delta);
+
+    
+    renderer.render(scene, camera);
 };
 
 animate();
