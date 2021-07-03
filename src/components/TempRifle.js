@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { LoadingManager, MeshStandardMaterial, TextureLoader } from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
-import DefaultGeneralLoadingManager from './Tools/GeneralLoadingManager';
+import { DefaultGeneralLoadingManager } from './Tools/GeneralLoadingManager';
 
 import RifleModel from '../asset/models/rifle/rifle.obj';
 import RifleTexture from '../asset/models/rifle/textures/Weapon_BaseColor.png';
@@ -20,7 +20,7 @@ function addRifle(callback) {
 
     var material = new MeshStandardMaterial();   
 
-    const loadingManager = new DefaultGeneralLoadingManager
+    const loadingManager = DefaultGeneralLoadingManager;
     loadingManager.addOnLoad(() => {
         object.traverse(function (child) {
             if (child.isMesh){

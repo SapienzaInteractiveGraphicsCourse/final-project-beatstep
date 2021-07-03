@@ -1,11 +1,12 @@
 import * as THREE from 'three';
 import { Clock } from 'three';
+
+// Tools
+import { DefaultGeneralLoadingManager } from './components/Tools/GeneralLoadingManager';
+
+// Player
 import FPSCamera from './components/player/FPSCamera';
 import Player from './components/player/Player';
-
-import './style.css';
-
-import { genFloor } from './components/TempFloor';
 
 // Walls
 import Wall from './components/environment/Wall';
@@ -22,24 +23,17 @@ import GasCylinder from './components/environment/GasCylinder';
 import gas_top from './asset/textures/gas_top.png';
 import gas_side from './asset/textures/gas_side.png';
 
+import './style.css';
 
-
-
+import { genFloor } from './components/TempFloor';
 
 const scene = new THREE.Scene();
-//const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const clock = new Clock()
+const clock = new Clock();
 
 const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setSize(window.innerWidth, window.innerHeight);
-window.addEventListener("resize", () => {
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-})
-document.body.appendChild(renderer.domElement);
 
 // Player and camera setup
 const camera = new FPSCamera(renderer.domElement, window.innerWidth, window.innerHeight, [0, 2, 5], [0, 0, 0]);
@@ -104,6 +98,19 @@ const animate = function () {
     
     renderer.render(scene, camera);
 };
+
+
+window.addEventListener("resize", () => {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+});
+
+DefaultGeneralLoadingManager.addOnLoad(() => {
+    document.body.removeChild(document.querySelector(".splash"));
+    document.body.appendChild(renderer.domElement);
+    player.hud.show();
+});
 
 animate();
 

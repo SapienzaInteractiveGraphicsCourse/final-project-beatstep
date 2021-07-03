@@ -66,5 +66,4 @@ class GeneralLoadingManager extends LoadingManager {
 
 const DefaultGeneralLoadingManager = new GeneralLoadingManager();
 
-export { DefaultGeneralLoadingManager }
-export default GeneralLoadingManager;
+export { DefaultGeneralLoadingManager, GeneralLoadingManager };

@@ -4,6 +4,7 @@ class HUD {
 
     constructor(camera){
         this.camera = camera;
+        this.objects = [];
 
         //creating rifle scope
         let lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
@@ -45,7 +46,6 @@ class HUD {
             let bar = document.createElement("div");
             bar.classList.add("stat_bar");
             bar.classList.add(color);
-            this.overlay.appendChild(bar);
 
             bar.indicator = document.createElement("div");
             bar.indicator.classList.add("bar");
@@ -67,17 +67,32 @@ class HUD {
                 set: (function(v){v == true ? (this.style.display = null) : (this.style.display = "none")}).bind(bar)
             })
 
+            bar.show = false;
+            this.overlay.appendChild(bar);
             this[name] = bar;
         }).bind(this)
 
         this.createBar("healthBar","green");
         this.healthBar.setPercentage(100);
+        this.objects.push(this.healthBar);
         this.createBar("shieldBar","blue");
         this.shieldBar.setPercentage(100);
+        this.objects.push(this.shieldBar);
         this.createBar("ammoBar","red");
         this.ammoBar.setPercentage(100);
+        this.objects.push(this.ammoBar);
+    }
 
+    show(){
+        for(let o of this.objects){
+            o.show = true;
+        }
+    }
 
+    hide(){
+        for(let o of this.objects){
+            o.show = false;
+        }
     }
 
 
