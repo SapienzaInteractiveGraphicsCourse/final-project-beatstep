@@ -1,6 +1,7 @@
 import * as THREE from 'three';
+import { CANNON, world } from './physics/CannonSetup';
 
-function genFloor(planeSize){
+function genFloor(planeSize) {
     const loader = new THREE.TextureLoader();
     const texture = loader.load('https://threejsfundamentals.org/threejs/resources/images/checker.png');
     texture.wrapS = THREE.RepeatWrapping;
@@ -17,6 +18,15 @@ function genFloor(planeSize){
     const mesh = new THREE.Mesh(planeGeo, planeMat);
     mesh.rotation.x = Math.PI * -.5;
     mesh.receiveShadow = true;
+
+    let shape = new CANNON.Plane();
+    let body = new CANNON.Body({
+        mass: 0
+    });
+    body.addShape(shape);
+    body.quaternion.copy(mesh.quaternion);
+    world.addBody(body);
+
     return mesh;
 }
 

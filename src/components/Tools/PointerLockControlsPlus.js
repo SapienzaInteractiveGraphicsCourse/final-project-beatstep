@@ -18,7 +18,7 @@ const _PI_2 = Math.PI / 2;
 
 class PointerLockControlsPlus extends EventDispatcher {
 
-    constructor(camera, domElement, angularSensitivity) {
+    constructor(object, domElement, angularSensitivity) {
 
         super();
 
@@ -107,14 +107,14 @@ class PointerLockControlsPlus extends EventDispatcher {
             const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
             const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
-            _euler.setFromQuaternion(camera.quaternion);
+            _euler.setFromQuaternion(object.quaternion);
 
             _euler.y -= movementX * scope.angularSensitivity;
             _euler.x -= movementY * scope.angularSensitivity;
 
             _euler.x = Math.max(_PI_2 - scope.maxPolarAngle, Math.min(_PI_2 - scope.minPolarAngle, _euler.x));
 
-            camera.quaternion.setFromEuler(_euler);
+            object.quaternion.setFromEuler(_euler);
 
             scope.dispatchEvent(_changeEvent);
 
@@ -167,14 +167,14 @@ class PointerLockControlsPlus extends EventDispatcher {
         };
 
         this.getObject = function () { // retaining this method for backward compatibility
-            return camera;
+            return object;
         };
 
         this.getDirection = function () {
             const direction = new Vector3(0, 0, - 1);
 
             return function (v) {
-                return v.copy(direction).applyQuaternion(camera.quaternion);
+                return v.copy(direction).applyQuaternion(object.quaternion);
             };
 
         }();
@@ -184,11 +184,11 @@ class PointerLockControlsPlus extends EventDispatcher {
             // move forward parallel to the xz-plane
             // assumes camera.up is y-up
 
-            _vector.setFromMatrixColumn(camera.matrix, 0);
+            _vector.setFromMatrixColumn(object.matrix, 0);
 
-            _vector.crossVectors(camera.up, _vector);
+            _vector.crossVectors(object.up, _vector);
 
-            camera.position.addScaledVector(_vector, distance);
+            object.position.addScaledVector(_vector, distance);
 
             let evt = Object.assign({},_moveForwardEvent);
             evt.distance = distance
@@ -198,9 +198,9 @@ class PointerLockControlsPlus extends EventDispatcher {
 
         this.moveRight = function (distance) {
 
-            _vector.setFromMatrixColumn(camera.matrix, 0);
+            _vector.setFromMatrixColumn(object.matrix, 0);
 
-            camera.position.addScaledVector(_vector, distance);
+            object.position.addScaledVector(_vector, distance);
 
             let evt = Object.assign({},_moveRightEvent);
             evt.distance = distance
@@ -209,7 +209,7 @@ class PointerLockControlsPlus extends EventDispatcher {
         };
 
         this.moveUp = function (distance) {
-            camera.position.addScaledVector(camera.up, distance);
+            object.position.addScaledVector(object.up, distance);
             
             let evt = Object.assign({},_moveUpEvent);
             evt.distance = distance

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { CANNON, world } from './components/physics/CannonSetup';
 import { Clock } from 'three';
 
 // Tools
@@ -36,9 +37,9 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 // Player and camera setup
-const camera = new FPSCamera(renderer.domElement, window.innerWidth, window.innerHeight, [0, 2, 5], [0, 0, 0]);
-scene.add(camera);
-let player = new Player(camera);
+const camera = new FPSCamera(window.innerWidth, window.innerHeight);
+let player = new Player(camera, renderer.domElement, [0, 2, 5], [0, 2, 0]);
+scene.add(player);
 window.player = player;
 
 
@@ -63,9 +64,25 @@ scene.add( helper );
 const geometry = new THREE.BoxGeometry();
 const material = new THREE.MeshToonMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(geometry, material);
-cube.position.y = 4;
+cube.position.y = 20;
 cube.castShadow = true;
 scene.add(cube);
+let shape = new CANNON.Box(new CANNON.Vec3(0.5,0.5,0.5));
+let body = new CANNON.Body({
+    mass: 1
+});
+body.addShape(shape);
+body.position.copy(cube.position);
+world.addBody(body);
+document.addEventListener("mousedown",(event)=>{
+    if(event.button == 2){ // shoot
+        let imp = new CANNON.Vec3();
+        imp.copy(player.getWorldDirection()).mult(-10,imp);
+        body.applyImpulse(imp,new CANNON.Vec3(0,0,0))
+    }
+});
+window.body = body;
+window.Vec3 = CANNON.Vec3;
 
 // Adding walls to scene
 let wall_1 = new Wall(wall1,0,0,-20, 40,20);
@@ -89,12 +106,14 @@ const animate = function () {
     requestAnimationFrame(animate);
     let delta = clock.getDelta();
 
-    camera.movementUpdate(delta);
     player.update(delta);
     healthPickup.update(delta);
     shieldPickup.update(delta);
     ammoPickup.update(delta);
 
+    world.step(delta);
+    cube.position.copy(body.position);
+    cube.quaternion.copy(body.quaternion);
     
     renderer.render(scene, camera);
 };

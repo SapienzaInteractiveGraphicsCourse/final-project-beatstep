@@ -2,7 +2,8 @@ import * as THREE from 'three';
 
 class HUD {
 
-    constructor(camera){
+    constructor(parent, camera){
+        this.parent = parent;
         this.camera = camera;
         this.objects = [];
 
@@ -19,10 +20,10 @@ class HUD {
         this.line.position.set(0, 0, -0.11);
 
         this.line.visible = false;
-        this.camera.controls.addEventListener("lock", function (e) {
+        this.parent.controls.addEventListener("lock", function (e) {
             this.line.visible = true;
         }.bind(this));
-        this.camera.controls.addEventListener("unlock", function (e) {
+        this.parent.controls.addEventListener("unlock", function (e) {
             this.line.visible = false;
         }.bind(this));
         

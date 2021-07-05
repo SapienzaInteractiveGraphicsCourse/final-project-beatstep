@@ -1,14 +1,27 @@
 import * as THREE from 'three';
+import * as CANNON from 'cannon';
 
+import { PointerLockControlsPlus } from '../Tools/PointerLockControlsPlus';
+import { DefaultPhysicsEngine, PhysicsProperties } from '../physics/PhysicsEngine';
 import HUD from "./HUD";
 
 import { addRifle } from "../TempRifle";
 
-class Player {
+class Player extends THREE.Object3D {
 
-    constructor(camera) {
+    constructor(camera,domElement,position = [0,0,0],lookAt = [0,0,0]) {
+        super();
+        this.isCamera = true; // To make .lookAt work as in the camera class, otherwise it give a reversed z axis
+        //this.up = new THREE.Vector3(0,1,0);
+        this.position.x = position[0];
+        this.position.y = position[1];
+        this.position.z = position[2];
+        this.lookAt(new THREE.Vector3(...lookAt));
+
         this.camera = camera;
-        this.hud = new HUD(camera);
+        this.camera.position.set(0,0,-1)
+        this.camera.quaternion.copy(this.quaternion);
+        this.add(camera);
         
         let _health = 100;
         let _shield = 0;
@@ -19,9 +32,6 @@ class Player {
         this.topAmmo = 1000;
         
         Object.defineProperties(this,{
-            position: {
-                get: function() { return this.camera.position; }
-            },
             health: {
                 get: function() {return _health},
                 set: function(d) {_health = d; this.hud.healthBar.setPercentage(_health/(this.topHealth*100))}
@@ -36,7 +46,53 @@ class Player {
             }
         });
 
+        // Creating controls
+        
+        this.physicsProperties = new PhysicsProperties(20);
+        this.controls = new PointerLockControlsPlus(this, domElement);
+        this.controls.shouldLock = true;
+        this.movement = {
+            movementSpeed: 10,
+            jumpSpeed: 15,
+        };
 
+        // Updating movement in the space (not view)
+        this.movementUpdate = function () {
+
+			return function update( delta ) {
+                let xDir = Number(this.controls.shouldMoveRight) - Number(this.controls.shouldMoveLeft);
+                let zDir = Number(this.controls.shouldMoveForward) - Number(this.controls.shouldMoveBackward);
+
+                if(xDir || zDir){
+                    this.physicsProperties.velocity.setX(xDir * this.movement.movementSpeed);
+                    this.physicsProperties.velocity.setZ(zDir * this.movement.movementSpeed * 1.5);
+                }
+
+                if(this.controls.shouldJump && this.isOnGround()){
+                    this.physicsProperties.velocity.setY(this.movement.jumpSpeed);
+                }
+                //this.controls.shouldJump = false;
+
+                this.physicsProperties.constraints = this.isOnGround() ? 
+                                                     this.physicsProperties.constraints | PhysicsProperties.BOTTOM_CONSTRAINT :
+                                                     this.physicsProperties.constraints & !PhysicsProperties.BOTTOM_CONSTRAINT;
+                let displacement = DefaultPhysicsEngine.update(this.physicsProperties, delta);
+
+                if (displacement.x != 0) this.controls.moveRight(displacement.x);
+				if (displacement.y != 0) this.controls.moveUp(displacement.y);
+				if (displacement.z != 0) this.controls.moveForward(displacement.z);
+			};
+
+		}();
+
+        this.isOnGround = function(){
+            //STUB method. Replace with collision detection with ground
+            if (Math.floor(this.position.y) <= position[1]) return true;
+            return false;
+        }
+
+        
+        this.hud = new HUD(this,camera);
         
 
         addRifle((obj) => {
@@ -89,6 +145,7 @@ class Player {
     }
 
     update(delta){
+        this.movementUpdate(delta);
         if(this.mixer){
             this.mixer.update(delta);
         }
