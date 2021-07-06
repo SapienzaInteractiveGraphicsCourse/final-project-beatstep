@@ -1,6 +1,8 @@
 import * as THREE from 'three';
-import { CANNON, world } from './components/physics/CannonSetup';
 import { Clock } from 'three';
+
+// Physics engine
+import { CANNON, world } from './components/physics/CannonSetup';
 
 // Tools
 import { DefaultGeneralLoadingManager } from './components/Tools/GeneralLoadingManager';
@@ -61,27 +63,80 @@ scene.add(pointLight);
 const helper = new THREE.CameraHelper( pointLight.shadow.camera );
 scene.add( helper );
 
-const geometry = new THREE.BoxGeometry();
-const material = new THREE.MeshToonMaterial({ color: 0x00ff00 });
-const cube = new THREE.Mesh(geometry, material);
-cube.position.y = 20;
+// Creating cube properties
+let cube_dimension = new CANNON.Vec3(0.5,0.5,0.5);
+let cube_shape = new CANNON.Box(cube_dimension);
+let cube_geometry = new THREE.BoxGeometry(cube_dimension.x*2,cube_dimension.y*2,cube_dimension.z*2);
+let cube_material = new THREE.MeshToonMaterial({ color: 0x00ff00 });
+let cube_body = new CANNON.Body({mass: 2});
+cube_body.addShape(cube_shape);
+// Creating cube
+let cube = new THREE.Mesh(cube_geometry, cube_material);
 cube.castShadow = true;
+cube.position.set(0,20,0);
+cube_body.position.copy(cube.position); // the body must have the same as the cube
+// Adding cube to the world and scene
 scene.add(cube);
-let shape = new CANNON.Box(new CANNON.Vec3(0.5,0.5,0.5));
-let body = new CANNON.Body({
-    mass: 1
-});
-body.addShape(shape);
-body.position.copy(cube.position);
-world.addBody(body);
+world.add(cube_body);
+
+
+// Create a sphere
+var mass = 5, radius = 1.3;
+let sphereShape = new CANNON.Sphere(radius);
+let sphereBody = new CANNON.Body({ mass: mass });
+sphereBody.addShape(sphereShape);
+sphereBody.position.set(0,5,0);
+sphereBody.linearDamping = 0.9;
+world.add(sphereBody);
+
+// Creating bullets (balls)
+let bullets = {
+    bodies: [],
+    meshes: []
+};
+// Bullet properties
+let bullet = {};
+bullet.shape = new CANNON.Sphere(0.2);
+bullet.geometry = new THREE.SphereGeometry(bullet.shape.radius, 32, 32);
+bullet.material = new THREE.MeshToonMaterial({ color: 0x00ff00 });
+bullet.velocity = 15;
+
+// TODO: toremove, to make shoot
 document.addEventListener("mousedown",(event)=>{
     if(event.button == 2){ // shoot
-        let imp = new CANNON.Vec3();
-        imp.copy(player.getWorldDirection()).mult(-10,imp);
-        body.applyImpulse(imp,new CANNON.Vec3(0,0,0))
+        // let imp = new CANNON.Vec3();
+        // imp.copy(player.getWorldDirection()).mult(-10,imp);
+        // cube_body.applyImpulse(imp,new CANNON.Vec3(0,0,0))
+        var x = player.position.x;
+        var y = player.position.y;
+        var z = player.position.z;
+        var bulletBody = new CANNON.Body({ mass: 1 });
+        bulletBody.addShape(bullet.shape);
+        var bulletMesh = new THREE.Mesh( bullet.geometry, bullet.material );
+        bulletMesh.castShadow = true;
+        bulletMesh.receiveShadow = true;
+        world.add(bulletBody);
+        scene.add(bulletMesh);
+        
+        bullets.bodies.push(bulletBody);
+        bullets.meshes.push(bulletMesh);
+
+        // TODO: Shooting direction 
+        var shootDirection = new THREE.Vector3(0,0,1);
+        
+        bulletBody.velocity.set(    shootDirection.x * bullet.velocity,
+                                    shootDirection.y * bullet.velocity,
+                                    shootDirection.z * bullet.velocity);
+
+        // Move the ball outside the player sphere  (put here player radius * 1.02)
+        x += shootDirection.x * (sphereShape.radius*1.02 + bullet.shape.radius);
+        y += shootDirection.y * (sphereShape.radius*1.02 + bullet.shape.radius);
+        z += shootDirection.z * (sphereShape.radius*1.02 + bullet.shape.radius);
+        bulletBody.position.set(x,y,z);
+        bulletMesh.position.set(x,y,z);
     }
 });
-window.body = body;
+window.body = cube_body;
 window.Vec3 = CANNON.Vec3;
 
 // Adding walls to scene
@@ -112,8 +167,14 @@ const animate = function () {
     ammoPickup.update(delta);
 
     world.step(delta);
-    cube.position.copy(body.position);
-    cube.quaternion.copy(body.quaternion);
+    cube.position.copy(cube_body.position);
+    cube.quaternion.copy(cube_body.quaternion);
+
+    // Update bullets positions
+    for(var i=0; i<bullets.bodies.length; i++){
+        bullets.meshes[i].position.copy(bullets.bodies[i].position);
+        bullets.meshes[i].quaternion.copy(bullets.bodies[i].quaternion);
+    }
     
     renderer.render(scene, camera);
 };
