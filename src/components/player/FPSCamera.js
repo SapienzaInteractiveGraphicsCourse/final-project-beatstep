@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { THREE } from '../setup/ThreeSetup'; 
 import { PointerLockControlsPlus } from '../Tools/PointerLockControlsPlus';
 import { DefaultPhysicsEngine, PhysicsProperties } from '../physics/PhysicsEngine';
 

@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { THREE } from '../setup/ThreeSetup';
 import * as CANNON from 'cannon';
 
 import { PointerLockControlsPlus } from '../Tools/PointerLockControlsPlus';
@@ -6,6 +6,7 @@ import { DefaultPhysicsEngine, PhysicsProperties } from '../physics/PhysicsEngin
 import HUD from "./HUD";
 
 import { addRifle } from "../TempRifle";
+import { BulletEmitter } from './BulletEmitter';
 
 class Player extends THREE.Object3D {
 
@@ -22,6 +23,7 @@ class Player extends THREE.Object3D {
         this.camera.position.set(0,0,-1)
         this.camera.quaternion.copy(this.quaternion);
         this.add(camera);
+
         
         let _health = 100;
         let _shield = 0;
@@ -94,6 +96,9 @@ class Player extends THREE.Object3D {
         
         this.hud = new HUD(this,camera);
         
+        this.bulletEmitter = new BulletEmitter(this.position,100);
+        //this.add(this.bulletEmitter);
+        
 
         addRifle((obj) => {
             //obj.scale(0.5,0.5,0.5);
@@ -127,10 +132,16 @@ class Player extends THREE.Object3D {
             document.addEventListener("mousedown",((event)=>{
                 if(event.button == 2){ // shoot
                     this.startShootAnimation();
+                    this.bulletEmitter.shoot(this.getWorldDirection().multiplyScalar(-80));
                 }
             }).bind(this));
 
             camera.add(obj);
+            
+            obj.children[0].geometry.computeBoundingBox();
+            let box = obj.children[0].geometry.boundingBox;
+            obj.add(this.bulletEmitter);
+            this.bulletEmitter.position.set(0,box.max.y,box.min.z);
         });
 
         
@@ -149,6 +160,7 @@ class Player extends THREE.Object3D {
         if(this.mixer){
             this.mixer.update(delta);
         }
+        this.bulletEmitter.update(delta);
     }
 
 }

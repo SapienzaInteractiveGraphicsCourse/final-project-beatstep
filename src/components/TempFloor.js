@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { THREE } from './setup/ThreeSetup';
 import { CANNON, world } from './physics/CannonSetup';
 
 function genFloor(planeSize) {

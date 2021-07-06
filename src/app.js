@@ -1,5 +1,4 @@
-import * as THREE from 'three';
-import { Clock } from 'three';
+import { THREE, scene, clock, renderer } from './components/setup/ThreeSetup';
 
 // Physics engine
 import { CANNON, world } from './components/physics/CannonSetup';
@@ -30,16 +29,16 @@ import './style.css';
 
 import { genFloor } from './components/TempFloor';
 
-const scene = new THREE.Scene();
-const clock = new Clock();
+// const scene = new THREE.Scene();
+// const clock = new Clock();
 
-const renderer = new THREE.WebGLRenderer({antialias: true});
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.setSize(window.innerWidth, window.innerHeight);
+// const renderer = new THREE.WebGLRenderer({antialias: true});
+// renderer.shadowMap.enabled = true;
+// renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+// renderer.setSize(window.innerWidth, window.innerHeight);
 
 // Player and camera setup
-const camera = new FPSCamera(window.innerWidth, window.innerHeight);
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 let player = new Player(camera, renderer.domElement, [0, 2, 5], [0, 2, 0]);
 scene.add(player);
 window.player = player;
@@ -81,25 +80,25 @@ world.add(cube_body);
 
 
 // Create a sphere
-var mass = 5, radius = 1.3;
-let sphereShape = new CANNON.Sphere(radius);
-let sphereBody = new CANNON.Body({ mass: mass });
-sphereBody.addShape(sphereShape);
-sphereBody.position.set(0,5,0);
-sphereBody.linearDamping = 0.9;
-world.add(sphereBody);
+// var mass = 5, radius = 1.3;
+// let sphereShape = new CANNON.Sphere(radius);
+// let sphereBody = new CANNON.Body({ mass: mass });
+// sphereBody.addShape(sphereShape);
+// sphereBody.position.set(0,5,0);
+// sphereBody.linearDamping = 0.9;
+// world.add(sphereBody);
 
 // Creating bullets (balls)
-let bullets = {
-    bodies: [],
-    meshes: []
-};
-// Bullet properties
-let bullet = {};
-bullet.shape = new CANNON.Sphere(0.2);
-bullet.geometry = new THREE.SphereGeometry(bullet.shape.radius, 32, 32);
-bullet.material = new THREE.MeshToonMaterial({ color: 0x00ff00 });
-bullet.velocity = 15;
+// let bullets = {
+//     bodies: [],
+//     meshes: []
+// };
+// // Bullet properties
+// let bullet = {};
+// bullet.shape = new CANNON.Sphere(0.2);
+// bullet.geometry = new THREE.SphereGeometry(bullet.shape.radius, 32, 32);
+// bullet.material = new THREE.MeshToonMaterial({ color: 0x00ff00 });
+// bullet.velocity = 15;
 
 // TODO: toremove, to make shoot
 document.addEventListener("mousedown",(event)=>{
@@ -107,33 +106,33 @@ document.addEventListener("mousedown",(event)=>{
         // let imp = new CANNON.Vec3();
         // imp.copy(player.getWorldDirection()).mult(-10,imp);
         // cube_body.applyImpulse(imp,new CANNON.Vec3(0,0,0))
-        var x = player.position.x;
-        var y = player.position.y;
-        var z = player.position.z;
-        var bulletBody = new CANNON.Body({ mass: 1 });
-        bulletBody.addShape(bullet.shape);
-        var bulletMesh = new THREE.Mesh( bullet.geometry, bullet.material );
-        bulletMesh.castShadow = true;
-        bulletMesh.receiveShadow = true;
-        world.add(bulletBody);
-        scene.add(bulletMesh);
+        // var x = player.position.x;
+        // var y = player.position.y;
+        // var z = player.position.z;
+        // var bulletBody = new CANNON.Body({ mass: 1 });
+        // bulletBody.addShape(bullet.shape);
+        // var bulletMesh = new THREE.Mesh( bullet.geometry, bullet.material );
+        // bulletMesh.castShadow = true;
+        // bulletMesh.receiveShadow = true;
+        // world.add(bulletBody);
+        // scene.add(bulletMesh);
         
-        bullets.bodies.push(bulletBody);
-        bullets.meshes.push(bulletMesh);
+        // bullets.bodies.push(bulletBody);
+        // bullets.meshes.push(bulletMesh);
 
-        // TODO: Shooting direction 
-        var shootDirection = new THREE.Vector3(0,0,1);
+        // // TODO: Shooting direction 
+        // var shootDirection = new THREE.Vector3(0,0,1);
         
-        bulletBody.velocity.set(    shootDirection.x * bullet.velocity,
-                                    shootDirection.y * bullet.velocity,
-                                    shootDirection.z * bullet.velocity);
+        // bulletBody.velocity.set(    shootDirection.x * bullet.velocity,
+        //                             shootDirection.y * bullet.velocity,
+        //                             shootDirection.z * bullet.velocity);
 
-        // Move the ball outside the player sphere  (put here player radius * 1.02)
-        x += shootDirection.x * (sphereShape.radius*1.02 + bullet.shape.radius);
-        y += shootDirection.y * (sphereShape.radius*1.02 + bullet.shape.radius);
-        z += shootDirection.z * (sphereShape.radius*1.02 + bullet.shape.radius);
-        bulletBody.position.set(x,y,z);
-        bulletMesh.position.set(x,y,z);
+        // // Move the ball outside the player sphere  (put here player radius * 1.02)
+        // x += shootDirection.x * (sphereShape.radius*1.02 + bullet.shape.radius);
+        // y += shootDirection.y * (sphereShape.radius*1.02 + bullet.shape.radius);
+        // z += shootDirection.z * (sphereShape.radius*1.02 + bullet.shape.radius);
+        // bulletBody.position.set(x,y,z);
+        // bulletMesh.position.set(x,y,z);
     }
 });
 window.body = cube_body;
@@ -160,6 +159,7 @@ scene.add(gasCylinder.obj);
 const animate = function () {
     requestAnimationFrame(animate);
     let delta = clock.getDelta();
+    //delta = 0.01;
 
     player.update(delta);
     healthPickup.update(delta);
@@ -171,26 +171,20 @@ const animate = function () {
     cube.quaternion.copy(cube_body.quaternion);
 
     // Update bullets positions
-    for(var i=0; i<bullets.bodies.length; i++){
-        bullets.meshes[i].position.copy(bullets.bodies[i].position);
-        bullets.meshes[i].quaternion.copy(bullets.bodies[i].quaternion);
-    }
+    // for(var i=0; i<bullets.bodies.length; i++){
+    //     bullets.meshes[i].position.copy(bullets.bodies[i].position);
+    //     bullets.meshes[i].quaternion.copy(bullets.bodies[i].quaternion);
+    // }
     
     renderer.render(scene, camera);
 };
-
-
-window.addEventListener("resize", () => {
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-});
 
 DefaultGeneralLoadingManager.addOnLoad(() => {
     document.body.removeChild(document.querySelector(".splash"));
     document.body.appendChild(renderer.domElement);
     player.hud.show();
+    animate();
 });
 
-animate();
+
 

@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 
 class GasCylinder {

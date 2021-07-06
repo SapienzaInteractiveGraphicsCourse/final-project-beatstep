@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { THREE } from './setup/ThreeSetup';
 import { LoadingManager, MeshStandardMaterial, TextureLoader } from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { DefaultGeneralLoadingManager } from './Tools/GeneralLoadingManager';
