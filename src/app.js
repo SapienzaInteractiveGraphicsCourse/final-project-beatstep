@@ -1,10 +1,12 @@
-import { THREE, scene, clock, renderer } from './components/setup/ThreeSetup';
+import { THREE, scene, clock, renderer, camera } from './components/setup/ThreeSetup';
 
 // Physics engine
 import { CANNON, world } from './components/physics/CannonSetup';
 
 // Tools
 import { DefaultGeneralLoadingManager } from './components/Tools/GeneralLoadingManager';
+import CannonDebugRenderer from './components/Tools/CannonDebugRenderer';
+const cannonDebugRenderer = new CannonDebugRenderer(scene,world);
 
 // Player
 import FPSCamera from './components/player/FPSCamera';
@@ -21,9 +23,7 @@ import pickup_shield from './asset/textures/pickup_shield.png';
 import pickup_ammo from './asset/textures/pickup_ammo.png';
 
 // Gas Cylinder
-import GasCylinder from './components/environment/GasCylinder';
-import gas_top from './asset/textures/gas_top.png';
-import gas_side from './asset/textures/gas_side.png';
+import gasCylinderPool from './components/environment/GasCylinder';
 
 import './style.css';
 
@@ -38,7 +38,6 @@ import { genFloor } from './components/TempFloor';
 // renderer.setSize(window.innerWidth, window.innerHeight);
 
 // Player and camera setup
-const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 let player = new Player(camera, renderer.domElement, [0, 2, 5], [0, 2, 0]);
 scene.add(player);
 window.player = player;
@@ -152,9 +151,13 @@ scene.add(healthPickup.obj);
 scene.add(shieldPickup.obj);
 scene.add(ammoPickup.obj);
 
-// Adding gas cylinder to scene
-let gasCylinder = new GasCylinder(gas_top,gas_top,gas_side,6,0,6,0.5,()=>{});
-scene.add(gasCylinder.obj);
+// // Adding gas cylinder to scene
+// let gasCylinder = new GasCylinder(gas_top,gas_top,gas_side,6,0,6,0.5,()=>{});
+// scene.add(gasCylinder.obj);
+let cylinder1 = gasCylinderPool.getFreeObject();
+cylinder1.body.position.set(4,20,4);
+world.addBody(cylinder1.body);
+scene.add(cylinder1);
 
 const animate = function () {
     requestAnimationFrame(animate);
@@ -166,16 +169,21 @@ const animate = function () {
     shieldPickup.update(delta);
     ammoPickup.update(delta);
 
-    world.step(delta);
     cube.position.copy(cube_body.position);
     cube.quaternion.copy(cube_body.quaternion);
+
+    // Cylinder
+    gasCylinderPool.update(delta);
+
+    world.step(1/60,delta,1);
+    
 
     // Update bullets positions
     // for(var i=0; i<bullets.bodies.length; i++){
     //     bullets.meshes[i].position.copy(bullets.bodies[i].position);
     //     bullets.meshes[i].quaternion.copy(bullets.bodies[i].quaternion);
     // }
-    
+    cannonDebugRenderer.update();
     renderer.render(scene, camera);
 };
 

@@ -3,6 +3,7 @@ import { Clock } from 'three';
 
 const scene = new THREE.Scene();
 const clock = new Clock();
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 
 const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.shadowMap.enabled = true;
@@ -15,4 +16,4 @@ window.addEventListener("resize", () => {
     camera.updateProjectionMatrix();
 });
 
-export { THREE, scene, clock, renderer };
+export { THREE, scene, clock, renderer, camera };
