@@ -1,40 +1,75 @@
 import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 
-class Pickup {
-    constructor(texturePath,x,y,z, onTouch = ()=>{}){
-        const dimension = 0.8;
+import pickup_health from '../../asset/textures/pickup_health.png';
+import pickup_shield from '../../asset/textures/pickup_shield.png';
+import pickup_ammo from '../../asset/textures/pickup_ammo.png';
 
-        const loader = DefaultGeneralLoadingManager.getHandler("texture");
-        this.texture = loader.load(texturePath);
+import { ObjectPool } from '../Tools/ObjectPool';
 
-        this.geometry = new THREE.BoxGeometry(dimension,dimension,dimension);
-        this.material = new THREE.MeshPhongMaterial({
-            map: this.texture,
-            side: THREE.DoubleSide,
-        });
+const loader = DefaultGeneralLoadingManager.getHandler("texture");
+const _pickupTextureHealth = loader.load(pickup_health);
+const _pickupTextureShield = loader.load(pickup_shield);
+const _pickupTextureAmmo = loader.load(pickup_ammo);
+
+const dimension = 0.8;
+
+const _pickupGeometry = new THREE.BoxGeometry(dimension,dimension,dimension);
+const _pickupMaterialHealth = new THREE.MeshPhongMaterial({
+    map: _pickupTextureHealth,
+    side: THREE.DoubleSide,
+});
+const _pickupMaterialShield = new THREE.MeshPhongMaterial({
+    map: _pickupTextureShield,
+    side: THREE.DoubleSide,
+});
+const _pickupMaterialAmmo = new THREE.MeshPhongMaterial({
+    map: _pickupTextureAmmo,
+    side: THREE.DoubleSide,
+});
+
+class Pickup extends THREE.Mesh {
+    constructor(type = "health", onTouch = ()=>{}){
+        
+        switch(type){
+            default:
+            case "health":
+                super(_pickupGeometry, _pickupMaterialHealth);
+                break;
+            case "ammo":
+                super(_pickupGeometry, _pickupMaterialAmmo);
+                break;
+            case "shield":
+                super(_pickupGeometry, _pickupMaterialShield);
+                break;
+        }        
+
+        this._type = type;
+        
         this.mesh = new THREE.Mesh(this.geometry, this.material);
 
-        this.mesh.receiveShadow = false;
-        this.mesh.castShadow = true;
-
-        // Apply position
-        this.mesh.position.set(x,y+dimension/2,z);
+        this.receiveShadow = false;
+        this.castShadow = true;
 
         // Apply event touching
         this.onTouch = onTouch;
 
-        this.mesh.rotation.y = 0;
-    }
-
-    get obj(){
-        return this.mesh;
+        this.rotation.y = 0;
     }
 
     update(delta){
-        this.mesh.rotation.y += (Math.PI/2)*delta;
+        this.rotation.y += (Math.PI/2)*delta;
+    }
+
+    setPosition(x,y,z){
+        // Apply position
+        this.position.set(x,y+dimension,z);
     }
 
 }
 
-export default Pickup;
+const pickupHealthPool = new ObjectPool(Pickup,5,["health"]);
+const pickupAmmoPool = new ObjectPool(Pickup,5,["ammo"]);
+const pickupShieldPool = new ObjectPool(Pickup,5,["shield"]);
+
+export { pickupHealthPool, pickupAmmoPool, pickupShieldPool };

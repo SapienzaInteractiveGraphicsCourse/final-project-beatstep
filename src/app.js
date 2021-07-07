@@ -17,10 +17,7 @@ import Wall from './components/environment/Wall';
 import wall1 from './asset/textures/wall1.png';
 
 // Pickups
-import Pickup from './components/environment/Pickup';
-import pickup_health from './asset/textures/pickup_health.png';
-import pickup_shield from './asset/textures/pickup_shield.png';
-import pickup_ammo from './asset/textures/pickup_ammo.png';
+import { pickupHealthPool, pickupAmmoPool, pickupShieldPool } from './components/environment/Pickup';
 
 // Gas Cylinder
 import gasCylinderPool from './components/environment/GasCylinder';
@@ -143,13 +140,24 @@ let wall_2 = new Wall(wall1,-20,0,0, 40,20,0.5);
 scene.add(wall_1.obj);
 scene.add(wall_2.obj);
 
-// Adding pickups to scene
-let healthPickup = new Pickup(pickup_health,-6,0.5,-6,()=>{});
-let shieldPickup = new Pickup(pickup_shield,-4.5,0.5,-6,()=>{});
-let ammoPickup = new Pickup(pickup_ammo,-3,0.5,-6,()=>{});
-scene.add(healthPickup.obj);
-scene.add(shieldPickup.obj);
-scene.add(ammoPickup.obj);
+// // Adding pickups to scene
+// let healthPickup = new Pickup(pickup_health,-6,0.5,-6,()=>{});
+// let shieldPickup = new Pickup(pickup_shield,-4.5,0.5,-6,()=>{});
+// let ammoPickup = new Pickup(pickup_ammo,-3,0.5,-6,()=>{});
+// scene.add(healthPickup.obj);
+// scene.add(shieldPickup.obj);
+// scene.add(ammoPickup.obj);
+let pickupHealth1 = pickupHealthPool.getFreeObject();
+pickupHealth1.setPosition(-6,0,-6);
+scene.add(pickupHealth1);
+
+let pickupShield1 = pickupShieldPool.getFreeObject();
+pickupShield1.setPosition(-4.5,0,-6);
+scene.add(pickupShield1);
+
+let pickupAmmo1 = pickupAmmoPool.getFreeObject();
+pickupAmmo1.setPosition(-3,0,-6);
+scene.add(pickupAmmo1);
 
 // // Adding gas cylinder to scene
 // let gasCylinder = new GasCylinder(gas_top,gas_top,gas_side,6,0,6,0.5,()=>{});
@@ -165,17 +173,19 @@ const animate = function () {
     //delta = 0.01;
 
     player.update(delta);
-    healthPickup.update(delta);
-    shieldPickup.update(delta);
-    ammoPickup.update(delta);
 
     cube.position.copy(cube_body.position);
     cube.quaternion.copy(cube_body.quaternion);
+    
+    // Pickup
+    pickupHealthPool.update(delta);
+    pickupAmmoPool.update(delta);
+    pickupShieldPool.update(delta);
 
     // Cylinder
     gasCylinderPool.update(delta);
 
-    world.step(1/60,delta,1);
+    world.step(1/(60*10),delta,100);
     
 
     // Update bullets positions
