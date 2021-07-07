@@ -23,14 +23,17 @@ const  _gascylinderMaterials = [
     new THREE.MeshPhongMaterial({
         map: _gascylinderTextures[0],
         side: THREE.DoubleSide,
+        //bumpMap: _gascylinderTextures[0],
     }),
     new THREE.MeshPhongMaterial({
         map: _gascylinderTextures[1],
         side: THREE.DoubleSide,
+        // bumpMap: _gascylinderTextures[1],
     }),
     new THREE.MeshPhongMaterial({
         map: _gascylinderTextures[2],
         side: THREE.DoubleSide,
+        // bumpMap: _gascylinderTextures[2],
     })
 ];
 

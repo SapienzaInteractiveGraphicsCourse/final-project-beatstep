@@ -18,14 +18,20 @@ const _pickupGeometry = new THREE.BoxGeometry(dimension,dimension,dimension);
 const _pickupMaterialHealth = new THREE.MeshPhongMaterial({
     map: _pickupTextureHealth,
     side: THREE.DoubleSide,
+    bumpMap: _pickupTextureHealth,
+    bumpScale  :  0.25,
 });
 const _pickupMaterialShield = new THREE.MeshPhongMaterial({
     map: _pickupTextureShield,
     side: THREE.DoubleSide,
+    bumpMap: _pickupTextureShield,
+    bumpScale  :  0.25,
 });
 const _pickupMaterialAmmo = new THREE.MeshPhongMaterial({
     map: _pickupTextureAmmo,
     side: THREE.DoubleSide,
+    bumpMap: _pickupTextureAmmo,
+    bumpScale  :  0.25,
 });
 
 class Pickup extends THREE.Mesh {
