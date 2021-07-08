@@ -22,6 +22,10 @@ import { pickupHealthPool, pickupAmmoPool, pickupShieldPool } from './components
 // Gas Cylinder
 import gasCylinderPool from './components/environment/GasCylinder';
 
+// Particle System
+import ParticleSystem from './components/environment/ParticleSystem';
+let particles = new ParticleSystem(scene,camera);
+
 import './style.css';
 
 import { genFloor } from './components/TempFloor';
@@ -188,6 +192,11 @@ const animate = function () {
 
     // Cylinder
     gasCylinderPool.update(delta);
+
+    // Particles
+    particles.step(delta);
+    particles.setPosition(5,5,5);
+    particles.setLife(4);
 
     world.step(delta/10,delta,100);
     
