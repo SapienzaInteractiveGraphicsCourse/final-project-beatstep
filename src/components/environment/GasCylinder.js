@@ -1,7 +1,9 @@
 import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 import gas_top from '../../asset/textures/gas_top.png';
+import gas_top_b from '../../asset/textures/gas_top_b.png';
 import gas_side from '../../asset/textures/gas_side.png';
+import gas_side_b from '../../asset/textures/gas_side_b.png';
 import { ExtendedBody } from '../physics/ExtendedBody';
 import { CANNON, world } from '../physics/CannonSetup';
 import { ObjectPool } from '../Tools/ObjectPool';
@@ -11,6 +13,11 @@ const _gascylinderTextures = [
     loader.load(gas_side),
     loader.load(gas_top),
     loader.load(gas_top),
+];
+const _gasCylinderBumpMaps = [
+    loader.load(gas_side_b),
+    loader.load(gas_top_b),
+    loader.load(gas_top_b),
 ];
 const _gascylinderRadius = 0.5;
 const _gascylinderHeight = 2;
@@ -23,17 +30,20 @@ const  _gascylinderMaterials = [
     new THREE.MeshPhongMaterial({
         map: _gascylinderTextures[0],
         side: THREE.DoubleSide,
-        //bumpMap: _gascylinderTextures[0],
+        bumpMap: _gasCylinderBumpMaps[0],
+        bumpScale  :  0.25,
     }),
     new THREE.MeshPhongMaterial({
         map: _gascylinderTextures[1],
         side: THREE.DoubleSide,
-        // bumpMap: _gascylinderTextures[1],
+        bumpMap: _gasCylinderBumpMaps[1],
+        bumpScale  :  0.85,
     }),
     new THREE.MeshPhongMaterial({
         map: _gascylinderTextures[2],
         side: THREE.DoubleSide,
-        // bumpMap: _gascylinderTextures[2],
+        bumpMap: _gasCylinderBumpMaps[2],
+        bumpScale  :  0.85,
     })
 ];
 
@@ -58,6 +68,17 @@ class GasCylinder extends THREE.Mesh{
 
     update(delta){
         this.body.update(this);
+    }
+
+    setPosition(x,y,z){
+        // Apply position
+        this.body.position.set(x,y+_gascylinderHeight,z);
+    }
+
+    setRotation(alpha){
+        let rot = new CANNON.Vec3();
+        this.body.quaternion.toEuler(rot);
+        this.body.quaternion.setFromEuler(rot.x,rot.y,rot.z+alpha);
     }
 
 }

@@ -162,10 +162,14 @@ scene.add(pickupAmmo1);
 // // Adding gas cylinder to scene
 // let gasCylinder = new GasCylinder(gas_top,gas_top,gas_side,6,0,6,0.5,()=>{});
 // scene.add(gasCylinder.obj);
-let cylinder1 = gasCylinderPool.getFreeObject();
-cylinder1.body.position.set(4,20,4);
-world.addBody(cylinder1.body);
-scene.add(cylinder1);
+for(let i = 0; i < 5; i++){
+    let cylinderi = gasCylinderPool.getFreeObject();
+    cylinderi.setPosition(2+2*i,0,-6);
+    cylinderi.setRotation(Math.PI);
+    world.addBody(cylinderi.body);
+    scene.add(cylinderi);
+}
+
 
 const animate = function () {
     requestAnimationFrame(animate);
@@ -185,7 +189,7 @@ const animate = function () {
     // Cylinder
     gasCylinderPool.update(delta);
 
-    world.step(1/(60*10),delta,100);
+    world.step(delta/10,delta,100);
     
 
     // Update bullets positions
