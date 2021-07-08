@@ -106,6 +106,7 @@ class ParticleSystem {
         this._geometry.setAttribute('angle', new THREE.Float32BufferAttribute([], 1));
 
         this._points = new THREE.Points(this._geometry, this._material);
+        this._points.frustumCulled = false;
         parent.add(this._points);
 
         this._alphaSpline = new LinearSpline((t, a, b) => {

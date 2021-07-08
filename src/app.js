@@ -25,6 +25,8 @@ import gasCylinderPool from './components/environment/GasCylinder';
 // Particle System
 import ParticleSystem from './components/environment/ParticleSystem';
 let particles = new ParticleSystem(scene,camera);
+particles.setPosition(5,5,5);
+particles.setLife(0.2);
 
 import './style.css';
 
@@ -195,8 +197,6 @@ const animate = function () {
 
     // Particles
     particles.step(delta);
-    particles.setPosition(5,5,5);
-    particles.setLife(4);
 
     world.step(delta/10,delta,100);
     
