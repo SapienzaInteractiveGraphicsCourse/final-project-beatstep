@@ -1,20 +1,20 @@
 import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
+import wall1 from '../../asset/textures/wall1.png';
+
+const loader = DefaultGeneralLoadingManager.getHandler("texture");
+const _wallTexture = loader.load(wall1);
+// Apply repetition
+_wallTexture.wrapS = THREE.RepeatWrapping;
+_wallTexture.wrapT = THREE.RepeatWrapping;
+_wallTexture.magFilter = THREE.NearestFilter;
+_wallTexture.repeat.set(3,3);
 
 class Wall {
-    constructor(texturePath,x,y,z,width,height,rotationRadians=0){
-        const loader = DefaultGeneralLoadingManager.getHandler("texture");
-        this.texture = loader.load(texturePath);
-        // Apply repetition
-        this.texture.wrapS = THREE.RepeatWrapping;
-        this.texture.wrapT = THREE.RepeatWrapping;
-        this.texture.magFilter = THREE.NearestFilter;
-
-        this.texture.repeat.set(3,3);
-
+    constructor(x,y,z,width,height,rotationRadians=0){
         this.geometry = new THREE.PlaneGeometry(width,height);
         this.material = new THREE.MeshPhongMaterial({
-            map: this.texture,
+            map: _wallTexture,
             side: THREE.DoubleSide,
         });
         this.mesh = new THREE.Mesh(this.geometry, this.material);

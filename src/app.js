@@ -1,12 +1,7 @@
 import { THREE, scene, clock, renderer, camera } from './components/setup/ThreeSetup';
 
-// Physics engine
-import { CANNON, world } from './components/physics/CannonSetup';
-
 // Tools
 import { DefaultGeneralLoadingManager } from './components/Tools/GeneralLoadingManager';
-import CannonDebugRenderer from './components/Tools/CannonDebugRenderer';
-const cannonDebugRenderer = new CannonDebugRenderer(scene,world);
 
 // Player
 import FPSCamera from './components/player/FPSCamera';
@@ -31,6 +26,7 @@ particles.setLife(0.2);
 import './style.css';
 
 import { genFloor } from './components/TempFloor';
+import Staircase from './components/environment/Staircase';
 
 // const scene = new THREE.Scene();
 // const clock = new Clock();
@@ -65,20 +61,14 @@ const helper = new THREE.CameraHelper( pointLight.shadow.camera );
 scene.add( helper );
 
 // Creating cube properties
-let cube_dimension = new CANNON.Vec3(0.5,0.5,0.5);
-let cube_shape = new CANNON.Box(cube_dimension);
-let cube_geometry = new THREE.BoxGeometry(cube_dimension.x*2,cube_dimension.y*2,cube_dimension.z*2);
+let cube_geometry = new THREE.BoxGeometry(1,1,1);
 let cube_material = new THREE.MeshToonMaterial({ color: 0x00ff00 });
-let cube_body = new CANNON.Body({mass: 2});
-cube_body.addShape(cube_shape);
 // Creating cube
 let cube = new THREE.Mesh(cube_geometry, cube_material);
 cube.castShadow = true;
 cube.position.set(0,20,0);
-cube_body.position.copy(cube.position); // the body must have the same as the cube
-// Adding cube to the world and scene
+// Adding cube to the scene
 scene.add(cube);
-world.add(cube_body);
 
 
 // Create a sphere
@@ -137,12 +127,10 @@ document.addEventListener("mousedown",(event)=>{
         // bulletMesh.position.set(x,y,z);
     }
 });
-window.body = cube_body;
-window.Vec3 = CANNON.Vec3;
 
 // Adding walls to scene
-let wall_1 = new Wall(wall1,0,0,-20, 40,20);
-let wall_2 = new Wall(wall1,-20,0,0, 40,20,0.5);
+let wall_1 = new Wall(0,0,-20, 40,20);
+let wall_2 = new Wall(-20,0,0, 40,20,0.5);
 scene.add(wall_1.obj);
 scene.add(wall_2.obj);
 
@@ -170,22 +158,23 @@ scene.add(pickupAmmo1);
 // scene.add(gasCylinder.obj);
 for(let i = 0; i < 5; i++){
     let cylinderi = gasCylinderPool.getFreeObject();
-    cylinderi.setPosition(2+2*i,0,-6);
+    cylinderi.setPosition(6+2*i,0,-6);
     cylinderi.setRotation(Math.PI);
-    world.addBody(cylinderi.body);
     scene.add(cylinderi);
 }
+
+// Adding staircase to scene:
+let stair = new Staircase(  2,0,-12,
+                            4,2,8,
+                            10,2);
+scene.add(stair);
 
 
 const animate = function () {
     requestAnimationFrame(animate);
     let delta = clock.getDelta();
-    //delta = 0.01;
 
     player.update(delta);
-
-    cube.position.copy(cube_body.position);
-    cube.quaternion.copy(cube_body.quaternion);
     
     // Pickup
     pickupHealthPool.update(delta);
@@ -198,15 +187,6 @@ const animate = function () {
     // Particles
     particles.step(delta);
 
-    world.step(delta/10,delta,100);
-    
-
-    // Update bullets positions
-    // for(var i=0; i<bullets.bodies.length; i++){
-    //     bullets.meshes[i].position.copy(bullets.bodies[i].position);
-    //     bullets.meshes[i].quaternion.copy(bullets.bodies[i].quaternion);
-    // }
-    cannonDebugRenderer.update();
     renderer.render(scene, camera);
 };
 

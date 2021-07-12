@@ -4,8 +4,6 @@ import gas_top from '../../asset/textures/gas_top.png';
 import gas_top_b from '../../asset/textures/gas_top_b.png';
 import gas_side from '../../asset/textures/gas_side.png';
 import gas_side_b from '../../asset/textures/gas_side_b.png';
-import { ExtendedBody } from '../physics/ExtendedBody';
-import { CANNON, world } from '../physics/CannonSetup';
 import { ObjectPool } from '../Tools/ObjectPool';
 
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
@@ -24,8 +22,9 @@ const _gascylinderHeight = 2;
 const _gascylinderMass = 2;
 const _gascylinderRotation = Math.PI/2;
 
-const _gascylinderShape = new CANNON.Cylinder(_gascylinderRadius,_gascylinderRadius,_gascylinderHeight,32)
-const _gascylinderGeometry = new THREE.CylinderGeometry(_gascylinderRadius,_gascylinderRadius,_gascylinderHeight,32);
+const _gascylinderGeometry = new THREE.CylinderGeometry(_gascylinderRadius,
+                                                        _gascylinderRadius,
+                                                        _gascylinderHeight,32);
 const  _gascylinderMaterials = [
     new THREE.MeshPhongMaterial({
         map: _gascylinderTextures[0],
@@ -47,19 +46,9 @@ const  _gascylinderMaterials = [
     })
 ];
 
-_gascylinderGeometry.rotateX( - _gascylinderRotation);
-
 class GasCylinder extends THREE.Mesh{
     constructor(){
         super(_gascylinderGeometry, _gascylinderMaterials);
-        
-        this.body = new ExtendedBody({
-            mass: _gascylinderMass,
-            shape: _gascylinderShape
-        });
-        let rot = new CANNON.Vec3();
-        this.body.quaternion.toEuler(rot);
-        this.body.quaternion.setFromEuler(rot.x + _gascylinderRotation,rot.y,rot.z);
 
         this.receiveShadow = true;
 
@@ -67,18 +56,17 @@ class GasCylinder extends THREE.Mesh{
     }
 
     update(delta){
-        this.body.update(this);
+        // TODO
     }
 
     setPosition(x,y,z){
         // Apply position
-        this.body.position.set(x,y+_gascylinderHeight,z);
+        this.position.set(x,y+_gascylinderHeight/2,z);
     }
 
     setRotation(alpha){
-        let rot = new CANNON.Vec3();
-        this.body.quaternion.toEuler(rot);
-        this.body.quaternion.setFromEuler(rot.x,rot.y,rot.z+alpha);
+        // TODO
+        this.rotation.y = alpha;
     }
 
 }
