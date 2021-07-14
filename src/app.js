@@ -72,63 +72,6 @@ scene.add(cube);
 window.cube = cube;
 
 
-// Create a sphere
-// var mass = 5, radius = 1.3;
-// let sphereShape = new CANNON.Sphere(radius);
-// let sphereBody = new CANNON.Body({ mass: mass });
-// sphereBody.addShape(sphereShape);
-// sphereBody.position.set(0,5,0);
-// sphereBody.linearDamping = 0.9;
-// world.add(sphereBody);
-
-// Creating bullets (balls)
-// let bullets = {
-//     bodies: [],
-//     meshes: []
-// };
-// // Bullet properties
-// let bullet = {};
-// bullet.shape = new CANNON.Sphere(0.2);
-// bullet.geometry = new THREE.SphereGeometry(bullet.shape.radius, 32, 32);
-// bullet.material = new THREE.MeshToonMaterial({ color: 0x00ff00 });
-// bullet.velocity = 15;
-
-// TODO: toremove, to make shoot
-document.addEventListener("mousedown",(event)=>{
-    if(event.button == 2){ // shoot
-        // let imp = new CANNON.Vec3();
-        // imp.copy(player.getWorldDirection()).mult(-10,imp);
-        // cube_body.applyImpulse(imp,new CANNON.Vec3(0,0,0))
-        // var x = player.position.x;
-        // var y = player.position.y;
-        // var z = player.position.z;
-        // var bulletBody = new CANNON.Body({ mass: 1 });
-        // bulletBody.addShape(bullet.shape);
-        // var bulletMesh = new THREE.Mesh( bullet.geometry, bullet.material );
-        // bulletMesh.castShadow = true;
-        // bulletMesh.receiveShadow = true;
-        // world.add(bulletBody);
-        // scene.add(bulletMesh);
-        
-        // bullets.bodies.push(bulletBody);
-        // bullets.meshes.push(bulletMesh);
-
-        // // TODO: Shooting direction 
-        // var shootDirection = new THREE.Vector3(0,0,1);
-        
-        // bulletBody.velocity.set(    shootDirection.x * bullet.velocity,
-        //                             shootDirection.y * bullet.velocity,
-        //                             shootDirection.z * bullet.velocity);
-
-        // // Move the ball outside the player sphere  (put here player radius * 1.02)
-        // x += shootDirection.x * (sphereShape.radius*1.02 + bullet.shape.radius);
-        // y += shootDirection.y * (sphereShape.radius*1.02 + bullet.shape.radius);
-        // z += shootDirection.z * (sphereShape.radius*1.02 + bullet.shape.radius);
-        // bulletBody.position.set(x,y,z);
-        // bulletMesh.position.set(x,y,z);
-    }
-});
-
 // Adding walls to scene
 let wall_1 = new Wall(0,0,-20, 40,20);
 let wall_2 = new Wall(-20,0,0, 40,20,0.5);
@@ -174,6 +117,7 @@ scene.add(stair);
 const animate = function () {
     requestAnimationFrame(animate);
     let delta = clock.getDelta();
+    delta = 0.02;
 
     player.update(delta);
     

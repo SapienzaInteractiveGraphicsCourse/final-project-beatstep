@@ -1,5 +1,6 @@
-import { detectCollision, setCollideable } from '../physics/CollisionDetector';
 import { THREE } from '../setup/ThreeSetup';
+import { detectCollision, setCollideable } from '../physics/CollisionDetector';
+import { DefaultPhysicsEngine, PhysicsProperties } from '../physics/PhysicsEngine_old';
 
 // Bullet properties
 let _bulletRadius = 0.05;
@@ -17,19 +18,25 @@ class Bullet extends THREE.Mesh{
 
         this.lifeTime = 0;
         this.totalLifeTime = 10; // in seconds
-        setCollideable(this);
+
+        this.physicsProperties = new PhysicsProperties(0.5);
+
+        setCollideable(this,_bulletGeometry);
         this.onPersonalCollision = function(intersections){
             this.lifeTime = this.totalLifeTime;
         };
     }
 
     update(delta){
-        detectCollision(this);
+        let displacement = DefaultPhysicsEngine.update(this.physicsProperties, delta);
+        this.position.add(displacement);
+        // detectCollision(this);
         this.lifeTime += delta;
         if(this.lifeTime >= this.totalLifeTime){
             if(this.__poolId) this.freeInPool();
             this.removeFromParent();
             this.lifeTime = 0;
+            this.physicsProperties.reset();
         }
     }
 

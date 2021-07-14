@@ -131,7 +131,7 @@ class Player extends THREE.Object3D {
             document.addEventListener("mousedown",((event)=>{
                 if(event.button == 2){ // shoot
                     this.startShootAnimation();
-                    this.bulletEmitter.shoot(this.getWorldDirection().multiplyScalar(-80));
+                    this.bulletEmitter.shoot(this.getWorldDirection().multiplyScalar(-10));
                 }
             }).bind(this));
 

@@ -15,7 +15,7 @@ class BulletEmitter extends THREE.Object3D {
     shoot(velocity){
         let b = this.pool.getFreeObject();
         b.position.copy(this.getWorldPosition());
-        // b.velocity.copy(velocity);
+        b.physicsProperties.velocity.copy(velocity);
         scene.add(b);
         console.log(`FROM THE POOL -- ${this.pool.freeObject.length} / ${Object.keys(this.pool.usingObject).length}`);
         // console.log(`Body -- ${b.body.position} - ${b.body.velocity}`);

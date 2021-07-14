@@ -97,8 +97,10 @@ class PhysicsProperties {
 
     constructor(mass = 10, initialVelocity = [0,0,0], initialAcceleration = [0,0,0]){
         this.mass = mass;
-        this.velocity = new Vector3(...initialVelocity);
-        this.acceleration = new Vector3(...initialAcceleration);
+        this.initialVelocity = new Vector3(...initialVelocity);
+        this.initialAcceleration = new Vector3(...initialAcceleration);
+        this.velocity = this.initialVelocity.clone();
+        this.acceleration = this.initialAcceleration.clone(); 
         this.constraints = 0;
 
         this.setVelocity = this.velocity.set;
@@ -109,6 +111,12 @@ class PhysicsProperties {
 
         this.multiplyVelocity = this.velocity.multiply;
         this.multiplyAcceleration = this.acceleration.multiply;
+    }
+
+    reset(){
+        this.velocity.copy(this.initialVelocity);
+        this.acceleration.copy(this.initialAcceleration);
+        this.constraints = 0; 
     }
 }
 

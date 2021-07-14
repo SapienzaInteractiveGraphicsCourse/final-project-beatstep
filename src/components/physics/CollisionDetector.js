@@ -13,6 +13,12 @@ const direction = new THREE.Vector3();
  * @returns {THREE.Object3D} - The now collideable object to chain calls
  */
 function setCollideable(object,geometry, onPersonalCollision = null, onCollisionWith = null){
+
+    if(!object) throw new Error("The object parameter is required");
+    if(!geometry) throw new Error("The geometry parameter is required");
+
+    object.collisionHolder = {};
+
     object.collisionHolder.onPersonalCollision = onPersonalCollision || function(intersections){};
     object.collisionHolder.onCollisionWith = onCollisionWith || function(object, distance, intersection){};
 
@@ -21,7 +27,7 @@ function setCollideable(object,geometry, onPersonalCollision = null, onCollision
     let indices = geometry.index ? geometry.index.array : [...Array(vertices.count).keys()];
 
     
-    va = vertices.array;
+    let va = vertices.array;
     for (let i = 0; i < indices.length; i+=3) {
         // Extracting the 3 vertices to create a face
         let i1 = i, i2 = i+1, i3 = i+2;
@@ -53,25 +59,28 @@ function detectCollision(object, distance = 0.1, collidableList = null) {
     let objectsCollidedHandled = [];
     // Array to keep all the intersection objects returned by ray.intersectObjects
     let intersectionObjects = [];
-    for (let i = 0; i < faces.length; i += 3) {
+    let actualCollision = false; // Flag used to decide whether a notifyable colision has appened
+    for (let face of faces) {
         origin.copy(face.midpoint).transformDirection(object.matrixWorld);; // Transforming the face center to world coords
         direction.copy(face.normal).transformDirection(object.matrixWorld); // // Transforming the face normal to world coords
         raycaster.near = -distance;
         raycaster.far = distance;
 
         raycaster.set(origin, direction);
-        let collisionResults = ray.intersectObjects(collidableList, true);
+        let collisionResults = raycaster.intersectObjects(collidableList, true); // Check for intersections 
         if (collisionResults.length == 0) continue;
 
         for (let colObj of collisionResults) {
-            if (colObj.object.collisionHolder && !objectsCollidedHandled.includes(colObj.object)) {
+            if (colObj.object != object && colObj.object.collisionHolder && !objectsCollidedHandled.includes(colObj.object)) {
+                actualCollision = true;
+                colObj.personalFace = face;
                 colObj.object.collisionHolder.onCollisionWith(object, colObj.distance, colObj);
                 objectsCollidedHandled.push(colObj.object);
                 intersectionObjects.push(colObj);
             }
         }
     }
-    object.collisionHolder.onPersonalCollision(intersectionObjects);
+    if(actualCollision) object.collisionHolder.onPersonalCollision(intersectionObjects);
     return intersectionObjects;
 
 }
