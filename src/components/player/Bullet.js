@@ -1,3 +1,4 @@
+import { detectCollision, setCollideable } from '../physics/CollisionDetector';
 import { THREE } from '../setup/ThreeSetup';
 
 // Bullet properties
@@ -16,9 +17,14 @@ class Bullet extends THREE.Mesh{
 
         this.lifeTime = 0;
         this.totalLifeTime = 10; // in seconds
+        setCollideable(this);
+        this.onPersonalCollision = function(intersections){
+            this.lifeTime = this.totalLifeTime;
+        };
     }
 
     update(delta){
+        detectCollision(this);
         this.lifeTime += delta;
         if(this.lifeTime >= this.totalLifeTime){
             if(this.__poolId) this.freeInPool();

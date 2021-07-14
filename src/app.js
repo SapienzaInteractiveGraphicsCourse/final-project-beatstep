@@ -69,6 +69,7 @@ cube.castShadow = true;
 cube.position.set(0,20,0);
 // Adding cube to the scene
 scene.add(cube);
+window.cube = cube;
 
 
 // Create a sphere
