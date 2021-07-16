@@ -12,13 +12,18 @@ const direction = new THREE.Vector3();
  * @param {Function} onCollisionWith  - Function called when an object collides with this object. Arguments: The other object, the collision distance, the intersection object
  * @returns {THREE.Object3D} - The now collideable object to chain calls
  */
-function setCollideable(object,geometry, onPersonalCollision = null, onCollisionWith = null){
+function setCollideable(object ,geometry, onPersonalCollision = null, onCollisionWith = null){
 
     if(!object) throw new Error("The object parameter is required");
     if(!geometry) throw new Error("The geometry parameter is required");
 
     object.collisionHolder = {};
 
+    // PER MARCO
+    // Scegli quale dei due approcci preferisci se dentro il collisionHolder o tenere questo metodo fuori
+
+    object.collisionHolder.detectCollision = detectCollision.bind(object);
+    object.detectCollision = detectCollision.bind(object); 
     object.collisionHolder.onPersonalCollision = onPersonalCollision || function(intersections){};
     object.collisionHolder.onCollisionWith = onCollisionWith || function(object, distance, intersection){};
 
@@ -49,8 +54,9 @@ function setCollideable(object,geometry, onPersonalCollision = null, onCollision
  * @param {THREE.Object3D[]} [collidableList] - The list of object to check against for collisions. Default = all the objects in the scene
  * @returns {Intersection[]} - The list of intersection objects
  */
-function detectCollision(object, distance = 0.1, collidableList = null) {
-    if(!object.collisionHolder) throw new Error("Can't detect collision with non collideable objects");
+function detectCollision(distance = 0.1, collidableList = null) {
+    //if(!object.collisionHolder) throw new Error("Can't detect collision with non collideable objects");
+    let object = this;
 
     if (!collidableList) collidableList = scene.children
     let faces = object.collisionHolder.faces
