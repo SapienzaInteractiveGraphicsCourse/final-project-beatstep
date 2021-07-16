@@ -2,10 +2,12 @@ import { THREE } from '../setup/ThreeSetup';
 
 import { PointerLockControlsPlus } from '../Tools/PointerLockControlsPlus';
 import { DefaultPhysicsEngine, PhysicsProperties } from '../physics/PhysicsEngine_old';
+import { world, PhysicsBody, PhysicsMaterial } from '../physics/PhysicsEngine';
 import HUD from "./HUD";
 
 import { addRifle } from "../TempRifle";
 import { BulletEmitter } from './BulletEmitter';
+
 
 class Player extends THREE.Object3D {
 
@@ -49,46 +51,63 @@ class Player extends THREE.Object3D {
 
         // Creating controls
         
-        this.physicsProperties = new PhysicsProperties(20);
+        // this.physicsProperties = new PhysicsProperties(20);
         this.controls = new PointerLockControlsPlus(this, domElement);
         this.controls.shouldLock = true;
         this.movement = {
-            movementSpeed: 10,
-            jumpSpeed: 15,
+            movementSpeed: 8,
+            jumpForce: 12000,
         };
 
+        this.body = new PhysicsBody(80, null, new PhysicsMaterial(0.2,0.5,0));
+        this.body.position.copy(this.position);
+        world.addBody(this.body);
+
         // Updating movement in the space (not view)
-        this.movementUpdate = function () {
+        this.movementUpdate = function ( delta ) {
+            let xDir = Number(this.controls.shouldMoveRight) - Number(this.controls.shouldMoveLeft);
+            let zDir = Number(this.controls.shouldMoveForward) - Number(this.controls.shouldMoveBackward);
 
-			return function update( delta ) {
-                let xDir = Number(this.controls.shouldMoveRight) - Number(this.controls.shouldMoveLeft);
-                let zDir = Number(this.controls.shouldMoveForward) - Number(this.controls.shouldMoveBackward);
+            if(xDir || zDir){
+                // this.physicsProperties.velocity.setX(xDir * this.movement.movementSpeed);
+                // this.physicsProperties.velocity.setZ(zDir * this.movement.movementSpeed * 1.5);
+                this.body.linearVelocity.setX(xDir * this.movement.movementSpeed);
+                this.body.linearVelocity.setZ(zDir * this.movement.movementSpeed * 1.5);
+            }
 
-                if(xDir || zDir){
-                    this.physicsProperties.velocity.setX(xDir * this.movement.movementSpeed);
-                    this.physicsProperties.velocity.setZ(zDir * this.movement.movementSpeed * 1.5);
-                }
+            if(this.controls.shouldJump && this.isOnGround()){
+                //this.physicsProperties.velocity.setY(this.movement.jumpSpeed);
+                // this.body.linearVelocity.setY(this.movement.jumpSpeed);
+                this.body.applyForce({x:0,y:this.movement.jumpForce,z:0});
+                console.log("JUMP");
+            }
+            //this.controls.shouldJump = false;
 
-                if(this.controls.shouldJump && this.isOnGround()){
-                    this.physicsProperties.velocity.setY(this.movement.jumpSpeed);
-                }
-                //this.controls.shouldJump = false;
+            // this.physicsProperties.constraints = this.isOnGround() ? 
+            //                                      this.physicsProperties.constraints | PhysicsProperties.BOTTOM_CONSTRAINT :
+            //                                      this.physicsProperties.constraints & !PhysicsProperties.BOTTOM_CONSTRAINT;
+            // let displacement = DefaultPhysicsEngine.update(this.physicsProperties, delta);
 
-                this.physicsProperties.constraints = this.isOnGround() ? 
-                                                     this.physicsProperties.constraints | PhysicsProperties.BOTTOM_CONSTRAINT :
-                                                     this.physicsProperties.constraints & !PhysicsProperties.BOTTOM_CONSTRAINT;
-                let displacement = DefaultPhysicsEngine.update(this.physicsProperties, delta);
+            // if (displacement.x != 0) this.controls.moveRight(displacement.x);
+            // if (displacement.y != 0) this.controls.moveUp(displacement.y);
+            // if (displacement.z != 0) this.controls.moveForward(displacement.z);
 
-                if (displacement.x != 0) this.controls.moveRight(displacement.x);
-				if (displacement.y != 0) this.controls.moveUp(displacement.y);
-				if (displacement.z != 0) this.controls.moveForward(displacement.z);
-			};
+            this.body.constraints = this.isOnGround() ? 
+                                    this.body.constraints | PhysicsBody.LinearConstraints.BOTTOM :
+                                    this.body.constraints & !PhysicsBody.LinearConstraints.BOTTOM;
+            let displacement = this.body.lastDisplacement;
 
-		}();
+            if (displacement.x != 0) this.controls.moveRight(displacement.x);
+            if (displacement.y != 0) this.controls.moveUp(displacement.y);
+            if (displacement.z != 0) this.controls.moveForward(displacement.z);
+        }.bind(this);
 
         this.isOnGround = function(){
             //STUB method. Replace with collision detection with ground
-            if (Math.floor(this.position.y) <= position[1]) return true;
+            if (this.position.y <= position[1]){
+                this.position.y = position[1];
+                return true;
+            } 
             return false;
         }
 
@@ -128,10 +147,12 @@ class Player extends THREE.Object3D {
             this.repetitions = 1;
 
             // TODO: DEBUG (toremove)
+            let vel = new THREE.Vector3(0,0,0);
             document.addEventListener("mousedown",((event)=>{
                 if(event.button == 2){ // shoot
                     this.startShootAnimation();
-                    this.bulletEmitter.shoot(this.getWorldDirection().multiplyScalar(-10));
+                    this.getWorldDirection(vel).multiplyScalar(-60);
+                    this.bulletEmitter.shoot(vel);
                 }
             }).bind(this));
 

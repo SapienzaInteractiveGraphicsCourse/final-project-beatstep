@@ -1,10 +1,11 @@
 import { THREE } from '../setup/ThreeSetup';
 import { detectCollision, setCollideable } from '../physics/CollisionDetector';
 import { DefaultPhysicsEngine, PhysicsProperties } from '../physics/PhysicsEngine_old';
+import { world, PhysicsBody, PhysicsMaterial } from '../physics/PhysicsEngine';
 
 // Bullet properties
 let _bulletRadius = 0.05;
-let _bulletMass = 0.5;
+let _bulletMass = 0.002;
 const _bulletGeometry = new THREE.SphereGeometry(_bulletRadius, 16, 16);
 const _bulletMaterial = new THREE.MeshLambertMaterial({ color: 0xa8a8a8 });
 
@@ -19,7 +20,12 @@ class Bullet extends THREE.Mesh{
         this.lifeTime = 0;
         this.totalLifeTime = 10; // in seconds
 
-        this.physicsProperties = new PhysicsProperties(0.5);
+        //this.physicsProperties = new PhysicsProperties(0.5);
+
+        this.body = new PhysicsBody(_bulletMass, null, new PhysicsMaterial(0.01,1,0));
+        this.body.gravityInfluence = 0.1;
+        //this.body.position.copy(this.position);
+        //this.body.mesh = this;
 
         setCollideable(this,_bulletGeometry);
         this.onPersonalCollision = function(intersections){
@@ -28,15 +34,18 @@ class Bullet extends THREE.Mesh{
     }
 
     update(delta){
-        let displacement = DefaultPhysicsEngine.update(this.physicsProperties, delta);
-        this.position.add(displacement);
+        //let displacement = DefaultPhysicsEngine.update(this.physicsProperties, delta);
+        //this.position.add(displacement);
+
         // detectCollision(this);
+        this.body.updateMesh(this);
         this.lifeTime += delta;
         if(this.lifeTime >= this.totalLifeTime){
             if(this.__poolId) this.freeInPool();
             this.removeFromParent();
             this.lifeTime = 0;
-            this.physicsProperties.reset();
+            this.body.reset();
+            world.removeBody(this.body);
         }
     }
 

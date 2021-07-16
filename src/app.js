@@ -1,10 +1,12 @@
 import { THREE, scene, clock, renderer, camera } from './components/setup/ThreeSetup';
 
+// Physics
+import { world } from './components/physics/PhysicsEngine';
+
 // Tools
 import { DefaultGeneralLoadingManager } from './components/Tools/GeneralLoadingManager';
 
 // Player
-import FPSCamera from './components/player/FPSCamera';
 import Player from './components/player/Player';
 
 // Walls
@@ -39,7 +41,6 @@ import Staircase from './components/environment/Staircase';
 // Player and camera setup
 let player = new Player(camera, renderer.domElement, [0, 2, 5], [0, 2, 0]);
 scene.add(player);
-window.player = player;
 
 
 scene.add(genFloor(40));
@@ -114,6 +115,20 @@ let stair = new Staircase(  2,0,-12,
 scene.add(stair);
 
 
+window.player = player;
+window.exp = new THREE.Vector3(0,0,0);
+window.sh = () => {
+    exp.copy(player.getWorldDirection()).multiplyScalar(-1000);
+    exp.setY(Math.abs(exp.y));
+    //player.body.linearVelocity.copy(exp);
+    player.body.applyForce(exp.multiplyScalar(100));
+}
+
+window.addEventListener("keyup",(e) =>{
+    if(e.key == "e") sh();
+})
+
+
 const animate = function () {
     requestAnimationFrame(animate);
     let delta = clock.getDelta();
@@ -132,6 +147,7 @@ const animate = function () {
     // Particles
     particles.step(delta);
 
+    world.step(delta);
     renderer.render(scene, camera);
 };
 
