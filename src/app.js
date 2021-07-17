@@ -112,7 +112,6 @@ let stair = new Staircase(  2,0,-12,
                             10,2);
 scene.add(stair);
 
-
 window.player = player;
 window.exp = new THREE.Vector3(0,0,0);
 window.sh = () => {
@@ -146,11 +145,11 @@ const animate = function () {
     particles.step(delta);
 
     world.step(delta);
-    
+
     // Detect collisions
-    stair.detectCollision();
-    cylinderi.detectCollision();
-    player.detectCollision();
+    stair.detectCollision(1,true);
+    cylinderi.detectCollision(1,true);
+    player.detectCollision(5,true);
 
     renderer.render(scene, camera);
 };

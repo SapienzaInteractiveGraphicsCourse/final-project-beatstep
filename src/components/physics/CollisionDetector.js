@@ -43,17 +43,19 @@ function setCollideable(object ,geometry, onPersonalCollision = null, onCollisio
     }
 
     object.collisionHolder.faces = faces;
+    // Raycast debug
+    object.collisionHolder.visualRaycasts = [];
     return object    
 }
 
 /**
  * Detects if the specified object is colliding, or is closer than the specified distance with the specified list of cllideable objects
- * @param {THREE.Object3D} object - object to check for collision
  * @param {Number} [distance] - The maximum distance to check for a collision. Default = 0.1 
+ * @param {Boolean} debug - If it's needed a visual representation of the raycasts, default: false
  * @param {THREE.Object3D[]} [collidableList] - The list of object to check against for collisions. Default = all the objects in the scene
  * @returns {Intersection[]} - The list of intersection objects
  */
-function detectCollision(distance = 0.1, collidableList = null) {
+function detectCollision(distance = 0.1, debug = false, collidableList = null) {
     //if(!object.collisionHolder) throw new Error("Can't detect collision with non collideable objects");
     let object = this;
 
@@ -65,6 +67,13 @@ function detectCollision(distance = 0.1, collidableList = null) {
     // Array to keep all the intersection objects returned by ray.intersectObjects
     let intersectionObjects = [];
     let actualCollision = false; // Flag used to decide whether a notifyable colision has appened
+
+    // Raycast debug
+    for(let r of this.collisionHolder.visualRaycasts){
+        scene.remove(r);
+    }
+    this.collisionHolder.visualRaycasts = [];
+
     for (let face of faces) {
         origin.copy(face.midpoint).applyMatrix4(object.matrixWorld); // Transforming the face center to world coords
         direction.copy(face.normal).transformDirection(object.matrixWorld); // // Transforming the face normal to world coords
@@ -72,6 +81,13 @@ function detectCollision(distance = 0.1, collidableList = null) {
         raycaster.far = distance;
 
         raycaster.set(origin, direction);
+
+        // Raycast debug
+        if(debug){
+            let l = this.collisionHolder.visualRaycasts.push(new THREE.ArrowHelper(raycaster.ray.direction, raycaster.ray.origin, distance, 0xff0000))
+            scene.add( this.collisionHolder.visualRaycasts[l-1] );
+        }
+        
         let collisionResults = raycaster.intersectObjects(collidableList, true); // Check for intersections
         if (collisionResults.length == 0) continue;
 

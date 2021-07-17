@@ -62,6 +62,9 @@ class GasCylinder extends THREE.Mesh{
             },
             (object, distance, intersection)=>{ // On collision with
                 console.log(this.constructor.name+" on collision with "+ object.constructor.name);
+                if(object.constructor.name == "Player"){
+                    // Make physical
+                }
             }
         );
     }

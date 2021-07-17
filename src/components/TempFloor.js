@@ -13,6 +13,8 @@ function genFloor(planeSize) {
     const planeMat = new THREE.MeshPhongMaterial({
         map: texture,
         side: THREE.DoubleSide,
+        opacity: 0.2,
+        transparent: true,
     });
     const mesh = new THREE.Mesh(planeGeo, planeMat);
     mesh.rotation.x = Math.PI * -.5;

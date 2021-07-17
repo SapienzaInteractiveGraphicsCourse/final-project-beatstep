@@ -14,7 +14,7 @@ _staircaseTexture.repeat.set(3,3);
 class Staircase extends THREE.Group {
     constructor(x,y,z,width,height,depth,steps=10,direction=0){
         super();
-
+        this.height = height;
         let discreteHeight = height/steps;
         let discreteDepth = depth/steps;
         for(let i=1;i<=steps;i++){
@@ -28,19 +28,18 @@ class Staircase extends THREE.Group {
             mesh.castShadow = false;
 
             mesh.position.set(  0,
-                                0 + h/2,
+                                0 -height/2 + h/2,
                                 0 + discreteDepth*(i) - (depth/2 + discreteDepth/2) );
             this.add(mesh);
         }
 
         // Apply position
-        this.position.set(x,y,z);
+        this.setPosition(x,y,z);
 
         // Apply Rotation
         this.rotation.y = (Math.PI / 2) * direction;
         this.direction = direction;
-
-        this.height = height;
+        
 
         // Adding collision detection
         setCollideable(this,new THREE.BoxGeometry(width,height,depth),
@@ -55,7 +54,7 @@ class Staircase extends THREE.Group {
     }
 
     setPosition(x,y,z){
-        this.position.set(x,y,z);
+        this.position.set(x,y+this.height/2,z);
     }
 
     setDirection(direction){
