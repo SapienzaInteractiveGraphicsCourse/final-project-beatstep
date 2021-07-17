@@ -5,6 +5,7 @@ import gas_top_b from '../../asset/textures/gas_top_b.png';
 import gas_side from '../../asset/textures/gas_side.png';
 import gas_side_b from '../../asset/textures/gas_side_b.png';
 import { ObjectPool } from '../Tools/ObjectPool';
+import { setCollideable } from '../physics/CollisionDetector';
 
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
 const _gascylinderTextures = [
@@ -53,6 +54,16 @@ class GasCylinder extends THREE.Mesh{
         this.receiveShadow = true;
 
         this.health = 100; // TODO: when 0, explode onCollision
+
+        // Adding collision detection
+        setCollideable(this,_gascylinderGeometry,
+            (intersections)=>{ // On personal collsion
+                console.log("personal collsion");
+            },
+            (object, distance, intersection)=>{ // On collision with
+                console.log(this.constructor.name+" on collision with "+ object.constructor.name);
+            }
+        );
     }
 
     update(delta){

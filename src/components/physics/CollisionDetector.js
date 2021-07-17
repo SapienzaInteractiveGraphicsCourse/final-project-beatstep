@@ -30,12 +30,11 @@ function setCollideable(object ,geometry, onPersonalCollision = null, onCollisio
     let faces = [];
     let vertices = geometry.getAttribute("position");
     let indices = geometry.index ? geometry.index.array : [...Array(vertices.count).keys()];
-
     
     let va = vertices.array;
     for (let i = 0; i < indices.length; i+=3) {
         // Extracting the 3 vertices to create a face
-        let i1 = i, i2 = i+1, i3 = i+2;
+        let i1 = indices[i], i2 = indices[i+1], i3 = indices[i+2];
         let v1 = [va[i1*3],va[i1*3+1],va[i1*3+2]];
         let v2 = [va[i2*3],va[i2*3+1],va[i2*3+2]];
         let v3 = [va[i3*3],va[i3*3+1],va[i3*3+2]];
@@ -58,8 +57,8 @@ function detectCollision(distance = 0.1, collidableList = null) {
     //if(!object.collisionHolder) throw new Error("Can't detect collision with non collideable objects");
     let object = this;
 
-    if (!collidableList) collidableList = scene.children
-    let faces = object.collisionHolder.faces
+    if (!collidableList) collidableList = scene.children;
+    let faces = object.collisionHolder.faces;
     
     // Array used to keep track of all the object for which a collision has been detected already, so to not call onCollisionWith a second time
     let objectsCollidedHandled = [];
@@ -67,13 +66,13 @@ function detectCollision(distance = 0.1, collidableList = null) {
     let intersectionObjects = [];
     let actualCollision = false; // Flag used to decide whether a notifyable colision has appened
     for (let face of faces) {
-        origin.copy(face.midpoint).transformDirection(object.matrixWorld);; // Transforming the face center to world coords
+        origin.copy(face.midpoint).applyMatrix4(object.matrixWorld); // Transforming the face center to world coords
         direction.copy(face.normal).transformDirection(object.matrixWorld); // // Transforming the face normal to world coords
         raycaster.near = -distance;
         raycaster.far = distance;
 
         raycaster.set(origin, direction);
-        let collisionResults = raycaster.intersectObjects(collidableList, true); // Check for intersections 
+        let collisionResults = raycaster.intersectObjects(collidableList, true); // Check for intersections
         if (collisionResults.length == 0) continue;
 
         for (let colObj of collisionResults) {
@@ -86,6 +85,7 @@ function detectCollision(distance = 0.1, collidableList = null) {
             }
         }
     }
+
     if(actualCollision) object.collisionHolder.onPersonalCollision(intersectionObjects);
     return intersectionObjects;
 

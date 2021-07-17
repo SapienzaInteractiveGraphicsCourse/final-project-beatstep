@@ -101,12 +101,10 @@ scene.add(pickupAmmo1);
 // // Adding gas cylinder to scene
 // let gasCylinder = new GasCylinder(gas_top,gas_top,gas_side,6,0,6,0.5,()=>{});
 // scene.add(gasCylinder.obj);
-for(let i = 0; i < 5; i++){
-    let cylinderi = gasCylinderPool.getFreeObject();
-    cylinderi.setPosition(6+2*i,0,-6);
-    cylinderi.setRotation(Math.PI);
-    scene.add(cylinderi);
-}
+let cylinderi = gasCylinderPool.getFreeObject();
+cylinderi.setPosition(6+2,0,-6);
+cylinderi.setRotation(Math.PI);
+scene.add(cylinderi);
 
 // Adding staircase to scene:
 let stair = new Staircase(  2,0,-12,
@@ -132,7 +130,7 @@ window.addEventListener("keyup",(e) =>{
 const animate = function () {
     requestAnimationFrame(animate);
     let delta = clock.getDelta();
-    delta = 0.02;
+    // delta = 0.02;
 
     player.update(delta);
     
@@ -148,6 +146,12 @@ const animate = function () {
     particles.step(delta);
 
     world.step(delta);
+    
+    // Detect collisions
+    stair.detectCollision();
+    cylinderi.detectCollision();
+    player.detectCollision();
+
     renderer.render(scene, camera);
 };
 

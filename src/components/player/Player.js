@@ -7,6 +7,7 @@ import HUD from "./HUD";
 
 import { addRifle } from "../TempRifle";
 import { BulletEmitter } from './BulletEmitter';
+import { setCollideable } from '../physics/CollisionDetector';
 
 
 class Player extends THREE.Object3D {
@@ -104,10 +105,10 @@ class Player extends THREE.Object3D {
 
         this.isOnGround = function(){
             //STUB method. Replace with collision detection with ground
-            if (this.position.y <= position[1]){
+            if (this.position.y <= position[1]){ 
                 this.position.y = position[1];
                 return true;
-            } 
+            }
             return false;
         }
 
@@ -163,6 +164,17 @@ class Player extends THREE.Object3D {
             obj.add(this.bulletEmitter);
             this.bulletEmitter.position.set(0,box.max.y,box.min.z);
         });
+
+
+        // Adding collision detection
+        setCollideable(this,new THREE.BoxGeometry(1,2,1),
+            (intersections)=>{ // On personal collsion
+
+            },
+            (object, distance, intersection)=>{ // On collision with
+                console.log(this.constructor.name+" on collision with "+ object.constructor.name);
+            }
+        );
 
         
         

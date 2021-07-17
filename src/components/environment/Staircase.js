@@ -1,6 +1,7 @@
 import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 import wall1 from '../../asset/textures/wall1.png';
+import { setCollideable } from '../physics/CollisionDetector';
 
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
 const _staircaseTexture = loader.load(wall1);
@@ -40,6 +41,17 @@ class Staircase extends THREE.Group {
         this.direction = direction;
 
         this.height = height;
+
+        // Adding collision detection
+        setCollideable(this,new THREE.BoxGeometry(width,height,depth),
+            (intersections)=>{ // On personal collsion
+                console.log("personal collsion");
+            },
+            (object, distance, intersection)=>{ // On collision with
+                console.log(this.constructor.name+" on collision with "+ object.constructor.name);
+            }
+        );
+
     }
 
     setPosition(x,y,z){
