@@ -38,7 +38,9 @@ class Staircase extends THREE.Mesh {
         let singleGeometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
         super(singleGeometry,material);
 
+        this.width = width;
         this.height = height;
+        this.depth = depth;
 
         // Apply position
         this.setPosition(x,y,z);
@@ -57,6 +59,10 @@ class Staircase extends THREE.Mesh {
             },
             (object, distance, intersection)=>{ // On collision with
                 console.log(this.constructor.name+" on collision with "+ object.constructor.name);
+                if(object.constructor.name == "Player"){
+                    let h = this.calcHeight(object.position.x,object.position.z);
+                    // object.position.y = 2 + h; // Uncomment here to see effects
+                }
             }
         );
 
@@ -72,14 +78,22 @@ class Staircase extends THREE.Mesh {
     }
 
     calcHeight(player_x,player_z){
-        let x0 = this.position.x;
-        let y0 = this.position.y;
-        let y1 = this.position.y + this.height;
-        
-        let xf = player_z;
-        if((this.direction % 2) == 0) xf = player_x;
+        let y0 = this.position.y - this.height/2;
+        let y1 = y0 + this.height;
 
-        let yf = ((xf-x0)/(x1-x0))*(y1-y0) + y0;
+        let xfs = [
+            Math.abs((player_z - this.position.z) + this.depth/2),
+            Math.abs((player_x - this.position.x) + this.depth/2),
+            Math.abs((player_z - this.position.z) - this.depth/2),
+            Math.abs((player_x - this.position.x) - this.depth/2),
+        ];
+        let xf = xfs[this.direction%4];
+        
+        let yi = (xf/this.depth)*(y1-y0);
+        if(yi > this.height) yi = this.height;
+
+        let yf = yi + y0;
+
         return yf;
     }
 

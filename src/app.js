@@ -149,7 +149,7 @@ const animate = function () {
     // Detect collisions
     stair.detectCollision(1,true);
     cylinderi.detectCollision(1,true);
-    player.detectCollision(5,true);
+    player.detectCollision(1.5,true);
 
     renderer.render(scene, camera);
 };
