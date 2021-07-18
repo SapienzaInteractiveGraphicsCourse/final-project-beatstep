@@ -6,6 +6,7 @@ import pickup_shield from '../../asset/textures/pickup_shield.png';
 import pickup_ammo from '../../asset/textures/pickup_ammo.png';
 
 import { ObjectPool } from '../Tools/ObjectPool';
+import { setCollideable } from '../physics/CollisionDetector';
 
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
 const _pickupTextureHealth = loader.load(pickup_health);
@@ -35,7 +36,7 @@ const _pickupMaterialAmmo = new THREE.MeshPhongMaterial({
 });
 
 class Pickup extends THREE.Mesh {
-    constructor(type = "health", onTouch = ()=>{}){
+    constructor(type = "health", onTouch = (player, distance, intersection, pickup)=>{}){
         
         switch(type){
             default:
@@ -51,14 +52,20 @@ class Pickup extends THREE.Mesh {
         }        
 
         this._type = type;
-        
-        this.mesh = new THREE.Mesh(this.geometry, this.material);
 
         this.receiveShadow = false;
         this.castShadow = true;
 
         // Apply event touching
         this.onTouch = onTouch;
+        setCollideable(this,_pickupGeometry,
+            ()=>{},
+            (object, distance, intersection)=> {
+                if(object.constructor && object.constructor.name == "Player"){
+                    this.onTouch(object, distance, intersection,this);
+                }
+            }
+        );
 
         this.rotation.y = 0;
     }
@@ -74,8 +81,17 @@ class Pickup extends THREE.Mesh {
 
 }
 
-const pickupHealthPool = new ObjectPool(Pickup,5,["health"]);
-const pickupAmmoPool = new ObjectPool(Pickup,5,["ammo"]);
-const pickupShieldPool = new ObjectPool(Pickup,5,["shield"]);
+const pickupHealthPool = new ObjectPool(Pickup,5,["health",(player, distance, intersection, pickup)=>{
+    console.log("Health pickup!");
+    pickup.removeFromParent();
+}]);
+const pickupAmmoPool = new ObjectPool(Pickup,5,["ammo",(player, distance, intersection, pickup)=>{
+    console.log("Ammo pickup!");
+    pickup.removeFromParent();
+}]);
+const pickupShieldPool = new ObjectPool(Pickup,5,["shield",(player, distance, intersection, pickup)=>{
+    console.log("Shield pickup!");
+    pickup.removeFromParent();
+}]);
 
 export { pickupHealthPool, pickupAmmoPool, pickupShieldPool };

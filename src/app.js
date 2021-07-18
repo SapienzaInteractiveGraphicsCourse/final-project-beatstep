@@ -127,6 +127,7 @@ window.addEventListener("keyup",(e) =>{
 
 
 const animate = function () {
+    renderer.render(scene, camera);
     requestAnimationFrame(animate);
     let delta = clock.getDelta();
     // delta = 0.02;
@@ -150,8 +151,9 @@ const animate = function () {
     stair.detectCollision(1,true);
     cylinderi.detectCollision(1,true);
     player.detectCollision(1.5,true);
-
-    renderer.render(scene, camera);
+    pickupHealth1.detectCollision(1,true);
+    pickupShield1.detectCollision(1,true);
+    pickupAmmo1.detectCollision(1,true);
 };
 
 DefaultGeneralLoadingManager.addOnLoad(() => {
