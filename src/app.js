@@ -21,9 +21,7 @@ import gasCylinderPool from './components/environment/GasCylinder';
 
 // Particle System
 import ParticleSystem from './components/environment/ParticleSystem';
-let particles = new ParticleSystem(scene,camera);
-particles.setPosition(5,5,5);
-particles.setLife(0.2);
+
 
 import './style.css';
 
@@ -37,126 +35,136 @@ import Staircase from './components/environment/Staircase';
 // renderer.shadowMap.enabled = true;
 // renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 // renderer.setSize(window.innerWidth, window.innerHeight);
-
-// Player and camera setup
-let player = new Player(camera, renderer.domElement, [0, 2, 5], [0, 2, 0]);
-scene.add(player);
-
-
-scene.add(genFloor(40));
-
-// Lighting
-const color = 0xFFFFFF;
-const ambientLight = new THREE.AmbientLight(color, 0.2);
-scene.add(ambientLight);
-
-const pointLight = new THREE.PointLight(color);
-pointLight.position.set(0,30,0);
-pointLight.castShadow = true;
-pointLight.shadow.mapSize.set(4192,4192);
-pointLight.shadow.radius = 2;
-scene.add(pointLight);
-
-//TODO: DEBUG, just to see the point light
-const helper = new THREE.CameraHelper( pointLight.shadow.camera );
-scene.add( helper );
-
-// Creating cube properties
-let cube_geometry = new THREE.BoxGeometry(1,1,1);
-let cube_material = new THREE.MeshToonMaterial({ color: 0x00ff00 });
-// Creating cube
-let cube = new THREE.Mesh(cube_geometry, cube_material);
-cube.castShadow = true;
-cube.position.set(0,20,0);
-// Adding cube to the scene
-scene.add(cube);
-window.cube = cube;
+function init(){
+    // Player and camera setup
+    let player = new Player(camera, renderer.domElement, [0, 2, 5], [0, 2, 0]);
+    scene.add(player);
 
 
-// Adding walls to scene
-let wall_1 = new Wall(0,0,-20, 40,20);
-let wall_2 = new Wall(-20,0,0, 40,20,0.5);
-scene.add(wall_1.obj);
-scene.add(wall_2.obj);
+    scene.add(genFloor(40));
 
-// // Adding pickups to scene
-// let healthPickup = new Pickup(pickup_health,-6,0.5,-6,()=>{});
-// let shieldPickup = new Pickup(pickup_shield,-4.5,0.5,-6,()=>{});
-// let ammoPickup = new Pickup(pickup_ammo,-3,0.5,-6,()=>{});
-// scene.add(healthPickup.obj);
-// scene.add(shieldPickup.obj);
-// scene.add(ammoPickup.obj);
-let pickupHealth1 = pickupHealthPool.getFreeObject();
-pickupHealth1.setPosition(-6,0,-6);
-scene.add(pickupHealth1);
+    // Lighting
+    const color = 0xFFFFFF;
+    const ambientLight = new THREE.AmbientLight(color, 0.2);
+    scene.add(ambientLight);
 
-let pickupShield1 = pickupShieldPool.getFreeObject();
-pickupShield1.setPosition(-4.5,0,-6);
-scene.add(pickupShield1);
+    const pointLight = new THREE.PointLight(color);
+    pointLight.position.set(0,30,0);
+    pointLight.castShadow = true;
+    pointLight.shadow.mapSize.set(4192,4192);
+    pointLight.shadow.radius = 2;
+    scene.add(pointLight);
 
-let pickupAmmo1 = pickupAmmoPool.getFreeObject();
-pickupAmmo1.setPosition(-3,0,-6);
-scene.add(pickupAmmo1);
+    //TODO: DEBUG, just to see the point light
+    const helper = new THREE.CameraHelper( pointLight.shadow.camera );
+    scene.add( helper );
 
-// // Adding gas cylinder to scene
-// let gasCylinder = new GasCylinder(gas_top,gas_top,gas_side,6,0,6,0.5,()=>{});
-// scene.add(gasCylinder.obj);
-let cylinderi = gasCylinderPool.getFreeObject();
-cylinderi.setPosition(6+2,0,-6);
-cylinderi.setRotation(Math.PI);
-scene.add(cylinderi);
+    // Adding Particle test
+    let particles = new ParticleSystem(scene,camera);
+    particles.setPosition(5,5,5);
+    particles.setLife(0.2);
 
-// Adding staircase to scene:
-let stair = new Staircase(  2,0,-12,
-                            4,2,8,
-                            10,2);
-scene.add(stair);
+    // Creating cube properties
+    let cube_geometry = new THREE.BoxGeometry(1,1,1);
+    let cube_material = new THREE.MeshToonMaterial({ color: 0x00ff00 });
+    // Creating cube
+    let cube = new THREE.Mesh(cube_geometry, cube_material);
+    cube.castShadow = true;
+    cube.position.set(0,20,0);
+    // Adding cube to the scene
+    scene.add(cube);
+    window.cube = cube;
 
-window.player = player;
-window.exp = new THREE.Vector3(0,0,0);
-window.sh = () => {
-    exp.copy(player.getWorldDirection()).multiplyScalar(-1000);
-    exp.setY(Math.abs(exp.y));
-    //player.body.linearVelocity.copy(exp);
-    player.body.applyForce(exp.multiplyScalar(100));
+
+    // Adding walls to scene
+    let wall_1 = new Wall(0,0,-20, 40,20);
+    let wall_2 = new Wall(-20,0,0, 40,20,0.5);
+    scene.add(wall_1.obj);
+    scene.add(wall_2.obj);
+
+    // // Adding pickups to scene
+    // let healthPickup = new Pickup(pickup_health,-6,0.5,-6,()=>{});
+    // let shieldPickup = new Pickup(pickup_shield,-4.5,0.5,-6,()=>{});
+    // let ammoPickup = new Pickup(pickup_ammo,-3,0.5,-6,()=>{});
+    // scene.add(healthPickup.obj);
+    // scene.add(shieldPickup.obj);
+    // scene.add(ammoPickup.obj);
+    let pickupHealth1 = pickupHealthPool.getFreeObject();
+    pickupHealth1.setPosition(-6,0,-6);
+    scene.add(pickupHealth1);
+
+    let pickupShield1 = pickupShieldPool.getFreeObject();
+    pickupShield1.setPosition(-4.5,0,-6);
+    scene.add(pickupShield1);
+
+    let pickupAmmo1 = pickupAmmoPool.getFreeObject();
+    pickupAmmo1.setPosition(-3,0,-6);
+    scene.add(pickupAmmo1);
+
+    // // Adding gas cylinder to scene
+    // let gasCylinder = new GasCylinder(gas_top,gas_top,gas_side,6,0,6,0.5,()=>{});
+    // scene.add(gasCylinder.obj);
+    let cylinderi = gasCylinderPool.getFreeObject();
+    cylinderi.setPosition(6+2,0,-6);
+    cylinderi.setRotation(Math.PI);
+    scene.add(cylinderi);
+
+    // Adding staircase to scene:
+    let stair = new Staircase(  2,0,-12,
+                                4,2,8,
+                                10,2);
+    scene.add(stair);
+
+    window.player = player;
+    window.exp = new THREE.Vector3(0,0,0);
+    window.sh = () => {
+        exp.copy(player.getWorldDirection()).multiplyScalar(-1000);
+        exp.setY(Math.abs(exp.y));
+        //player.body.linearVelocity.copy(exp);
+        player.body.applyForce(exp.multiplyScalar(100));
+    }
+
+    window.addEventListener("keyup",(e) =>{
+        if(e.key == "e") sh();
+    })
+
+    animate = function () {
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+        let delta = clock.getDelta();
+        // delta = 0.02;
+    
+        player.update(delta);
+        
+        // Pickup
+        pickupHealthPool.update(delta);
+        pickupAmmoPool.update(delta);
+        pickupShieldPool.update(delta);
+    
+        // Cylinder
+        gasCylinderPool.update(delta);
+    
+        // Particles
+        particles.step(delta);
+    
+        world.step(delta);
+    
+        // Detect collisions
+        stair.detectCollision(1,true);
+        cylinderi.detectCollision(1,true);
+        player.detectCollision(1.5,true);
+        pickupHealth1.detectCollision(1,true);
+        pickupShield1.detectCollision(1,true);
+        pickupAmmo1.detectCollision(1,true);
+    };
+
 }
 
-window.addEventListener("keyup",(e) =>{
-    if(e.key == "e") sh();
-})
-
-
-const animate = function () {
-    renderer.render(scene, camera);
-    requestAnimationFrame(animate);
-    let delta = clock.getDelta();
-    // delta = 0.02;
-
-    player.update(delta);
-    
-    // Pickup
-    pickupHealthPool.update(delta);
-    pickupAmmoPool.update(delta);
-    pickupShieldPool.update(delta);
-
-    // Cylinder
-    gasCylinderPool.update(delta);
-
-    // Particles
-    particles.step(delta);
-
-    world.step(delta);
-
-    // Detect collisions
-    stair.detectCollision(1,true);
-    cylinderi.detectCollision(1,true);
-    player.detectCollision(1.5,true);
-    pickupHealth1.detectCollision(1,true);
-    pickupShield1.detectCollision(1,true);
-    pickupAmmo1.detectCollision(1,true);
-};
+let animate;
 
 DefaultGeneralLoadingManager.addOnLoad(() => {
+    console.log("LOADED");
+    init();
     document.body.removeChild(document.querySelector(".splash"));
     document.body.appendChild(renderer.domElement);
     player.hud.show();
