@@ -47,12 +47,12 @@ class PhysicsBody {
         LEFT    : 0b100000,
     }
 
-    constructor(mass, shape, material){
+    constructor(mass, shape, material, onPersonalCollision, onCollisionWith){
         this._minVectorValue = -1e10, this._maxVectorValue = 1e10;
         this._world = null;
 
         this.mass = mass || 1;
-        this.shape = shape || new PhysicsShapeThree(THREE.BoxGeometry); // TODO: Change with custom box shape
+        this.shape = shape || new PhysicsShapeThree(new THREE.BoxGeometry(1,1,1)); // TODO: Change with custom box shape
         this.material = material || new PhysicsMaterial();
 
         this.position = new Vector3(0,0,0);
@@ -72,13 +72,15 @@ class PhysicsBody {
 
         this.linearAcceleration = new Vector3(0,0,0);
         this.angularAcceleration = new Vector3(0,0,0);
-        this.linea
 
         this.constraints = 0;
 
         this.appliedForce = new Vector3(0,0,0);
 
         this.gravityInfluence = 1;
+        
+        this.onPersonalCollision = onPersonalCollision || function(intersections){};
+        this.onCollisionWith = onCollisionWith || function(body, distance, intersection){};
 
         this.mesh = null;
     }
@@ -134,7 +136,27 @@ class PhysicsBody {
     }
 
     detectCollision(body){
-
+        for (let face of this.shape.faces) {
+            origin.copy(face.midpoint).applyMatrix4(this.matrixWorld); // Transforming the face center to world coords
+            direction.copy(face.normal).transformDirection(this.matrixWorld); // // Transforming the face normal to world coords
+            raycaster.near = -distance;
+            raycaster.far = distance;
+    
+            raycaster.set(origin, direction);
+            
+            let collisionResults = raycaster.intersectObjects(collidableList, true); // Check for intersections
+            if (collisionResults.length == 0) continue;
+    
+            for (let colObj of collisionResults) {
+                if (colObj.object != this && colObj.object.collisionHolder && !objectsCollidedHandled.includes(colObj.object)) {
+                    actualCollision = true;
+                    colObj.personalFace = face;
+                    colObj.object.collisionHolder.onCollisionWith(this, colObj.distance, colObj);
+                    objectsCollidedHandled.push(colObj.object);
+                    intersectionObjects.push(colObj);
+                }
+            }
+        }
     }
 
     _limitByConstraints(vector){
@@ -160,7 +182,7 @@ class PhysicsBody {
 class PhysicsShape {
 
     constructor() {
-        if(this.prototype.constructor === PhysicsShape){
+        if(this.constructor === PhysicsShape){
             throw new Error("Cannot instantiate PhysicsBody. Use an inheriting class");
         }
         this.faces = [];
@@ -227,8 +249,8 @@ class Face {
         // plane = [(X_1 − X_3) × (X_2 − X_3), −X_3T(X_1 × X_2)]
         this.plane = new Vector4();
 
-        let topVec1 = new Vector3(0,0,0).subVectors(v1,v3);
-        let topVec2 = new Vector3(0,0,0).subVectors(v2,v3);
+        let topVec1 = new Vector3(0,0,0).subVectors(this.v1,this.v3);
+        let topVec2 = new Vector3(0,0,0).subVectors(this.v2,this.v3);
         let normal = new Vector3(0,0,0).crossVectors(topVec1,topVec2).normalize();
         this.plane.copy(normal);
 

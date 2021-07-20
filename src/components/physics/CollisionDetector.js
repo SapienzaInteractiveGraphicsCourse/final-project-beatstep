@@ -71,7 +71,7 @@ function detectCollision(distance = 0.1, debug = false, collidableList = null) {
 
     for (let face of faces) {
         origin.copy(face.midpoint).applyMatrix4(this.matrixWorld); // Transforming the face center to world coords
-        direction.copy(face.normal).transformDirection(this.matrixWorld); // // Transforming the face normal to world coords
+        direction.copy(face.normal).transformDirection(this.matrixWorld); // Transforming the face normal to world coords
         raycaster.near = -distance;
         raycaster.far = distance;
 
