@@ -1,7 +1,6 @@
 import { THREE } from '../setup/ThreeSetup';
 
 import { PointerLockControlsPlus } from '../Tools/PointerLockControlsPlus';
-import { DefaultPhysicsEngine, PhysicsProperties } from '../physics/PhysicsEngine_old';
 import { world, PhysicsBody, PhysicsMaterial } from '../physics/PhysicsEngine';
 import HUD from "./HUD";
 

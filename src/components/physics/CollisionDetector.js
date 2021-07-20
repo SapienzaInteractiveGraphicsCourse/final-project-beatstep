@@ -12,17 +12,13 @@ const direction = new THREE.Vector3();
  * @param {Function} onCollisionWith  - Function called when an object collides with this object. Arguments: The other object, the collision distance, the intersection object
  * @returns {THREE.Object3D} - The now collideable object to chain calls
  */
-function setCollideable(object ,geometry, onPersonalCollision = null, onCollisionWith = null){
+function setCollideable(object, geometry, onPersonalCollision = null, onCollisionWith = null){
 
     if(!object) throw new Error("The object parameter is required");
     if(!geometry) throw new Error("The geometry parameter is required");
 
     object.collisionHolder = {};
 
-    // PER MARCO
-    // Scegli quale dei due approcci preferisci se dentro il collisionHolder o tenere questo metodo fuori
-
-    object.collisionHolder.detectCollision = detectCollision.bind(object);
     object.detectCollision = detectCollision.bind(object); 
     object.collisionHolder.onPersonalCollision = onPersonalCollision || function(intersections){};
     object.collisionHolder.onCollisionWith = onCollisionWith || function(object, distance, intersection){};
@@ -49,7 +45,7 @@ function setCollideable(object ,geometry, onPersonalCollision = null, onCollisio
 }
 
 /**
- * Detects if the specified object is colliding, or is closer than the specified distance with the specified list of cllideable objects
+ * Detects if the specified object is colliding, or is closer than the specified distance with the specified list of collideable objects
  * @param {Number} [distance] - The maximum distance to check for a collision. Default = 0.1 
  * @param {Boolean} debug - If it's needed a visual representation of the raycasts, default: false
  * @param {THREE.Object3D[]} [collidableList] - The list of object to check against for collisions. Default = all the objects in the scene
@@ -57,10 +53,9 @@ function setCollideable(object ,geometry, onPersonalCollision = null, onCollisio
  */
 function detectCollision(distance = 0.1, debug = false, collidableList = null) {
     //if(!object.collisionHolder) throw new Error("Can't detect collision with non collideable objects");
-    let object = this;
 
     if (!collidableList) collidableList = scene.children;
-    let faces = object.collisionHolder.faces;
+    let faces = this.collisionHolder.faces;
     
     // Array used to keep track of all the object for which a collision has been detected already, so to not call onCollisionWith a second time
     let objectsCollidedHandled = [];
@@ -75,8 +70,8 @@ function detectCollision(distance = 0.1, debug = false, collidableList = null) {
     this.collisionHolder.visualRaycasts = [];
 
     for (let face of faces) {
-        origin.copy(face.midpoint).applyMatrix4(object.matrixWorld); // Transforming the face center to world coords
-        direction.copy(face.normal).transformDirection(object.matrixWorld); // // Transforming the face normal to world coords
+        origin.copy(face.midpoint).applyMatrix4(this.matrixWorld); // Transforming the face center to world coords
+        direction.copy(face.normal).transformDirection(this.matrixWorld); // // Transforming the face normal to world coords
         raycaster.near = -distance;
         raycaster.far = distance;
 
@@ -92,17 +87,17 @@ function detectCollision(distance = 0.1, debug = false, collidableList = null) {
         if (collisionResults.length == 0) continue;
 
         for (let colObj of collisionResults) {
-            if (colObj.object != object && colObj.object.collisionHolder && !objectsCollidedHandled.includes(colObj.object)) {
+            if (colObj.object != this && colObj.object.collisionHolder && !objectsCollidedHandled.includes(colObj.object)) {
                 actualCollision = true;
                 colObj.personalFace = face;
-                colObj.object.collisionHolder.onCollisionWith(object, colObj.distance, colObj);
+                colObj.object.collisionHolder.onCollisionWith(this, colObj.distance, colObj);
                 objectsCollidedHandled.push(colObj.object);
                 intersectionObjects.push(colObj);
             }
         }
     }
 
-    if(actualCollision) object.collisionHolder.onPersonalCollision(intersectionObjects);
+    if(actualCollision) this.collisionHolder.onPersonalCollision(intersectionObjects);
     return intersectionObjects;
 
 }

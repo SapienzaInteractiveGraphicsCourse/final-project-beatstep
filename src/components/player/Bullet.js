@@ -1,6 +1,5 @@
 import { THREE } from '../setup/ThreeSetup';
 import { detectCollision, setCollideable } from '../physics/CollisionDetector';
-import { DefaultPhysicsEngine, PhysicsProperties } from '../physics/PhysicsEngine_old';
 import { world, PhysicsBody, PhysicsMaterial } from '../physics/PhysicsEngine';
 
 // Bullet properties
