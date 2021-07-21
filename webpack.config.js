@@ -33,7 +33,7 @@ module.exports = {
                 },
             },
             {
-                test: /\.(obj|stl|gltf|babylon)$/i,
+                test: /\.(obj|stl|gltf|babylon|bin|glb)$/i,
                 type: 'asset/resource',
                 generator: {
                     filename: 'models/[hash][ext]'

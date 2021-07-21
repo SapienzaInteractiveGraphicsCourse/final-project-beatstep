@@ -61,7 +61,7 @@ class Staircase extends THREE.Mesh {
                 console.log(this.constructor.name+" on collision with "+ object.constructor.name);
                 if(object.constructor && object.constructor.name == "Player"){
                     let h = this.calcHeight(object.position.x,object.position.z);
-                    // object.position.y = 2 + h; // Uncomment here to see effects
+                    object.position.y = 2 + h; // Uncomment here to see effects
                 }
             }
         );

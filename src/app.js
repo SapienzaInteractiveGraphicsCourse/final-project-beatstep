@@ -9,6 +9,9 @@ import { DefaultGeneralLoadingManager } from './components/Tools/GeneralLoadingM
 // Player
 import Player from './components/player/Player';
 
+// Enemies
+import Robot from './components/enemies/Robot';
+
 // Walls
 import Wall from './components/environment/Wall';
 import wall1 from './asset/textures/wall1.png';
@@ -105,15 +108,31 @@ function init(){
     // let gasCylinder = new GasCylinder(gas_top,gas_top,gas_side,6,0,6,0.5,()=>{});
     // scene.add(gasCylinder.obj);
     let cylinderi = gasCylinderPool.getFreeObject();
-    cylinderi.setPosition(6+2,0,-6);
+    cylinderi.setPosition(2,0,-6);
     cylinderi.setRotation(Math.PI);
     scene.add(cylinderi);
 
     // Adding staircase to scene:
-    let stair = new Staircase(  2,0,-12,
+    let stair = new Staircase(  10,0,-6,
+                                4,2,8,
+                                10,2);
+    let stair2 = new Staircase( 10,2,-6-8,
                                 4,2,8,
                                 10,2);
     scene.add(stair);
+    scene.add(stair2);
+
+    // Adding enemies
+    let robots = [];
+    let nr = 1;
+    for(let i = 0; i<nr; i++){
+        let robot = new Robot();
+        robot.setPosition(-12,0,0+i*3);
+        // robot.setRotation(0);
+        scene.add(robot.group);
+        robots.push(robot);
+    }
+    
 
     window.player = player;
     window.exp = new THREE.Vector3(0,0,0);
@@ -151,11 +170,17 @@ function init(){
     
         // Detect collisions
         stair.detectCollision(1,true);
+        stair2.detectCollision(1,true);
         cylinderi.detectCollision(1,true);
         player.detectCollision(1.5,true);
         pickupHealth1.detectCollision(1,true);
         pickupShield1.detectCollision(1,true);
         pickupAmmo1.detectCollision(1,true);
+
+        // Enemies
+        for(let robot of robots){
+            robot.step(delta,player);
+        }
     };
 
 }
