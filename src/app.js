@@ -171,11 +171,11 @@ function init(){
         // Detect collisions
         stair.detectCollision(1,true);
         stair2.detectCollision(1,true);
-        cylinderi.detectCollision(1,true);
+        cylinderi.detectCollision(1,false);
         player.detectCollision(1.5,true);
-        pickupHealth1.detectCollision(1,true);
-        pickupShield1.detectCollision(1,true);
-        pickupAmmo1.detectCollision(1,true);
+        pickupHealth1.detectCollision(1,false);
+        pickupShield1.detectCollision(1,false);
+        pickupAmmo1.detectCollision(1,false);
 
         // Enemies
         for(let robot of robots){

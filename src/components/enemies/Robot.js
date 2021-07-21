@@ -2,17 +2,27 @@ import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 
 import robot1 from '../../asset/models/robot1/robot_1.glb';
+import { setCollideable } from '../physics/CollisionDetector';
 
 const loader = DefaultGeneralLoadingManager.getHandler("gltf");
 let _robot1Model;
+const _robotHeight = 2;
+let _robotSize;
+let _robotCollisionGeometry;
 loader.load(robot1, (gltf)=>{
     _robot1Model = gltf.scene;
     // Scale
     let boundingBox = new THREE.Box3().setFromObject(_robot1Model).getSize();
-    let scaleFactor = 2 / boundingBox.y; 
+    let scaleFactor = _robotHeight / boundingBox.y;
     _robot1Model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+    _robotSize = new THREE.Box3().setFromObject(_robot1Model).getSize();
+    _robotCollisionGeometry = new THREE.CylinderGeometry(   _robotSize.x*4,
+                                                            _robotSize.x*4,
+                                                            _robotSize.y*5,10, 1, true);
+    _robotCollisionGeometry.translate(0,_robotSize.y*2,0);
 
 });
+
 
 class Robot {
     constructor(){
@@ -56,6 +66,21 @@ class Robot {
 
         // Animation
         this.createAnimationAlert();
+
+
+        // Adding collision detection
+        setCollideable(this.wheels,_robotCollisionGeometry,
+            (intersections)=>{ // On personal collsion
+                console.log("personal collsion");
+            },
+            (object, distance, intersection)=>{ // On collision with
+                console.log(this.constructor.name+" on collision with "+ object.constructor.name);
+                if(object.constructor.name == "Player"){
+                    // Make physical
+                }
+            }
+        );
+        this.detectCollision = (...args) => this.wheels.detectCollision(...args);
     }
 
     setPosition(x,y,z){
@@ -115,6 +140,8 @@ class Robot {
 
         // Update every animation
         this.mixer.update(delta);
+        // Update collision
+        this.detectCollision(2,true);
     }
 
     createAnimationAlert(){
