@@ -25,6 +25,10 @@ import gasCylinderPool from './components/environment/GasCylinder';
 // Particle System
 import ParticleSystem from './components/environment/ParticleSystem';
 
+// Environment
+import Floor from './components/environment/Floor';
+import TopLight from './components/environment/TopLight';
+import FloorLight from './components/environment/FloorLight';
 
 import './style.css';
 
@@ -43,24 +47,36 @@ function init(){
     let player = new Player(camera, renderer.domElement, [0, 2, 5], [0, 2, 0]);
     scene.add(player);
 
+    // Floor(s)
+    // scene.add(genFloor(40));
+    let floor1 = new Floor(28,0,0, 80,80);
+    let ceiling1 = new Floor(28,10,0, 8,8);
+    scene.add(floor1);
+    scene.add(ceiling1);
 
-    scene.add(genFloor(40));
+    // top light
+    let topLight = new TopLight(28,10,0);
+    topLight.addToScene(scene);
+
+    // floor light
+    let floorLight = new FloorLight(30,0,0);
+    floorLight.addToScene(scene);
 
     // Lighting
-    const color = 0xFFFFFF;
-    const ambientLight = new THREE.AmbientLight(color, 0.2);
-    scene.add(ambientLight);
+    // const color = 0xFFFFFF;
+    // const ambientLight = new THREE.AmbientLight(color, 0.2);
+    // scene.add(ambientLight.obj);
 
-    const pointLight = new THREE.PointLight(color);
-    pointLight.position.set(0,30,0);
-    pointLight.castShadow = true;
-    pointLight.shadow.mapSize.set(4192,4192);
-    pointLight.shadow.radius = 2;
-    scene.add(pointLight);
+    // const pointLight = new THREE.PointLight(color);
+    // pointLight.position.set(0,30,0);
+    // pointLight.castShadow = true;
+    // pointLight.shadow.mapSize.set(4192,4192);
+    // pointLight.shadow.radius = 2;
+    // scene.add(pointLight);
 
-    //TODO: DEBUG, just to see the point light
-    const helper = new THREE.CameraHelper( pointLight.shadow.camera );
-    scene.add( helper );
+    // //TODO: DEBUG, just to see the point light
+    // const helper = new THREE.CameraHelper( pointLight.shadow.camera );
+    // scene.add( helper );
 
     // Adding Particle test
     let particles = new ParticleSystem(scene,camera);
