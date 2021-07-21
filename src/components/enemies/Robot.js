@@ -64,8 +64,17 @@ class Robot {
         this.eyeRadiusDistanceMin = this.maxVicinityWithPlayer + 6;
         this.eyeRadiusDistanceMax = this.eyeRadiusDistanceMin + 4;
 
-        // Animation
-        this.createAnimationAlert();
+        // We need one mixer for each animated object in the scene
+        this.mixer = new THREE.AnimationMixer(this.group);
+        // Animations
+        this.animation_alert = this.createAnimationAlert();
+        this.animation_shootPose = this.createAnimationShootPose();
+        // TODO: debug animation, to remove
+        document.addEventListener("mousedown",((event)=>{
+            if(event.button == 1){ // wheel
+                this.startAnimation(this.animation_shootPose);
+            }
+        }).bind(this));
 
 
         // Adding collision detection
@@ -117,6 +126,11 @@ class Robot {
     }
 
     step(delta, player){
+        // Update every animation
+        this.mixer.update(delta);
+        // Update collision
+        this.detectCollision(2,true);
+
         let px = player.position.x;
         let py = player.position.y;
         let pz = player.position.z;
@@ -137,16 +151,57 @@ class Robot {
             let r = Math.atan2(v.z,v.x);
             this.setRotation(-r);
         } else this.isFollowing = false;
+    }
 
-        // Update every animation
-        this.mixer.update(delta);
-        // Update collision
-        this.detectCollision(2,true);
+    createAnimationShootPose(){
+        // this.arm_dx_1
+        let arm_dx_1_a1 = this.arm_dx_1.quaternion;
+        let arm_dx_1_a2 = this.incrementQuaternionFromEuler(arm_dx_1_a1, 0,Math.PI/8,Math.PI/3);
+
+        const arm_dx_1_rotation = new THREE.QuaternionKeyframeTrack(
+            this.arm_dx_1_path+'.quaternion',
+            [0, 0.3],
+            [...arm_dx_1_a1.toArray(),
+             ...arm_dx_1_a2.toArray()],
+        );
+
+        // this.arm_dx_2
+        let arm_dx_2_a1 = this.arm_dx_2.quaternion;
+        let arm_dx_2_a2 = this.incrementQuaternionFromEuler(arm_dx_2_a1, +Math.PI/8,0,0);
+
+        const arm_dx_2_rotation = new THREE.QuaternionKeyframeTrack(
+            this.arm_dx_2_path+'.quaternion',
+            [0, 0.3],
+            [...arm_dx_2_a1.toArray(),
+             ...arm_dx_2_a2.toArray()],
+        );
+
+        // this.hand_dx
+        let hand_dx_a1 = this.hand_dx.quaternion;
+        let hand_dx_a2 = this.incrementQuaternionFromEuler(hand_dx_a1, -Math.PI/4,0,0);
+
+        const hand_dx_rotation = new THREE.QuaternionKeyframeTrack(
+            this.hand_dx_path+'.quaternion',
+            [0, 0.3],
+            [...hand_dx_a1.toArray(),
+             ...hand_dx_a2.toArray()],
+        );
+
+        // Putting everything toghether
+        const shootPose_clip = new THREE.AnimationClip('shootPose_clip', -1, [
+            arm_dx_1_rotation, arm_dx_2_rotation,
+            hand_dx_rotation
+        ]);
+
+        let animation_shootPose = this.mixer.clipAction(shootPose_clip);
+        animation_shootPose.loop = THREE.LoopOnce;
+        animation_shootPose.enabled = false;
+        animation_shootPose.clampWhenFinished = true;
+
+        return animation_shootPose;
     }
 
     createAnimationAlert(){
-        // Load animation
-
         // this.chest
         let chest_a1 = this.chest.quaternion;
         let chest_a2 = this.incrementQuaternionFromEuler(chest_a1, 0,0,Math.PI/4);
@@ -218,11 +273,11 @@ class Robot {
             arm_dx_2_rotation, arm_sx_2_rotation,
         ]);
 
-        // We need one mixer for each animated object in the scene
-        this.mixer = new THREE.AnimationMixer(this.group);
-        this.animation_alert = this.mixer.clipAction(alert_clip);
-        this.animation_alert.loop = THREE.LoopOnce;
-        this.animation_alert.enabled = false;
+        let animation_alert = this.mixer.clipAction(alert_clip);
+        animation_alert.loop = THREE.LoopOnce;
+        animation_alert.enabled = false;
+
+        return animation_alert;
     }
 
     startAnimation(anim) {
