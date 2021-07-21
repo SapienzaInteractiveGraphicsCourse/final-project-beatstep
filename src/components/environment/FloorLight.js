@@ -17,15 +17,24 @@ loader.load(light, (gltf)=>{
 });
 
 class FloorLight {
-    constructor(x,y,z, intensity = 0.3, color = 0xFFFFFF){
-        this.group = _floorLightModel.clone(true); 
+    constructor(x,y,z, rotation = 0, intensity = 0.8, color = 0xFFFFFF){
+        this.group = _floorLightModel.clone(true);
 
         this.light = new THREE.PointLight(color, intensity);
-        this.light.position.set(x,_floorLightSize.y+y,z+1);
+        this.lightPosition = {
+            x: x,
+            y: y + _floorLightSize.y - _floorLightSize.y/10,
+            z: z,
+            r: _floorLightSize.z/5
+        }
+        this.light.position.set(this.lightPosition.x,
+                                this.lightPosition.y,
+                                this.lightPosition.z + this.lightPosition.r);
 
         // Size
         this.size = new THREE.Box3().setFromObject(this.group).getSize();
         this.setPosition(x,y,z);
+        this.setRotation(rotation);
     }
 
     setPosition(x,y,z){
@@ -35,6 +44,9 @@ class FloorLight {
 
     setRotation(alpha){
         this.group.rotation.y = alpha;
+        this.light.position.set(this.lightPosition.x + this.lightPosition.r*Math.sin(alpha),
+                                this.lightPosition.y,
+                                this.lightPosition.z + this.lightPosition.r*Math.cos(alpha));
     }
 
     addToScene(scene){

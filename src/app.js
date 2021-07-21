@@ -49,7 +49,7 @@ function init(){
 
     // Floor(s)
     // scene.add(genFloor(40));
-    let floor1 = new Floor(28,0,0, 80,80);
+    let floor1 = new Floor(0,0,0, 80,80);
     let ceiling1 = new Floor(28,10,0, 8,8);
     scene.add(floor1);
     scene.add(ceiling1);
@@ -59,7 +59,7 @@ function init(){
     topLight.addToScene(scene);
 
     // floor light
-    let floorLight = new FloorLight(30,0,0);
+    let floorLight = new FloorLight(30,0,0, -Math.PI/2);
     floorLight.addToScene(scene);
 
     // Lighting
@@ -80,7 +80,7 @@ function init(){
 
     // Adding Particle test
     let particles = new ParticleSystem(scene,camera);
-    particles.setPosition(5,5,5);
+    particles.setPosition(30,5,20);
     particles.setLife(0.2);
 
     // Creating cube properties

@@ -27,6 +27,7 @@ objLoaderLight.load(topLightModel,
 
         _topLightObj.traverse(function (child) {
             if (child.isMesh){
+                child.material = new THREE.MeshPhongMaterial();
                 child.material.map = _topLightTexture;
                 child.material.normalMap = _topLightTextureNormal;
                 child.material.metalnessMap = _topLightTextureMetallic;
