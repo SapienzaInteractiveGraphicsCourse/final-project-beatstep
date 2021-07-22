@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import { PhysicsBody } from "./PhysicsEngine";
+import { PhysicsBody } from "./PhysicsBody";
 import { CollisionMap } from "./CollisonMap";
 
 class PhysicsWorld {

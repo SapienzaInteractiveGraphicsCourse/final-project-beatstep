@@ -1,4 +1,4 @@
-import { PhysicsShape, Face } from "../PhysicsEngine";
+import { PhysicsShape, Face } from "./PhysicsShape";
 
 class PhysicsShapeThree extends PhysicsShape {
 
