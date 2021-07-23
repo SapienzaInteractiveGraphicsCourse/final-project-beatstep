@@ -31,6 +31,7 @@ objLoaderLight.load(topLightModel,
                 child.material.map = _topLightTexture;
                 child.material.normalMap = _topLightTextureNormal;
                 child.material.metalnessMap = _topLightTextureMetallic;
+                child.material.emissive = new THREE.Color( 0xffffff );
                 child.material.emissiveMap = _topLightTextureEmissive;
                 child.castShadow = true;
             } 
@@ -39,9 +40,9 @@ objLoaderLight.load(topLightModel,
 );
 
 class TopLight {
-    constructor(x,y,z, intensity = 0.3, color = 0xFFFFFF){
+    constructor(x,y,z, distance = 24, intensity = 1, color = 0xFFFFFF){
         this.obj = _topLightObj.clone(true);
-        this.light = new THREE.PointLight(color, intensity);
+        this.light = new THREE.PointLight(color, intensity, distance);
         this.light.position.set(x,y-2,z);
 
         // Apply position
@@ -56,8 +57,8 @@ class TopLight {
     addToScene(scene){
         scene.add(this.obj);
         scene.add(this.light);
-        const helper = new THREE.PointLightHelper( this.light );
-        scene.add( helper );
+        // const helper = new THREE.PointLightHelper( this.light );
+        // scene.add( helper );
     }
 
     removeFromScene(scene){
