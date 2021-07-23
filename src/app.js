@@ -35,6 +35,7 @@ import './style.css';
 import { genFloor } from './components/TempFloor';
 import Staircase from './components/environment/Staircase';
 import Door from './components/environment/Door';
+import { HalfCubeGeometry } from './components/Tools/CustomGeometries';
 
 // const scene = new THREE.Scene();
 // const clock = new Clock();
@@ -60,6 +61,13 @@ function init(){
     door.setPosition(10,0,0);
     scene.add(door.group);
 
+    // Custom geometry test
+    const cust_mat = new THREE.MeshNormalMaterial();
+    let cust_geometry = new HalfCubeGeometry(1,2,4);
+    const cust_mesh = new THREE.Mesh(cust_geometry, cust_mat);
+    cust_mesh.position.set(0,2,0)
+    scene.add(cust_mesh);
+
     // top light
     let topLight = new TopLight(28,10,0);
     topLight.addToScene(scene);
@@ -70,15 +78,15 @@ function init(){
 
     // Lighting
     const color = 0xFFFFFF;
-    const ambientLight = new THREE.AmbientLight(color, 0.6);
+    const ambientLight = new THREE.AmbientLight(color, 0.2);
     scene.add(ambientLight);
 
-    // const pointLight = new THREE.PointLight(color);
-    // pointLight.position.set(0,30,0);
-    // pointLight.castShadow = true;
-    // pointLight.shadow.mapSize.set(4192,4192);
-    // pointLight.shadow.radius = 2;
-    // scene.add(pointLight);
+    const pointLight = new THREE.PointLight(color, 0.5);
+    pointLight.position.set(0,30,0);
+    pointLight.castShadow = true;
+    pointLight.shadow.mapSize.set(4192,4192);
+    pointLight.shadow.radius = 2;
+    scene.add(pointLight);
 
     // //TODO: DEBUG, just to see the point light
     // const helper = new THREE.CameraHelper( pointLight.shadow.camera );
@@ -88,7 +96,6 @@ function init(){
     let particles = new ParticleSystem(scene,camera);
     particles.setPosition(30,5,20);
     particles.setLife(0.2);
-
 
     // Creating cube properties
     let cube_geometry = new THREE.BoxGeometry(1,1,1);
