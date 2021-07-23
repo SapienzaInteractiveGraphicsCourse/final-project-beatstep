@@ -4,7 +4,7 @@ import { CollisionMap } from "./CollisonMap";
 
 class PhysicsWorld {
 
-    constructor(worldSize = 150){s
+    constructor(worldSize = 150){
         this.gravity = new Vector3(0,0,0);
         this.collisionMap = new CollisionMap(worldSize/(5*2),5); // CellSize = 5 is fixed
         // this.bodies = this.collisionMap.list;

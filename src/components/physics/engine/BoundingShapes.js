@@ -20,6 +20,8 @@ class Box {
         this.max.x += e[ 12 ];
 		this.max.y += e[ 13 ];
 		this.max.z += e[ 14 ];
+
+        return this;
     }
 
     clone(){
@@ -43,6 +45,8 @@ class Sphere {
         this.center.x += e[12];
         this.center.y += e[13];
         this.center.z += e[14];
+
+        return this;
     }
 
     clone(){

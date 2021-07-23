@@ -1,7 +1,7 @@
 import { THREE, scene, clock, renderer, camera } from './components/setup/ThreeSetup';
 
 // Physics
-import { world } from './components/physics/PhysicsEngine';
+import { PhysicsBody, PhysicsMaterial, PhysicsShapeThree, world } from './components/physics/PhysicsEngine';
 
 // Tools
 import { DefaultGeneralLoadingManager } from './components/Tools/GeneralLoadingManager';
@@ -83,6 +83,7 @@ function init(){
     particles.setPosition(30,5,20);
     particles.setLife(0.2);
 
+
     // Creating cube properties
     let cube_geometry = new THREE.BoxGeometry(1,1,1);
     let cube_material = new THREE.MeshToonMaterial({ color: 0x00ff00 });
@@ -90,9 +91,17 @@ function init(){
     let cube = new THREE.Mesh(cube_geometry, cube_material);
     cube.castShadow = true;
     cube.position.set(0,20,0);
-    // Adding cube to the scene
+    // Creatind physics cube
+    let cubeBody = new PhysicsBody(0,new PhysicsShapeThree(cube_geometry),new PhysicsMaterial(),() => {
+
+    });
+    cubeBody.mesh = cube;
+    cubeBody.position.set(0,20,0);
+    // Adding cube to the scene and world
+    world.addBody(cubeBody);
     scene.add(cube);
     window.cube = cube;
+    window.cubeBody = cubeBody;
 
 
     // Adding walls to scene
@@ -167,7 +176,7 @@ function init(){
         renderer.render(scene, camera);
         requestAnimationFrame(animate);
         let delta = clock.getDelta();
-        // delta = 0.02;
+        delta = 0.02;
     
         player.update(delta);
         
@@ -204,7 +213,7 @@ function init(){
 let animate;
 
 DefaultGeneralLoadingManager.addOnLoad(() => {
-    console.log("LOADED");
+    console.log("Game loaded, starting rendering loop");
     init();
     document.body.removeChild(document.querySelector(".splash"));
     document.body.appendChild(renderer.domElement);

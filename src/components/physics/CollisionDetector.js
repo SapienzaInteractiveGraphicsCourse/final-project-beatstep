@@ -90,14 +90,14 @@ function detectCollision(distance = 0.1, debug = false, collidableList = null) {
             if (colObj.object != this && colObj.object.collisionHolder && !objectsCollidedHandled.includes(colObj.object)) {
                 actualCollision = true;
                 colObj.personalFace = face;
-                colObj.object.collisionHolder.onCollisionWith(this, colObj.distance, colObj);
+                //colObj.object.collisionHolder.onCollisionWith(this, colObj.distance, colObj);
                 objectsCollidedHandled.push(colObj.object);
                 intersectionObjects.push(colObj);
             }
         }
     }
 
-    if(actualCollision) this.collisionHolder.onPersonalCollision(intersectionObjects);
+    //if(actualCollision) this.collisionHolder.onPersonalCollision(intersectionObjects);
     return intersectionObjects;
 
 }

@@ -16,11 +16,11 @@ class PhysicsBody {
         LEFT    : 0b100000,
     }
 
-    constructor(mass, shape, material, onPersonalCollision, onCollisionWith){
+    constructor(mass = 1, shape, material, onCollisionWith){
         this._minVectorValue = -1e10, this._maxVectorValue = 1e10;
         this._world = null;
 
-        this.mass = mass || 1;
+        this.mass = mass;
         this.shape = shape || new PhysicsShapeThree(new BoxGeometry(1,1,1)); // TODO: Change with custom box shape
         this.material = material || new PhysicsMaterial();
 
@@ -65,7 +65,7 @@ class PhysicsBody {
         }
     }
 
-    step(deltaTime, gravity, commonForces){
+    step(deltaTime, gravity, commonForces){        
         if(this.mass <= 0) return; // mass = 0 => static body
 
         let currentForce = this.linearAcceleration.clone().multiplyScalar(this.mass);                                   // Calculating current force of body before any changes
@@ -100,7 +100,7 @@ class PhysicsBody {
         // Limit by constraints
         this._limitByConstraints(this.linearVelocity);
 
-        if(this.mesh) this.updateMesh(this.mesh);
+        if(this.mesh) this.updateMesh(this.mesh, true, true);
     }
 
     updateMesh(mesh, pos = true, rot = false){
@@ -135,7 +135,7 @@ class PhysicsBody {
     syncDetectCollision(body, distance, firstHitOnly = false){
         // If the bounding shapes of the 2 bodies are further apart, no precise collision gets computed
         if(this.roughDistance(body) > distance){
-            return [];
+            return [false, null, null];
         }
 
         let actualCollision = false;

@@ -104,8 +104,8 @@ class Face {
 
         let topVec1 = new Vector3(0,0,0).subVectors(this.v1,this.v3);
         let topVec2 = new Vector3(0,0,0).subVectors(this.v2,this.v3);
-        let normal = new Vector3(0,0,0).crossVectors(topVec1,topVec2).normalize();
-        this.plane.copy(normal);
+        this.normal = new Vector3(0,0,0).crossVectors(topVec1,topVec2).normalize();
+        this.plane.copy(this.normal);
 
         let planeW = this.v3.dot(new Vector3(0,0,0).crossVectors(this.v1,this.v2));
         this.plane.setW(planeW);
@@ -162,7 +162,7 @@ class Face {
      */
     pointInsideFace(point,coplanar = false) {
         // Check if the point is coplanar. If not, return false
-        if(!coplanar && point.clone().sub(midpoint).dot(normal) == 0){
+        if(!coplanar && point.clone().sub(this.midpoint).dot(this.normal) == 0){
             return false;
         }
 
