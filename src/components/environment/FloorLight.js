@@ -15,7 +15,7 @@ const _floorLightHeight = 4;
 let _floorLightSize;
 loaderGLTF.load(light, (gltf)=>{
     _floorLightModel = gltf.scene;
-    console.log(_floorLightModel)
+    
     // Scale
     let boundingBox = new THREE.Box3().setFromObject(_floorLightModel).getSize();
     let scaleFactor = _floorLightHeight / boundingBox.y;

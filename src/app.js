@@ -34,6 +34,7 @@ import './style.css';
 
 import { genFloor } from './components/TempFloor';
 import Staircase from './components/environment/Staircase';
+import Door from './components/environment/Door';
 
 // const scene = new THREE.Scene();
 // const clock = new Clock();
@@ -54,6 +55,11 @@ function init(){
     scene.add(floor1);
     scene.add(ceiling1);
 
+    // Door
+    let door = new Door();
+    door.setPosition(10,0,0);
+    scene.add(door.group);
+
     // top light
     let topLight = new TopLight(28,10,0);
     topLight.addToScene(scene);
@@ -63,9 +69,9 @@ function init(){
     floorLight.addToScene(scene);
 
     // Lighting
-    // const color = 0xFFFFFF;
-    // const ambientLight = new THREE.AmbientLight(color, 0.2);
-    // scene.add(ambientLight.obj);
+    const color = 0xFFFFFF;
+    const ambientLight = new THREE.AmbientLight(color, 0.6);
+    scene.add(ambientLight);
 
     // const pointLight = new THREE.PointLight(color);
     // pointLight.position.set(0,30,0);
@@ -206,6 +212,8 @@ function init(){
         for(let robot of robots){
             robot.step(delta,player);
         }
+        // Doors
+        door.step(delta);
     };
 
 }

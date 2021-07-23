@@ -69,13 +69,6 @@ class Robot {
         // Animations
         this.animation_alert = this.createAnimationAlert();
         this.animation_shootPose = this.createAnimationShootPose();
-        // TODO: debug animation, to remove
-        document.addEventListener("mousedown",((event)=>{
-            if(event.button == 1){ // wheel
-                this.startAnimation(this.animation_shootPose);
-            }
-        }).bind(this));
-
 
         // Adding collision detection
         setCollideable(this.wheels,_robotCollisionGeometry,
