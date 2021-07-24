@@ -29,16 +29,17 @@ class PhysicsShape {
      * @param {Number} maxDistance - The maxDistance for which the intersection is valid
      * @param {Matrix4} matrixWorld - The transformation matrix to apply to this shape
      * @param {Boolean} firstHitOnly - If true, return the intersection array right after the first hit has been detected
-     * @returns  {Object[]} A list of intersection objects. The intersection object has the intersection point, the distance and the 2 faces
+     * @returns  {Object[]} A list of intersection objects. The intersection object has the intersection point where the face
+     *                      intersects this shape's face, the distance between the intersection point on this shape and the supplied face's midpoint and the 2 faces
      */
     raycastFromFace(face, maxDistance, matrixWorld, firstHitOnly = false){
         let intersections = [];
-        let fWorld = new Face();
+        let fWorld = new Face(); // Used to apply this body's matrixWorld to all his faces
         for (let f of this.faces) {
             fWorld.set(f,matrixWorld);
             let int = fWorld.raycastFromFace(face, maxDistance);
             if(int){
-                int.shape = this;
+                int.raycastedShape = this;
                 intersections.push(int);
                 if(firstHitOnly) break;
             }
@@ -144,7 +145,10 @@ class Face {
         }
         // If the denominator == 0 but the numerator != 0 => there is no intersection
         if(denominator == 0){
-            return null;
+            return {
+                point: null,
+                distance: Infinity
+            }
         }
         // If the denominator != 0 but the numerator != 0 => there is a single point of intersection
         let d = numerator/denominator;
@@ -214,7 +218,8 @@ class Face {
      * Returns if the ray intersects the face and the intersection point is closer than maxDistance
      * @param {Face} face - The face to check the intersection with
      * @param {Number} maxDistance - The maxDistance for which the intersection is valid
-     * @returns {Object} The intersection object with the intersection point, the distance and the 2 faces
+     * @returns {Object} The intersection object has the intersection point where the face intersects this shape's face,
+     *                   ùàthe distance between the intersection point on this shape and the supplied face's midpoint and the 2 faces
      */
      raycastFromFace(face, maxDistance){
         // If this face's midpoint is further than maxDistance from the other face's plane, for sure we don't care about the intersection
@@ -234,14 +239,14 @@ class Face {
      * @param {Matrix4} matrixWorld - A transformation matrix
      */
     set(face,matrixWorld){
-        this.v1.set(face.v1);
-        this.v2.set(face.v2);
-        this.v3.set(face.v3);
+        this.v1.copy(face.v1);
+        this.v2.copy(face.v2);
+        this.v3.copy(face.v3);
 
-        this.midpoint.set(face.midpoint);
-        this.normal.set(face.normal);
+        this.midpoint.copy(face.midpoint);
+        this.normal.copy(face.normal);
         
-        this.plane.set(face.plane);
+        this.plane.copy(face.plane);
 
         if(matrixWorld){
             this.v1.applyMatrix4(matrixWorld);
@@ -252,6 +257,24 @@ class Face {
             this.normal.transformDirection(matrixWorld);
             
             this.plane.applyMatrix4(matrixWorld);
+        }
+        return this;
+    }
+
+    clone(matrixWorld) {
+        if (!matrixWorld) {
+            return new Face(
+                this.v1.clone(),
+                this.v2.clone(),
+                this.v3.clone()
+            );
+        }
+        if (matrixWorld) {
+            return new Face(
+                this.v1.clone().applyMatrix4(matrixWorld),
+                this.v2.clone().applyMatrix4(matrixWorld),
+                this.v3.clone().applyMatrix4(matrixWorld)
+            );
         }
     }
 

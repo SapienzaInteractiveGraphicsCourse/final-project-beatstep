@@ -38,7 +38,7 @@ class CollisionMap {
                 let xIn = object.__collisionMapIndices[0];
                 let yIn = object.__collisionMapIndices[1];
                 let zIn = object.__collisionMapIndices[2];
-                this.spaceMap[xIn][yIn][zIn].splice(this.this.spaceMap[xIn][yIn][zIn].indexOf(object),1);
+                this.spaceMap[xIn][yIn][zIn].splice(this.spaceMap[xIn][yIn][zIn].indexOf(object),1);
             }
         }
         else{
@@ -49,7 +49,7 @@ class CollisionMap {
         let xIn = Math.floor(((x - this.center[0]) / this.cellSize) + this.halfSize);
         let yIn = Math.floor(((y - this.center[1]) / this.cellSize) + this.halfSize);
         let zIn = Math.floor(((z - this.center[2]) / this.cellSize) + this.halfSize);
-        if (xIn >= this.size || yIn >= this.size || zIn >= this.size) {
+        if (xIn >= this.size || xIn < 0 || yIn >= this.size || yIn < 0 || zIn >= this.size || zIn < 0) {
             this.outOfBounds.push(object);
             object.__collisionMapIndices = null;
         }
@@ -117,9 +117,10 @@ class CollisionMap {
                 let xIn = object.__collisionMapIndices[0];
                 let yIn = object.__collisionMapIndices[1];
                 let zIn = object.__collisionMapIndices[2];
-                this.spaceMap[xIn][yIn][zIn].splice(this.this.spaceMap[xIn][yIn][zIn].indexOf(object),1);
+                this.spaceMap[xIn][yIn][zIn].splice(this.spaceMap[xIn][yIn][zIn].indexOf(object),1);
             }
             delete object.__collisionMapIndices;
+            this.list.splice(this.list.indexOf(object),1);
         }
     }
 

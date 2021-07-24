@@ -36,6 +36,7 @@ import { genFloor } from './components/TempFloor';
 import Staircase from './components/environment/Staircase';
 import Door from './components/environment/Door';
 import { HalfCubeGeometry } from './components/Tools/CustomGeometries';
+import { DebugDrawerThree } from './components/physics/engine/DebugDrawerThree';
 
 // const scene = new THREE.Scene();
 // const clock = new Clock();
@@ -67,6 +68,11 @@ function init(){
     const cust_mesh = new THREE.Mesh(cust_geometry, cust_mat);
     cust_mesh.position.set(0,2,0)
     scene.add(cust_mesh);
+    let cust_body = new PhysicsBody(0,new PhysicsShapeThree(cust_geometry),new PhysicsMaterial(0.5,0.5,0.5));
+    cust_body.position.copy(cust_mesh.position);
+    cust_body.preferBoundingBox = true;
+    world.addBody(cust_body);
+
 
     // top light
     let topLight = new TopLight(28,10,0);
@@ -98,7 +104,7 @@ function init(){
     particles.setLife(0.2);
 
     // Creating cube properties
-    let cube_geometry = new THREE.BoxGeometry(1,1,1);
+    let cube_geometry = new THREE.BoxGeometry(1,1,1,5,5,5);
     let cube_material = new THREE.MeshToonMaterial({ color: 0x00ff00 });
     // Creating cube
     let cube = new THREE.Mesh(cube_geometry, cube_material);
@@ -106,15 +112,17 @@ function init(){
     cube.position.set(0,20,0);
     // Creatind physics cube
     let cubeBody = new PhysicsBody(0,new PhysicsShapeThree(cube_geometry),new PhysicsMaterial(),() => {
-
+        console.log("COLLISION");
     });
     cubeBody.mesh = cube;
     cubeBody.position.set(0,20,0);
+    cubeBody.shape.preferBoundingBox = true;
     // Adding cube to the scene and world
     world.addBody(cubeBody);
     scene.add(cube);
     window.cube = cube;
     window.cubeBody = cubeBody;
+    window.Vector3 = THREE.Vector3;
 
 
     // Adding walls to scene
@@ -181,6 +189,8 @@ function init(){
         player.body.applyForce(exp.multiplyScalar(100));
     }
 
+    let debugDrawer = new DebugDrawerThree();
+
     window.addEventListener("keyup",(e) =>{
         if(e.key == "e") sh();
     })
@@ -188,6 +198,7 @@ function init(){
     animate = function () {
         renderer.render(scene, camera);
         requestAnimationFrame(animate);
+        
         let delta = clock.getDelta();
         delta = 0.02;
     
@@ -205,6 +216,7 @@ function init(){
         particles.step(delta);
     
         world.step(delta);
+        //debugDrawer.drawRays();
     
         // Detect collisions
         stair.detectCollision(1,true);

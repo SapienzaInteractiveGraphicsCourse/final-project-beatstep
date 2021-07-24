@@ -23,13 +23,14 @@ class Bullet extends THREE.Mesh{
 
         this.body = new PhysicsBody(_bulletMass, null, new PhysicsMaterial(0.01,1,0));
         this.body.gravityInfluence = 0.1;
+        this.body.collisionDistance = 0.3;
         //this.body.position.copy(this.position);
         //this.body.mesh = this;
 
-        setCollideable(this,_bulletGeometry);
-        this.onPersonalCollision = function(intersections){
-            this.lifeTime = this.totalLifeTime;
-        };
+        // setCollideable(this,_bulletGeometry);
+        // this.onPersonalCollision = function(intersections){
+        //     this.lifeTime = this.totalLifeTime;
+        // };
     }
 
     update(delta){
@@ -40,10 +41,11 @@ class Bullet extends THREE.Mesh{
         this.body.updateMesh(this);
         this.lifeTime += delta;
         if(this.lifeTime >= this.totalLifeTime){
-            if(this.__poolId) this.freeInPool();
-            this.removeFromParent();
             this.lifeTime = 0;
             this.body.reset();
+            
+            if(this.__poolId) this.freeInPool();
+            this.removeFromParent();
             world.removeBody(this.body);
         }
     }
