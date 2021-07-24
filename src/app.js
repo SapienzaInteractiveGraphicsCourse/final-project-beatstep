@@ -37,6 +37,7 @@ import Staircase from './components/environment/Staircase';
 import Door from './components/environment/Door';
 import { HalfCubeGeometry } from './components/Tools/CustomGeometries';
 import { DebugDrawerThree } from './components/physics/engine/DebugDrawerThree';
+import PhysicalFloor from './components/environment/PhysicalFloor';
 
 // const scene = new THREE.Scene();
 // const clock = new Clock();
@@ -52,10 +53,15 @@ function init(){
 
     // Floor(s)
     // scene.add(genFloor(40));
-    let floor1 = new Floor(0,0,0, 80,80);
+    // let floor1 = new Floor(0,0,0, 80,80);
+    // scene.add(floor1);
     let ceiling1 = new Floor(28,10,0, 8,8);
-    scene.add(floor1);
     scene.add(ceiling1);
+
+    // Physical floor
+    let pfloor = new PhysicalFloor(0,0,0, 80,80);
+    scene.add(pfloor.mesh);
+    world.addBody(pfloor);
 
     // Door
     let door = new Door();
