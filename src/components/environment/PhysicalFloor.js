@@ -13,7 +13,7 @@ _floorTexture.magFilter = THREE.NearestFilter;
 
 class PhysicalFloor extends PhysicsBody{
     constructor(x,y,z,width,height, preferBoundingBox = true){
-        let geometry = new THREE.PlaneGeometry(width,height);
+        let geometry = new THREE.BoxGeometry(width,0.01,height);
         let texture = _floorTexture.clone();
         texture.needsUpdate = true;
         texture.repeat.set(width/2,width/2);
@@ -36,8 +36,8 @@ class PhysicalFloor extends PhysicsBody{
         this.setPosition(x,y,z);
 
         // Apply Rotation
-        this.mesh.rotation.x = Math.PI/2;
-        this.quaternion.copy(this.mesh.quaternion);
+        // this.mesh.rotation.x = Math.PI/2;
+        // this.quaternion.copy(this.mesh.quaternion);
 
         this.shape.preferBoundingBox = preferBoundingBox;
     }

@@ -39,7 +39,7 @@ class Sphere {
     }
 
     applyMatrix4(m) {
-        // This is an axis aligned box, so rotation is ignored
+        // This is a sphere, so rotation is ignored
         const e = m.elements;
 
         this.center.x += e[12];

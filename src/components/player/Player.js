@@ -1,7 +1,7 @@
 import { THREE } from '../setup/ThreeSetup';
 
 import { PointerLockControlsPlus } from '../Tools/PointerLockControlsPlus';
-import { world, PhysicsBody, PhysicsMaterial } from '../physics/PhysicsEngine';
+import { world, PhysicsBody, PhysicsMaterial, PhysicsShapeThree } from '../physics/PhysicsEngine';
 import HUD from "./HUD";
 
 import { addRifle } from "../TempRifle";
@@ -61,8 +61,10 @@ class Player extends THREE.Object3D {
             jumpForce: 30000,
         };
 
-        this.body = new PhysicsBody(80, null, new PhysicsMaterial(0.2,0.5,0));
+        this.body = new PhysicsBody(80, new PhysicsShapeThree(new THREE.BoxGeometry(1,4,1,2,2,2)), new PhysicsMaterial(0.2,0.5,0));
         this.body.position.copy(this.position);
+        //this.body.position.y-1;
+        this.body.shape.preferBoundingBox = true;
         world.addBody(this.body);
 
         // Updating movement in the space (not view)
@@ -104,9 +106,9 @@ class Player extends THREE.Object3D {
             // if (displacement.y != 0) this.controls.moveUp(displacement.y);
             // if (displacement.z != 0) this.controls.moveForward(displacement.z);
 
-            this.body.constraints = this.isOnGround() ? 
-                                    this.body.constraints | PhysicsBody.LinearConstraints.BOTTOM :
-                                    this.body.constraints & !PhysicsBody.LinearConstraints.BOTTOM;
+            // this.body.constraints = this.isOnGround() ? 
+            //                         this.body.constraints | PhysicsBody.LinearConstraints.BOTTOM :
+            //                         this.body.constraints & !PhysicsBody.LinearConstraints.BOTTOM;
             // let displacement = this.body.lastDisplacement;
 
             // if (displacement.x != 0) this.controls.moveRight(displacement.x);
@@ -201,6 +203,7 @@ class Player extends THREE.Object3D {
     update(delta){
         this.movementUpdate(delta);
         this.body.updateMesh(this,true,false);
+        //this.position.set(this.body.position.x,this.body.position.y+1,this.body.position.z);
         if(this.mixer){
             this.mixer.update(delta);
         }

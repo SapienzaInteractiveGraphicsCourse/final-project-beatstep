@@ -110,6 +110,9 @@ class PhysicsWorld {
                     [body1, body2] = [body2, body1]; // Javascript easy swap
 
                 let {isColliding, intersections, minIntersection} = body1.syncDetectCollision(body2,this.collisionDistance,true);
+                if((body1.mass == 80 || body2.mass == 80) && (body1.constructor.name == "PhysicalFloor" || body2.constructor.name == "PhysicalFloor") && !isColliding){
+                    body1.syncDetectCollision(body2,this.collisionDistance,true);
+                }
                 if(isColliding){
                     if(body1.mass == 0 || body2.mass == 0){
                         let normal;

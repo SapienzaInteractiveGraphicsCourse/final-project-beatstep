@@ -222,7 +222,7 @@ function init(){
         particles.step(delta);
     
         world.step(delta);
-        //debugDrawer.drawRays();
+        debugDrawer.drawRays();
     
         // Detect collisions
         stair.detectCollision(1,true);

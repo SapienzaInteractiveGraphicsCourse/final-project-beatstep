@@ -84,7 +84,7 @@ class CollisionMap {
             closeObjects.push(...this.outOfBounds);
         }
         else{
-            let oobIncluded = false;
+            let oobIncluded = false; // Out of bounds objects included
             if(xInL < 0 || yInL < 0 || zInL < 0){
                 closeObjects.push(...this.outOfBounds); //Taking the outOfBound elements as the distance stretches outside the map
                 oobIncluded = true;

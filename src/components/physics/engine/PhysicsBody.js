@@ -80,9 +80,12 @@ class PhysicsBody {
             let vPerpendicular = _tempVector.copy(normal).
                                  multiplyScalar(this.linearVelocity.dot(normal)*this.material.restitutionFactor);       // The perpendicular component to the bouncing surface is afected by the restitution factor
             let vParallel = this.linearVelocity.sub(vPerpendicular);                                                    // The parallel component will be dampened by the friction
-            this.linearVelocity.subVectors(vParallel,vPerpendicular);                                                   // The sum of the normal component and the parallel component is the new velocity
+            this.linearVelocity.subVectors(vParallel,vPerpendicular);                                                   // The sum of the normal component and the parallel component is the new velocity. We subtract cause the parallel is considered going in the surface (against the normal)
         }
         currentForce.add(contactForces);   
+        if(currentForce.y != 0){
+            console.log("Moving vertically with force: " + currentForce.y);
+        }
 
         if(staticContactNormals.length > 0){
             let frictionForce = _tempVector.copy(this.linearVelocity).normalize()
@@ -95,11 +98,13 @@ class PhysicsBody {
         this.linearAcceleration.clampScalar(this._minVectorValue,this._maxVectorValue);                                 // Clamping values to not have memory problems
         // Limit by constraints
         this._limitByConstraints(this.linearAcceleration);
+        this._roundToZero(this.linearAcceleration);
 
         this.linearVelocity.add(_tempVector.copy(this.linearAcceleration).multiplyScalar(deltaTime));                   // v(t+dt) = v(t) + a(t+dt)*dt
         this.linearVelocity.clampScalar(this._minVectorValue,this._maxVectorValue);                                     // Clamping values to not have memory problems
         // Limit by constraints
         this._limitByConstraints(this.linearVelocity);
+        this._roundToZero(this.linearVelocity);
 
         // let v0t = _tempVector.copy(this.linearVelocity).multiplyScalar(deltaTime);                                   // v0*dt
         // let at2_2 = currentAcceleration.multiplyScalar(deltaTime*deltaTime*0.5);                                     // ½(a*dt²)
@@ -108,6 +113,7 @@ class PhysicsBody {
 
         // Limit by constraints
         this._limitByConstraints(displacement);
+        this._roundToZero(displacement);
 
         this.lastDisplacement.copy(displacement);
         this.position.add(displacement);                                                                                // s = v0*dt + ½(a*dt²)
@@ -196,6 +202,12 @@ class PhysicsBody {
         
         if(vector.z < 0 && (this.constraints & PhysicsBody.LinearConstraints.FORWARD))  vector.z = 0;
         if(vector.z > 0 && (this.constraints & PhysicsBody.LinearConstraints.BACK   ))  vector.z = 0;
+    }
+
+    _roundToZero(vector){
+        if(Math.abs(vector.x) < 0.001) vector.x = 0;
+        if(Math.abs(vector.y) < 0.001) vector.y = 0;
+        if(Math.abs(vector.z) < 0.001) vector.z = 0;
     }
 
     reset(){

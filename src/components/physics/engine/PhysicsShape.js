@@ -52,25 +52,32 @@ class PhysicsShape {
     }
 
     static boxToBoxDistance(box1,box2){
-        let xDistance = Math.min(
-            (box1.min.x - box2.min.x),
-            (box1.min.x - box2.max.x),
-            (box1.max.x - box2.min.x),
-            (box1.max.x - box2.max.x),
-        );
-        let yDistance = Math.min(
-            (box1.min.y - box2.min.y),
-            (box1.min.y - box2.max.y),
-            (box1.max.y - box2.min.y),
-            (box1.max.y - box2.max.y),
-        );
-        let zDistance = Math.min(
-            (box1.min.z - box2.min.z),
-            (box1.min.z - box2.max.z),
-            (box1.max.z - box2.min.z),
-            (box1.max.z - box2.max.z),
-        );
-        return Math.sqrt((xDistance*xDistance)+(yDistance*yDistance)+(zDistance*zDistance));
+        // let xDistance = Math.min(
+        //     Math.abs(box1.min.x - box2.min.x),
+        //     Math.abs(box1.min.x - box2.max.x),
+        //     Math.abs(box1.max.x - box2.min.x),
+        //     Math.abs(box1.max.x - box2.max.x),
+        // );
+        // let yDistance = Math.min(
+        //     Math.abs(box1.min.y - box2.min.y),
+        //     Math.abs(box1.min.y - box2.max.y),
+        //     Math.abs(box1.max.y - box2.min.y),
+        //     Math.abs(box1.max.y - box2.max.y),
+        // );
+        // let zDistance = Math.min(
+        //     Math.abs(box1.min.z - box2.min.z),
+        //     Math.abs(box1.min.z - box2.max.z),
+        //     Math.abs(box1.max.z - box2.min.z),
+        //     Math.abs(box1.max.z - box2.max.z),
+        // );
+        
+        // u = max(0, A_min - B_max) 
+        // v = max(0, B_min - A_max)
+        // dist = sqrt(||u||^2 + ||v||^2)
+
+        let scalarU = _tempVector.subVectors(box1.min,box2.max).clampScalar(0,Infinity).lengthSq();
+        let scalarV = _tempVector.subVectors(box2.min,box1.max).clampScalar(0,Infinity).lengthSq();
+        return Math.sqrt(scalarU+scalarV);
     }
 
     static boxToSphereDistance(box,sphere){
@@ -95,9 +102,9 @@ class Face {
         this.v3 = Array.isArray(v3) ? new Vector3().fromArray(v3) : v3;
 
         this.midpoint = new Vector3(
-            (v1[0]+v2[0]+v3[0])/3,
-            (v1[1]+v2[1]+v3[1])/3,
-            (v1[2]+v2[2]+v3[2])/3
+            (this.v1.x+this.v2.x+this.v3.x)/3,
+            (this.v1.y+this.v2.y+this.v3.y)/3,
+            (this.v1.z+this.v2.z+this.v3.z)/3
         );
         
         // plane = [(X_1 − X_3) × (X_2 − X_3), −X_3T(X_1 × X_2)]
