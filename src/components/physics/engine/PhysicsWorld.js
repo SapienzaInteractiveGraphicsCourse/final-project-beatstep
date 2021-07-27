@@ -1,148 +1,161 @@
-// import { Vector3 } from "three";
-// import { PhysicsBody } from "./PhysicsBody";
-// import { CollisionMap } from "./CollisonMap";
-
-// class PhysicsWorld {
-
-//     constructor(worldSize = 150){
-//         this.gravity = new Vector3(0,0,0);
-//         this.collisionMap = new CollisionMap(worldSize/(5*2),5); // CellSize = 5 is fixed
-//         // this.bodies = this.collisionMap.list;
-//         this.bodies = [];
-//         this.collisionDistance = 0.1;
-//         this.currentCollisionLoopTag = 0;
-//     }
-
-//     addBody(body){
-//         if(body instanceof PhysicsBody){
-//             // this.collisionMap.addObject(body);
-//             this.bodies.push(body);
-//             body._world = this;
-//         } 
-//     }
-
-//     removeBody(body){
-//         let index = this.bodies.indexOf(body);
-//         if(index != -1){
-//             // this.collisionMap.removeObject(body);
-//             this.bodies.splice(index,1);
-//             body._world = null;
-//         }
-//     }
-
-//     step(deltaTime){
-//         for (let i=0; i<this.bodies.length; i++) {
-//             let body = this.bodies[i];
-//             body.step(deltaTime,this.gravity);
-//             for (let j=i+1; j<this.bodies.length; j++){
-//                 let body2 = this.bodies[j];
-//                 let {actualCollision, intersections, minIntersection} = body.syncDetectCollision(body2,this.collisionDistance,false);
-//                 if(actualCollision){
-//                     //Handle physics collision here
-//                     console.log("-----------COLLISION-----------")
-//                     console.log(body)
-//                     console.log(body2)
-//                     console.log(`MINIMAL DISTANCE = ${minIntersection.distance}`)
-//                     console.log(`TOTAL N of INTERSECTIONS = ${intersections.length}`)
-//                     console.log("---------END COLLISION---------")
-//                     console.log("")
-//                 }
-//                 body.detectCollision(body2,body.collisionDistance,body.firstHitOnly);
-//             }
-//         }
-//     }
-
-// }
-
-// export { PhysicsWorld }
-
 import { Vector3 } from "three";
-import { PhysicsBody } from "./PhysicsBody";
-import { CollisionMap } from "./CollisonMap";
+import { CollisionInfo, PhysicsBody } from "./PhysicsBody";
+import { Raycaster } from "./Raycaster";
+
+const _tempVector = new Vector3(0, 0, 0);
 
 class PhysicsWorld {
 
-    constructor(worldSize = 150){
-        this.gravity = new Vector3(0,0,0);
-        this.collisionMap = new CollisionMap(worldSize/(5*2),5); // CellSize = 5 is fixed
-        this.bodies = this.collisionMap.list;
-        // this.bodies = [];
+    constructor() {
+        this.gravity = new Vector3(0, 0, 0);
+        this.bodies = [];
         this.collisionDistance = 0.1;
         this.currentCollisionLoopTag = 0;
     }
 
-    addBody(body){
-        if(body instanceof PhysicsBody){
-            this.collisionMap.addObject(body);
-            //this.bodies.push(body);
+    addBody(body) {
+        if (body instanceof PhysicsBody) {
+            this.bodies.push(body);
             body._world = this;
-        } 
+        }
     }
 
-    removeBody(body){
+    removeBody(body) {
         let index = this.bodies.indexOf(body);
-        if(index != -1){
-            this.collisionMap.removeObject(body);
-            //this.bodies.splice(index,1);
+        if (index != -1) {
+            this.bodies.splice(index, 1);
             body._world = null;
         }
     }
 
-    step(deltaTime){
-        for (let i=0; i<this.bodies.length; i++) {
+    step(deltaTime) {
+        // Clamping deltaTime to 1, a bigger deltaTime wouldn't be real time and would create weird responses
+        if (deltaTime > 1) deltaTime = 1;
+
+        for (let i = 0; i < this.bodies.length; i++) {
             let body = this.bodies[i];
-            let staticContactNormals = [];
 
-            let nearbyBodies = this.collisionMap.getObjects(body.position,body.collisionDistance);
-            for (let j=0; j < nearbyBodies.length; j++){
-                let body1 = body;
-                let body2 = nearbyBodies[j];
+            // Applying forces
+            body.appliedForce.add(_tempVector.copy(this.gravity).multiplyScalar(body.mass * body.gravityInfluence));
+            let currentAcceleration = body.appliedForce.divideScalar(body.mass); // a = F/m
+            body.linearVelocity.add(currentAcceleration.multiplyScalar(deltaTime)); // v(t+dt) = v(t) + a*dt
+            body.appliedForce.set(0,0,0); // Reset to zero, this way accelleration can't accumulate out of nowhere (without forces applied in the next steps)
 
-                // A body should not collide with itself
-                if(body1 == body2) continue;
-                // If body2 is before body1 in the bodies list, it means that we have already checked this collision in a previous loop
-                if(this.bodies.indexOf(body2) < this.bodies.indexOf(body1)) continue;
-                // Static bodies don't collide with each other
-                if(body1.mass == 0 && body2.mass == 0) continue;
+            // Computing the current displacement before collision detection, as if there were no collisions possible
+            let allegedDisplacement = new Vector3(0,0,0).copy(body.linearVelocity).multiplyScalar(deltaTime);
 
-                // Since body1 raycasts onto body2, to have the highest accuracy, the body with more faces should raycast, so body1 has to be the one with more faces
-                if(body2.shape.faces.length > body1.shape.faces.length)
-                    [body1, body2] = [body2, body1]; // Javascript easy swap
+            //Collision detection
+            let bodyVertices = body.getVertices();
+            let collisionLength = allegedDisplacement.length();
+            for (let j = i + 1; j < this.bodies.length; j++) {
+                let body2 = this.bodies[j];
 
-                let {isColliding, intersections, minIntersection} = body1.syncDetectCollision(body2,this.collisionDistance,true);
-                if((body1.mass == 80 || body2.mass == 80) && (body1.constructor.name == "PhysicalFloor" || body2.constructor.name == "PhysicalFloor") && !isColliding){
-                    body1.syncDetectCollision(body2,this.collisionDistance,true);
+                // Ignore the body if the bounding boxes aren't close enough
+                if (this.roughDistance(body, body2) > collisionLength) continue;
+
+                let body2Faces = body2.getFaces();
+                let intersections = [];
+                for (let vertex of bodyVertices) {
+                    let int = Raycaster.raycastToFaces(vertex, allegedDisplacement, body2Faces, collisionLength, false);
+                    intersections.push(...int);
                 }
-                if(isColliding){
-                    if(body1.mass == 0 || body2.mass == 0){
-                        let normal;
-                        if (body1.mass == 0){
-                            normal = minIntersection.raycastingFace.normal.clone();
-                            [body1, body2] = [body2, body1];
-                        }
-                        else if (body2.mass == 0){
-                            normal = minIntersection.raycastedFace.normal.clone();
-                        }
-                        staticContactNormals.push(normal);
-                    }
-                    
-                    //Handle physics collision here
-                    // console.log("-----------COLLISION-----------")
-                    // console.log(body1)
-                    // console.log(body2)
-                    // console.log(`MINIMAL DISTANCE = ${minIntersection.distance}`)
-                    // console.log(`TOTAL N of INTERSECTIONS = ${intersections.length}`)
-                    // console.log("---------END COLLISION---------")
-                    // console.log("")
+                if (intersections.length == 0) continue;  // No collision with this body
+
+                // Get the closest intersection point with this body2
+                let minIntersection = intersections[0];
+                for(let int of intersections){
+                    if(int.distance < minIntersection.distance) minIntersection = int;
                 }
-                body1.detectCollision(body2,body1.collisionDistance,body1.firstHitOnly);
+
+                body.collisionInfos.push(new CollisionInfo(
+                    minIntersection.raycastedFace.normal.clone(),
+                    minIntersection.distance,
+                    body2.mass,
+                    body2.material.frictionFactor
+                ));
+
+                if(body2.mass != 0){
+                    body2.collisionInfos.push(new CollisionInfo(
+                        minIntersection.raycastedFace.normal.clone().multiplyScalar(-1), // Newton's first law, reaction from body's push
+                        minIntersection.distance,
+                        body.mass,
+                        body.material.frictionFactor
+                    ));
+                }
             }
-            
-            body.step(deltaTime,this.gravity,null,staticContactNormals);
-            if(body.lastDisplacement.x != 0 && body.lastDisplacement.y != 0 && body.lastDisplacement.z != 0){
-                this.collisionMap.addObject(body); // Updating its position in the collision map
+
+            if(body.collisionInfos.length > 0){
+                // Collision resolution
+                body.collisionInfos.sort( (a, b) => Math.abs(a.distance) - Math.abs(b.distance) ); // Sort collisions by distance
+                // Moving the body to the closest collision point, then computing collision resolution
+                //let noCollisionDisplacement = _tempVector.copy(allegedDisplacement).setLength(body.collisionInfos[0].distance);
+                let noCollisionDeltaTime = (Math.abs(body.collisionInfos[0].distance)/collisionLength)*deltaTime;
+                let noCollisionDisplacement = _tempVector.copy(body.linearVelocity).multiplyScalar(noCollisionDeltaTime);
+                //body.position.add(noCollisionDisplacement);
+
+                // Computing collision resolution for all collisions, starting from the closest one onward
+                for (let colInfo of body.collisionInfos) {
+                    let vPerpendicular = colInfo.normal.multiplyScalar(
+                        body.linearVelocity.dot(colInfo.normal) * body.material.restitutionFactor
+                    );                                                                                         // The perpendicular component to the bouncing surface is afected by the restitution factor
+                    let vParallel = body.linearVelocity.sub(vPerpendicular).multiplyScalar(colInfo.friction);  // The parallel component will be dampened by the friction
+                    body.linearVelocity.subVectors(vParallel, vPerpendicular);                                 // The sum of the normal component and the parallel component is the new velocity. We subtract cause the parallel is considered going in the surface (against the normal)
+                }
+
+                // Computing final position post-collision
+                body.lastDisplacement.copy(noCollisionDisplacement);
+                let afterCollisionDisplacement = _tempVector.copy(body.linearVelocity).multiplyScalar(deltaTime-noCollisionDeltaTime);
+                body.lastDisplacement.add(afterCollisionDisplacement);
+                //body.position.add(noCollisionDisplacement);
+                body.position.add(body.lastDisplacement);
+
             }
+            else{
+                body.lastDisplacement.copy(body.lastDisplacement);
+                body.position.add(body.lastDisplacement);
+            }
+
+
         }
+
+    }
+
+    roughDistance(body1, body2) {
+        let bounding1 = body1.shape.preferBoundingBox ?
+            body1.shape.boundingBox.clone().applyMatrix4(body1.matrixWorld) :
+            body1.shape.boundingSphere.clone().applyMatrix4(body1.matrixWorld);
+        let bounding2 = body2.shape.preferBoundingBox ?
+            body2.shape.boundingBox.clone().applyMatrix4(body2.matrixWorld) :
+            body2.shape.boundingSphere.clone().applyMatrix4(body2.matrixWorld);
+        let distance = 0;
+        if ((bounding1.type == "box" && bounding2.type == "box")) {
+            distance = this.boxToBoxDistance(bounding1, bounding2);
+        }
+        else if ((bounding1.type == "sphere" && bounding2.type == "sphere")) {
+            distance = this.sphereToSphereDistance(bounding1, bounding2);
+        }
+        else if ((bounding1.type == "box" && bounding2.type == "sphere")) {
+            distance = this.boxToSphereDistance(bounding1, bounding2);
+        }
+        else if ((bounding1.type == "sphere" && bounding2.type == "box")) {
+            distance = this.boxToSphereDistance(bounding2, bounding1);
+        }
+        return distance;
+    }
+
+    sphereToSphereDistance(sphere1, sphere2) {
+        return sphere1.center.distanceTo(sphere2.center) - sphere1.radius - sphere2.radius;
+    }
+
+    boxToBoxDistance(box1, box2) {
+        let scalarU = _tempVector.subVectors(box1.min, box2.max).clampScalar(0, Infinity).lengthSq();
+        let scalarV = _tempVector.subVectors(box2.min, box1.max).clampScalar(0, Infinity).lengthSq();
+        return Math.sqrt(scalarU + scalarV);
+    }
+
+    boxToSphereDistance(box, sphere) {
+        let boxEdge = _tempVector.copy(sphere.center).clamp(box.min, box.max);
+        return sphere.center.distanceTo(boxEdge) - sphere.radius;
     }
 
 }

@@ -23,7 +23,7 @@ class PhysicalFloor extends PhysicsBody{
             side: THREE.DoubleSide,
         });
 
-        super(0,new PhysicsShapeThree(geometry),new PhysicsMaterial(0.8,0.2,0.5),()=>{
+        super(0,new PhysicsShapeThree(geometry),new PhysicsMaterial(0.8,0),()=>{
 
         });
 

@@ -61,7 +61,7 @@ class Player extends THREE.Object3D {
             jumpForce: 30000,
         };
 
-        this.body = new PhysicsBody(80, new PhysicsShapeThree(new THREE.BoxGeometry(1,4,1,2,2,2)), new PhysicsMaterial(0.2,0.5,0));
+        this.body = new PhysicsBody(80, new PhysicsShapeThree(new THREE.BoxGeometry(1,4,1,2,2,2)), new PhysicsMaterial(0.9,0));
         this.body.position.copy(this.position);
         //this.body.position.y-1;
         this.body.shape.preferBoundingBox = true;

@@ -4,9 +4,8 @@ import { PhysicsShape, Face } from "./engine/PhysicsShape";
 import { PhysicsShapeThree } from "./engine/PhysicsShapeThree";
 import { Box, Sphere } from "./engine/BoundingShapes";
 import { PhysicsMaterial } from "./engine/PhysicsMaterial";
-import { CollisionMap } from "./engine/CollisonMap";
 
 const world = new PhysicsWorld();
 world.gravity.y = -9.81;
 
-export { world, PhysicsWorld, PhysicsBody, PhysicsShape, PhysicsShapeThree, PhysicsMaterial, Box, Sphere, CollisionMap };
+export { world, PhysicsWorld, PhysicsBody, PhysicsShape, PhysicsShapeThree, PhysicsMaterial, Box, Sphere };

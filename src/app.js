@@ -36,7 +36,6 @@ import { genFloor } from './components/TempFloor';
 import Staircase from './components/environment/Staircase';
 import Door from './components/environment/Door';
 import { HalfCubeGeometry } from './components/Tools/CustomGeometries';
-import { DebugDrawerThree } from './components/physics/engine/DebugDrawerThree';
 import PhysicalFloor from './components/environment/PhysicalFloor';
 
 // const scene = new THREE.Scene();
@@ -77,7 +76,7 @@ function init(){
     let cust_body = new PhysicsBody(0,new PhysicsShapeThree(cust_geometry),new PhysicsMaterial(0.5,0.5,0.5));
     cust_body.position.copy(cust_mesh.position);
     cust_body.preferBoundingBox = true;
-    world.addBody(cust_body);
+    //world.addBody(cust_body);
 
 
     // top light
@@ -124,7 +123,7 @@ function init(){
     cubeBody.position.set(0,20,0);
     cubeBody.shape.preferBoundingBox = true;
     // Adding cube to the scene and world
-    world.addBody(cubeBody);
+    //world.addBody(cubeBody);
     scene.add(cube);
     window.cube = cube;
     window.cubeBody = cubeBody;
@@ -195,8 +194,6 @@ function init(){
         player.body.applyForce(exp.multiplyScalar(100));
     }
 
-    let debugDrawer = new DebugDrawerThree();
-
     window.addEventListener("keyup",(e) =>{
         if(e.key == "e") sh();
     })
@@ -222,7 +219,6 @@ function init(){
         particles.step(delta);
     
         world.step(delta);
-        debugDrawer.drawRays();
     
         // Detect collisions
         stair.detectCollision(1,true);
