@@ -26,6 +26,9 @@ const _gascylinderRotation = Math.PI/2;
 const _gascylinderGeometry = new THREE.CylinderGeometry(_gascylinderRadius,
                                                         _gascylinderRadius,
                                                         _gascylinderHeight,32);
+                                                                   
+_gascylinderGeometry.translate(0,_gascylinderHeight/2,0);
+
 const  _gascylinderMaterials = [
     new THREE.MeshPhongMaterial({
         map: _gascylinderTextures[0],
@@ -48,25 +51,19 @@ const  _gascylinderMaterials = [
 ];
 
 class GasCylinder extends THREE.Mesh{
-    constructor(){
+    constructor(x = 0,y = 0,z = 0, rotation = 0){
         super(_gascylinderGeometry, _gascylinderMaterials);
 
         this.receiveShadow = true;
 
+        this.size = new THREE.Vector3(  _gascylinderRadius,
+                                        _gascylinderHeight,
+                                        _gascylinderRadius);
+
         this.health = 100; // TODO: when 0, explode onCollision
 
-        // Adding collision detection
-        setCollideable(this,_gascylinderGeometry,
-            (intersections)=>{ // On personal collsion
-                console.log("personal collsion");
-            },
-            (object, distance, intersection)=>{ // On collision with
-                console.log(this.constructor.name+" on collision with "+ object.constructor.name);
-                if(object.constructor.name == "Player"){
-                    // Make physical
-                }
-            }
-        );
+        this.setPosition(x,y,z);
+        this.setRotation(rotation);
     }
 
     update(delta){
@@ -75,7 +72,7 @@ class GasCylinder extends THREE.Mesh{
 
     setPosition(x,y,z){
         // Apply position
-        this.position.set(x,y+_gascylinderHeight/2,z);
+        this.position.set(x,y,z);
     }
 
     setRotation(alpha){
@@ -85,6 +82,6 @@ class GasCylinder extends THREE.Mesh{
 
 }
 
-const gasCylinderPool = new ObjectPool(GasCylinder,5);
+// const gasCylinderPool = new ObjectPool(GasCylinder,5);
 
-export default gasCylinderPool;
+export default GasCylinder;

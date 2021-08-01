@@ -1,7 +1,8 @@
 import { THREE } from '../setup/ThreeSetup';
 
 import { PointerLockControlsPlus } from '../Tools/PointerLockControlsPlus';
-import { world, PhysicsBody, PhysicsMaterial, PhysicsShapeThree } from '../physics/PhysicsEngine';
+
+import { DefaultPhysicsEngine, PhysicsProperties } from '../physics/PhysicsEngine_old';
 import HUD from "./HUD";
 
 import { addRifle } from "../TempRifle";
@@ -13,19 +14,20 @@ const _vector2 = new THREE.Vector3(0,0,0);
 
 class Player extends THREE.Object3D {
 
-    constructor(camera,domElement,position = [0,0,0],lookAt = [0,0,0]) {
+    constructor(camera, domElement, height = 2, position = [0,0,0], lookAt = [0,0,0]) {
         super();
-        this.isCamera = true; // To make .lookAt work as in the camera class, otherwise it give a reversed z axis
-        //this.up = new THREE.Vector3(0,1,0);
-        this.position.x = position[0];
-        this.position.y = position[1];
-        this.position.z = position[2];
-        this.lookAt(new THREE.Vector3(...lookAt));
-
+        // this.isCamera = true; // To make .lookAt work as in the camera class, otherwise it give a reversed z axis
+        
         this.camera = camera;
-        this.camera.position.set(0,0,-1)
+        this.camera.position.set(0,height,0);
         this.camera.quaternion.copy(this.quaternion);
         this.add(camera);
+
+        this.position.x = position[0];
+        this.position.y = position[1]; // == this.levelHeight
+        this.position.z = position[2];
+
+        // this.lookAt(new THREE.Vector3(lookAt[0],lookAt[1],lookAt[2]));
 
         
         let _health = 100;
@@ -35,6 +37,9 @@ class Player extends THREE.Object3D {
         this.topHealth = 100;
         this.topShield = 0;
         this.topAmmo = 1000;
+
+        this.levelHeight = this.position.y;
+        this.height = height;
         
         Object.defineProperties(this,{
             health: {
@@ -53,73 +58,44 @@ class Player extends THREE.Object3D {
 
         // Creating controls
         
-        // this.physicsProperties = new PhysicsProperties(20);
+        this.physicsProperties = new PhysicsProperties(20);
         this.controls = new PointerLockControlsPlus(this, domElement);
         this.controls.shouldLock = true;
         this.movement = {
             movementSpeed: 8,
-            jumpForce: 30000,
+            jumpSpeed: 16,
         };
-
-        this.body = new PhysicsBody(80, new PhysicsShapeThree(new THREE.BoxGeometry(1,4,1,2,2,2)), new PhysicsMaterial(0.9,0));
-        this.body.position.copy(this.position);
-        //this.body.position.y-1;
-        this.body.shape.preferBoundingBox = true;
-        world.addBody(this.body);
 
         // Updating movement in the space (not view)
         this.movementUpdate = function ( delta ) {
             let xDir = Number(this.controls.shouldMoveRight) - Number(this.controls.shouldMoveLeft);
             let zDir = Number(this.controls.shouldMoveForward) - Number(this.controls.shouldMoveBackward);
 
-            let xVector = _vector1.setFromMatrixColumn(this.matrixWorld, 0);
-            let zVector = _vector2.crossVectors(this.up, _vector1);
-            xVector.multiplyScalar(xDir).normalize();
-            zVector.multiplyScalar(zDir).normalize();
-            let direction = xVector.add(zVector).normalize().multiplyScalar(this.movement.movementSpeed);
-
-            this.body.linearVelocity.copy(direction);
-
-
-            // if(xDir || zDir){
-            //     // this.physicsProperties.velocity.setX(xDir * this.movement.movementSpeed);
-            //     // this.physicsProperties.velocity.setZ(zDir * this.movement.movementSpeed * 1.5);
-            //     this.body.linearVelocity.setX(xDir * this.movement.movementSpeed);
-            //     this.body.linearVelocity.copy(direction).multiplyScalar(zDir * this.movement.movementSpeed * 1.5);
-            // }
+            if(xDir || zDir){
+                this.physicsProperties.velocity.setX(xDir * this.movement.movementSpeed);
+                this.physicsProperties.velocity.setZ(zDir * this.movement.movementSpeed);
+            }
 
             if(this.controls.shouldJump && this.isOnGround()){
-                //this.physicsProperties.velocity.setY(this.movement.jumpSpeed);
-                // this.body.linearVelocity.setY(this.movement.jumpSpeed);
-                this.body.applyForce({x:0,y:this.movement.jumpForce,z:0});
+                this.physicsProperties.velocity.setY(this.movement.jumpSpeed);
                 console.log("JUMP");
-                this.controls.shouldJump = false;
             }
-            //this.controls.shouldJump = false;
 
-            // this.physicsProperties.constraints = this.isOnGround() ? 
-            //                                      this.physicsProperties.constraints | PhysicsProperties.BOTTOM_CONSTRAINT :
-            //                                      this.physicsProperties.constraints & !PhysicsProperties.BOTTOM_CONSTRAINT;
-            // let displacement = DefaultPhysicsEngine.update(this.physicsProperties, delta);
+            this.physicsProperties.constraints = this.isOnGround() ? 
+                                                 this.physicsProperties.constraints | PhysicsProperties.BOTTOM_CONSTRAINT :
+                                                 this.physicsProperties.constraints & !PhysicsProperties.BOTTOM_CONSTRAINT;
+            let displacement = DefaultPhysicsEngine.update(this.physicsProperties, delta);
 
-            // if (displacement.x != 0) this.controls.moveRight(displacement.x);
-            // if (displacement.y != 0) this.controls.moveUp(displacement.y);
-            // if (displacement.z != 0) this.controls.moveForward(displacement.z);
+            if (displacement.x != 0) this.controls.moveRight(displacement.x);
+            if (displacement.y != 0) this.controls.moveUp(displacement.y);
+            if (displacement.z != 0) this.controls.moveForward(displacement.z);
 
-            // this.body.constraints = this.isOnGround() ? 
-            //                         this.body.constraints | PhysicsBody.LinearConstraints.BOTTOM :
-            //                         this.body.constraints & !PhysicsBody.LinearConstraints.BOTTOM;
-            // let displacement = this.body.lastDisplacement;
-
-            // if (displacement.x != 0) this.controls.moveRight(displacement.x);
-            // if (displacement.y != 0) this.controls.moveUp(displacement.y);
-            // if (displacement.z != 0) this.controls.moveForward(displacement.z);
         }.bind(this);
 
         this.isOnGround = function(){
             //STUB method. Replace with collision detection with ground
-            if (this.position.y <= position[1]){ 
-                this.position.y = position[1];
+            if (this.position.y <= this.levelHeight){ 
+                this.position.y = this.levelHeight;
                 return true;
             }
             return false;
@@ -177,19 +153,6 @@ class Player extends THREE.Object3D {
             obj.add(this.bulletEmitter);
             this.bulletEmitter.position.set(0,box.max.y,box.min.z);
         });
-
-
-        // Adding collision detection
-        setCollideable(this,new THREE.BoxGeometry(1,2,1),
-            (intersections)=>{ // On personal collsion
-
-            },
-            (object, distance, intersection)=>{ // On collision with
-                console.log(this.constructor.name+" on collision with "+ object.constructor.name);
-            }
-        );
-
-        
         
     }
 
@@ -202,8 +165,7 @@ class Player extends THREE.Object3D {
 
     update(delta){
         this.movementUpdate(delta);
-        this.body.updateMesh(this,true,false);
-        //this.position.set(this.body.position.x,this.body.position.y+1,this.body.position.z);
+        
         if(this.mixer){
             this.mixer.update(delta);
         }

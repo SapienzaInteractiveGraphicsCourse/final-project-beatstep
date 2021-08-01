@@ -1,7 +1,7 @@
 import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 
-import door from '../../asset/models/door/door.glb';
+import door from '../../asset/models/door/doorSquared.glb';
 
 const loader = DefaultGeneralLoadingManager.getHandler("gltf");
 let _doorModel;
@@ -24,16 +24,19 @@ loader.load(door, (gltf)=>{
 
 
 class Door {
-    constructor(){
+    constructor(x,y,z,width,height,rotationRadians=0){
         this.group = _doorModel.clone(true);
 
         this.door_r = this.group.getObjectByName("door_r");
         this.door_l = this.group.getObjectByName("door_l");
 
-        console.log(this.group)
-
         // Size
         this.size = new THREE.Box3().setFromObject(this.group).getSize();
+
+        this.setPosition(x,y,z);
+        this.setRotation(rotationRadians);
+
+        this.isOpen = false;
 
         // We need one mixer for each animated object in the scene
         this.mixer = new THREE.AnimationMixer(this.group);
@@ -43,10 +46,19 @@ class Door {
         // TODO: debug animation, to remove
         document.addEventListener("mousedown",((event)=>{
             if(event.button == 1){ // wheel
-                this.startAnimation(this.animation_openDoors);
+                this.openDoor();
             }
         }).bind(this));
         
+    }
+
+    addToScene(scene){
+        scene.add(this.group);
+    }
+
+    openDoor(){
+        this.startAnimation(this.animation_openDoors);
+        this.isOpen = true;
     }
 
     step(delta){
@@ -64,8 +76,8 @@ class Door {
     createOpenAnimation(){
         let door_r_p1 = this.door_r.position;
         let door_l_p1 = this.door_l.position;
-        let door_r_p2 = this.incrementEuler(door_r_p1, -this.size.x/3,0,0);
-        let door_l_p2 = this.incrementEuler(door_l_p1, this.size.x/3,0,0);
+        let door_r_p2 = this.incrementEuler(door_r_p1, -this.size.x/4,0,0);
+        let door_l_p2 = this.incrementEuler(door_l_p1, this.size.x/4,0,0);
 
         const door_r_translation = new THREE.VectorKeyframeTrack(
             'door_r.position',

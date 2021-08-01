@@ -8,29 +8,28 @@ const _wallTexture = loader.load(wall1);
 _wallTexture.wrapS = THREE.RepeatWrapping;
 _wallTexture.wrapT = THREE.RepeatWrapping;
 _wallTexture.magFilter = THREE.NearestFilter;
-_wallTexture.repeat.set(3,3);
 
-class Wall {
+class Wall extends THREE.Mesh{
     constructor(x,y,z,width,height,rotationRadians=0){
-        this.geometry = new THREE.PlaneGeometry(width,height);
-        this.material = new THREE.MeshPhongMaterial({
-            map: _wallTexture,
+        let geometry = new THREE.PlaneGeometry(width,height);
+        let texture = _wallTexture.clone();
+        texture.needsUpdate = true;
+        texture.repeat.set(width/2,height/2);
+
+        let material = new THREE.MeshPhongMaterial({
+            map: texture,
             side: THREE.DoubleSide,
         });
-        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        super(geometry, material);
 
-        this.mesh.receiveShadow = true;
-        this.mesh.castShadow = false;
+        this.receiveShadow = true;
+        this.castShadow = false;
 
         // Apply position
-        this.mesh.position.set(x,y+height/2,z);
+        this.position.set(x,y+height/2,z);
 
         // Apply Rotation
-        this.mesh.rotation.y = Math.PI * rotationRadians;
-    }
-
-    get obj(){
-        return this.mesh;
+        this.rotation.y = Math.PI * rotationRadians;
     }
 }
 

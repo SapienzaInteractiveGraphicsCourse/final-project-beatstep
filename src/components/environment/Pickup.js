@@ -13,30 +13,31 @@ const _pickupTextureHealth = loader.load(pickup_health);
 const _pickupTextureShield = loader.load(pickup_shield);
 const _pickupTextureAmmo = loader.load(pickup_ammo);
 
-const dimension = 0.8;
+const _pickupDimension = 0.8;
+const _pickupBumpScale = 0.25;
 
-const _pickupGeometry = new THREE.BoxGeometry(dimension,dimension,dimension);
+const _pickupGeometry = new THREE.BoxGeometry(_pickupDimension,_pickupDimension,_pickupDimension);
 const _pickupMaterialHealth = new THREE.MeshPhongMaterial({
     map: _pickupTextureHealth,
     side: THREE.DoubleSide,
     bumpMap: _pickupTextureHealth,
-    bumpScale  :  0.25,
+    bumpScale  :  _pickupBumpScale,
 });
 const _pickupMaterialShield = new THREE.MeshPhongMaterial({
     map: _pickupTextureShield,
     side: THREE.DoubleSide,
     bumpMap: _pickupTextureShield,
-    bumpScale  :  0.25,
+    bumpScale  :  _pickupBumpScale,
 });
 const _pickupMaterialAmmo = new THREE.MeshPhongMaterial({
     map: _pickupTextureAmmo,
     side: THREE.DoubleSide,
     bumpMap: _pickupTextureAmmo,
-    bumpScale  :  0.25,
+    bumpScale  :  _pickupBumpScale,
 });
 
 class Pickup extends THREE.Mesh {
-    constructor(type = "health", onTouch = (player, distance, intersection, pickup)=>{}){
+    constructor(type = "health", onTouch = ()=>{}){
         
         switch(type){
             default:
@@ -53,24 +54,26 @@ class Pickup extends THREE.Mesh {
 
         this._type = type;
 
+        this._dimension = _pickupDimension;
+
         this.receiveShadow = false;
         this.castShadow = true;
 
         // Apply event touching
         this.onTouch = onTouch;
-        setCollideable(this,_pickupGeometry,
-            ()=>{},
-            (object, distance, intersection)=> {
-                if(object.constructor && object.constructor.name == "Player"){
-                    this.onTouch(object, distance, intersection,this);
-                }
-            }
-        );
+        // setCollideable(this,_pickupGeometry,
+        //     ()=>{},
+        //     (object, distance, intersection)=> {
+        //         if(object.constructor && object.constructor.name == "Player"){
+        //             this.onTouch(object, distance, intersection,this);
+        //         }
+        //     }
+        // );
 
         this.rotation.y = 0;
     }
 
-    update(delta){
+    step(delta){
         this.rotation.y += (Math.PI/2)*delta;
     }
 
@@ -81,17 +84,19 @@ class Pickup extends THREE.Mesh {
 
 }
 
-const pickupHealthPool = new ObjectPool(Pickup,5,["health",(player, distance, intersection, pickup)=>{
-    console.log("Health pickup!");
-    pickup.removeFromParent();
-}]);
-const pickupAmmoPool = new ObjectPool(Pickup,5,["ammo",(player, distance, intersection, pickup)=>{
-    console.log("Ammo pickup!");
-    pickup.removeFromParent();
-}]);
-const pickupShieldPool = new ObjectPool(Pickup,5,["shield",(player, distance, intersection, pickup)=>{
-    console.log("Shield pickup!");
-    pickup.removeFromParent();
-}]);
+// const pickupHealthPool = new ObjectPool(Pickup,5,["health",(player, distance, intersection, pickup)=>{
+//     console.log("Health pickup!");
+//     pickup.removeFromParent();
+// }]);
+// const pickupAmmoPool = new ObjectPool(Pickup,5,["ammo",(player, distance, intersection, pickup)=>{
+//     console.log("Ammo pickup!");
+//     pickup.removeFromParent();
+// }]);
+// const pickupShieldPool = new ObjectPool(Pickup,5,["shield",(player, distance, intersection, pickup)=>{
+//     console.log("Shield pickup!");
+//     pickup.removeFromParent();
+// }]);
 
-export { pickupHealthPool, pickupAmmoPool, pickupShieldPool };
+// export { pickupHealthPool, pickupAmmoPool, pickupShieldPool };
+
+export default Pickup;
