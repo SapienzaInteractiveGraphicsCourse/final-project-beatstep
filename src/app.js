@@ -73,9 +73,11 @@ function init(){
     
     world3D.addFloorLight(2,0,1, 0);
 
-    world3D.addGasCylinder(2,0,2, Math.PI/2);
+    let gc = world3D.addGasCylinder(2,0,2, Math.PI/2);
+    console.log(world3D.getObjectTilePosition(gc));
 
-    world3D.addDoor(1,0,2, 0);
+    let dr = world3D.addDoor(1,0,2, 0);
+    console.log(world3D.getObjectTilePosition(dr));
 
     world3D.addWall(0,0,2, 0);
 

@@ -5,7 +5,7 @@ import door from '../../asset/models/door/doorSquared.glb';
 
 const loader = DefaultGeneralLoadingManager.getHandler("gltf");
 let _doorModel;
-const _doorHeight = 3;
+const _doorHeight = 5;
 let _doorSize;
 let _doorCollisionGeometry;
 loader.load(door, (gltf)=>{
@@ -76,8 +76,9 @@ class Door {
     createOpenAnimation(){
         let door_r_p1 = this.door_r.position;
         let door_l_p1 = this.door_l.position;
-        let door_r_p2 = this.incrementEuler(door_r_p1, -this.size.x/4,0,0);
-        let door_l_p2 = this.incrementEuler(door_l_p1, this.size.x/4,0,0);
+        
+        let door_r_p2 = this.incrementEuler(door_r_p1, -0.8, 0,0);
+        let door_l_p2 = this.incrementEuler(door_l_p1, 0.8, 0,0);
 
         const door_r_translation = new THREE.VectorKeyframeTrack(
             'door_r.position',
@@ -115,7 +116,7 @@ class Door {
     }
 
     setRotation(alpha){
-        this.group.rotation.y = alpha;
+        this.group.rotation.y = alpha * Math.PI;
     }
 }
 

@@ -21,7 +21,7 @@ class PhysicsWorld {
     constructor(tileSize = 5, heightLevels = 5, gravity = 9.8){
         this.gravity = gravity;
         this.tiles = {}; // 3D tiles dictionary
-        this.animatedTiles = {}; // animated tiles dictiionary
+        this.animatedTiles = {}; // animated tiles dictionary
         this.movingObjects = []; // Objects subject to environment collision
         this.tileSize = tileSize;
         this.heightLevels = heightLevels;
@@ -91,6 +91,7 @@ class PhysicsWorld {
      * @param {Number} tile_y the y tile value in this world to set this object
      * @param {Number} tile_z the z tile value in this world to set this object
      * @param {Number} direction the direction of the wall to be set: 0=bottom,1=right,2=top,3=left (contact Marco for more information)
+     * @returns the object created
      */
     addWall(tile_x,tile_y,tile_z, direction=0){ // 0=bottom,1=right,2=top,3=left
         [tile_x,tile_y,tile_z] = [parseInt(tile_x),parseInt(tile_y),parseInt(tile_z)];
@@ -109,6 +110,8 @@ class PhysicsWorld {
                             this.tileSize,this.heightLevels,direction*0.5);
 
         this.addToWorld(wall, tile_x,tile_y,tile_z);
+
+        return wall;
         
     }
 
@@ -118,6 +121,7 @@ class PhysicsWorld {
      * @param {Number} tile_y the y tile value in this world to set this object
      * @param {Number} tile_z the z tile value in this world to set this object
      * @param {Number} direction the direction of the door to be set: 0=bottom,1=right,2=top,3=left (contact Marco for more information)
+     * @returns the object created
      */
      addDoor(tile_x,tile_y,tile_z, direction=0){ // 0=bottom,1=right,2=top,3=left
         [tile_x,tile_y,tile_z] = [parseInt(tile_x),parseInt(tile_y),parseInt(tile_z)];
@@ -136,6 +140,8 @@ class PhysicsWorld {
                             this.tileSize,this.heightLevels,direction*0.5);
 
         this.addToWorld(door, tile_x,tile_y,tile_z);
+
+        return door;
         
     }
 
@@ -144,6 +150,7 @@ class PhysicsWorld {
      * @param {Number} tile_x the x tile value in this world to set this object
      * @param {Number} tile_y the y tile value in this world to set this object
      * @param {Number} tile_z the z tile value in this world to set this object
+     * @returns the object created
      * 
      * tip: if tile_y+1 -> it can be used as ceiling!!
      */
@@ -156,6 +163,8 @@ class PhysicsWorld {
                                 this.tileSize,this.tileSize);
 
         this.addToWorld(floor, tile_x,tile_y,tile_z);
+
+        return floor;
         
     }
 
@@ -165,6 +174,7 @@ class PhysicsWorld {
      * @param {Number} tile_y the y tile value in this world to set this object
      * @param {Number} tile_z the z tile value in this world to set this object
      * @param {Number} rotationRadians the rotation of the light in radians
+     * @returns the object created
      */
      addFloorLight(tile_x,tile_y,tile_z, rotationRadians = 0){
         [tile_x,tile_y,tile_z] = [parseInt(tile_x),parseInt(tile_y),parseInt(tile_z)];
@@ -175,6 +185,8 @@ class PhysicsWorld {
                                         rotationRadians);
 
         this.addToWorld(floorLight, tile_x,tile_y,tile_z);
+
+        return floorLight;
         
     }
 
@@ -184,6 +196,7 @@ class PhysicsWorld {
      * @param {Number} tile_y the y tile value in this world to set this object
      * @param {Number} tile_z the z tile value in this world to set this object
      * @param {Number} rotationRadians the rotation of the cylinder in radians
+     * @returns the object created
      */
      addGasCylinder(tile_x,tile_y,tile_z, rotationRadians = 0){
         [tile_x,tile_y,tile_z] = [parseInt(tile_x),parseInt(tile_y),parseInt(tile_z)];
@@ -194,6 +207,8 @@ class PhysicsWorld {
                                             rotationRadians);
 
         this.addToWorld(gasCylinder, tile_x,tile_y,tile_z);
+
+        return gasCylinder;
         
     }
 
@@ -203,6 +218,7 @@ class PhysicsWorld {
      * @param {Number} tile_y the y tile value in this world to set this object (relative to the floor!!)
      * @param {Number} tile_z the z tile value in this world to set this object
      * @param {Number} direction the rotation of the light: 0 = 0 or 1 = Math.PI/2
+     * @returns the object created
      */
      addTopLight(tile_x,tile_y,tile_z, direction = 0){
         [tile_x,tile_y,tile_z] = [parseInt(tile_x),parseInt(tile_y),parseInt(tile_z)];
@@ -213,7 +229,87 @@ class PhysicsWorld {
                                     direction*0.5*Math.PI);
 
         this.addToWorld(topLight, tile_x,tile_y,tile_z);
+
+        return topLight;
         
+    }
+
+    /**
+     * Get the tile position in the world of a tile object!
+     * @param {THREE.Object3D} obj a THREE.Object3D instance
+     * @returns a dictionary containing the x,y,z tile coordinate and the index number
+     */
+    getObjectTilePosition(obj){
+        let position = obj.position || obj.group.position;
+        
+        let t = {
+            x: this._getTilePosXZ(position.x),
+            z: this._getTilePosXZ(position.z),
+            y: this._getTilePosY(position.y),
+        };
+        console.log(position,t)
+
+        if(this.tiles[t.y] && this.tiles[t.y][t.x] && this.tiles[t.y][t.x][t.z]){
+            for(let n in this.tiles[t.y][t.x][t.z]){
+                if(this.tiles[t.y][t.x][t.z][n] === obj){
+                    t.n = n;
+                    return t;
+                }
+            }
+        }
+        
+        // not found? probably is a door or a wall, check nearby
+        let rotations = obj.rotation || obj.group.rotation;
+        let rotation = rotations.y;
+
+        let direction = rotation*(2/Math.PI);
+        let adjust = [
+            [0,-1],
+            [-1,0],
+            [0,1],
+            [0,-1],
+        ];
+        
+        let res = adjust[direction];
+        if(this.tiles[t.y] && this.tiles[t.y][t.x+res[0]] && this.tiles[t.y][t.x+res[0]][t.z+res[1]])
+        for(let n in this.tiles[t.y][t.x+res[0]][t.z+res[1]]){
+            if(this.tiles[t.y][t.x+res[0]][t.z+res[1]][n] === obj){
+                t.n = n;
+                return t;
+            }
+        }
+
+        // // not found? probably is a door or a wall, check nearby
+        // if(this.tiles[t.y] && this.tiles[t.y][t.x-1] && this.tiles[t.y][t.x-1][t.z])
+        // for(let n in this.tiles[t.y][t.x-1][t.z]){
+        //     if(this.tiles[t.y][t.x-1][t.z][n] === obj){
+        //         t.n = n;
+        //         return t;
+        //     }
+        // }
+        // if(this.tiles[t.y] && this.tiles[t.y][t.x+1] && this.tiles[t.y][t.x+1][t.z])
+        // for(let n in this.tiles[t.y][t.x+1][t.z]){
+        //     if(this.tiles[t.y][t.x+1][t.z][n] === obj){
+        //         t.n = n;
+        //         return t;
+        //     }
+        // }
+        // if(this.tiles[t.y] && this.tiles[t.y][t.x] && this.tiles[t.y][t.x][t.z-1])
+        // for(let n in this.tiles[t.y][t.x][t.z-1]){
+        //     if(this.tiles[t.y][t.x][t.z-1][n] === obj){
+        //         t.n = n;
+        //         return t;
+        //     }
+        // }
+        // if(this.tiles[t.y] && this.tiles[t.y][t.x] && this.tiles[t.y][t.x][t.z+1])
+        // for(let n in this.tiles[t.y][t.x][t.z+1]){
+        //     if(this.tiles[t.y][t.x][t.z+1][n] === obj){
+        //         t.n = n;
+        //         return t;
+        //     }
+        // }
+
+        throw Error("The tile object passed is not found:");
     }
 
     /**
@@ -221,6 +317,7 @@ class PhysicsWorld {
      * @param {Number} delta The delta time
      */
     step(delta = 0){
+        this.animateTiles(delta);
         this.animateObjects(delta);
         this.checkCollision();
     }
@@ -229,12 +326,22 @@ class PhysicsWorld {
      * Animate the world!
      * @param {Number} delta The delta time
      */
-    animateObjects(delta = 0){
+    animateTiles(delta = 0){
         for(let i in this.animatedTiles)
         for(let j in this.animatedTiles[i])
         for(let k in this.animatedTiles[i][j])
         for(let n of this.animatedTiles[i][j][k]){
             this.tiles[i][j][k][n].step(delta);
+        }
+    }
+
+    /** TODO: edit player, from update() to step()
+     * Animate the the moving objects!
+     * @param {Number} delta The delta time
+     */
+     animateObjects(delta = 0){
+        for(let o of this.movingObjects){
+            if(o.step) o.step(delta);
         }
     }
 
@@ -276,7 +383,7 @@ class PhysicsWorld {
 
 
         }
-        
+
 
     }
 

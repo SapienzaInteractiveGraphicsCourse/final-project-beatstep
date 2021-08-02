@@ -10,7 +10,6 @@ const _staircaseTexture = loader.load(wall1);
 _staircaseTexture.wrapS = THREE.RepeatWrapping;
 _staircaseTexture.wrapT = THREE.RepeatWrapping;
 _staircaseTexture.magFilter = THREE.NearestFilter;
-_staircaseTexture.repeat.set(3,3);
 
 class Staircase extends THREE.Mesh {
     constructor(x,y,z,width,height,depth,steps=10,direction=0){
@@ -20,8 +19,12 @@ class Staircase extends THREE.Mesh {
 
         let geometries = [];
 
+        let texture = _staircaseTexture.clone();
+        texture.needsUpdate = true;
+        texture.repeat.set(depth/2,height/2);
+
         let material = new THREE.MeshPhongMaterial({
-            map: _staircaseTexture
+            map: texture
         });
 
         for(let i=1;i<=steps;i++){
