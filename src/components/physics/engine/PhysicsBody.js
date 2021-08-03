@@ -63,10 +63,12 @@ class PhysicsBody {
         return this.shape.getVertices(this.matrixWorld);
     }
 
-    _roundToZero(vector){
-        if(Math.abs(vector.x) < 0.001) vector.x = 0;
-        if(Math.abs(vector.y) < 0.001) vector.y = 0;
-        if(Math.abs(vector.z) < 0.001) vector.z = 0;
+    getNormals(){
+        return this.shape.getNormals(this.matrixWorld);
+    }
+
+    getCenter(){
+        return this.shape.getCenter(this.matrixWorld);
     }
 
     reset(){
@@ -84,12 +86,14 @@ class CollisionInfo {
      * An object with the necessary info to resolve a collision 
      * @param {Vector3} normal - The normal of the collision surface 
      * @param {Number} distance - The distance from the collision point
+     * @param {Number} collisionTime - The time from the start of this frame, when this collision starts
      * @param {Number} mass - The mass of the other object
      * @param {Number} friction - The friction the other object impresses
      */
-    constructor(normal,distance,mass,friction){
+    constructor(normal,distance,collisionTime,mass,friction){
         this.normal = normal;
         this.distance = distance;
+        this.collisionTime = collisionTime;
         this.mass = mass;
         this.friction = friction;
     }

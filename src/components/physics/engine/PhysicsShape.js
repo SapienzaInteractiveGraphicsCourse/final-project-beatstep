@@ -19,6 +19,8 @@ class PhysicsShape {
         this.boundingBox = new Box();
         // The bounding sphere
         this.boundingSphere = new Sphere();
+        // The center of the shape
+        this.center = new Vector3(0,0,0);
     }
 
     getFaces(matrixWorld) {
@@ -34,22 +36,47 @@ class PhysicsShape {
         if(matrixWorld){
             for (let f of this.faces) {
                 newVertices.push(
-                    f.v1.clone().applyMatrix4(matrixWorld),
-                    f.v2.clone().applyMatrix4(matrixWorld),
-                    f.v3.clone().applyMatrix4(matrixWorld)
+                    f.v1.clone().applyMatrix4(matrixWorld).fixZeroPrecision(),
+                    f.v2.clone().applyMatrix4(matrixWorld).fixZeroPrecision(),
+                    f.v3.clone().applyMatrix4(matrixWorld).fixZeroPrecision()
                 );
             }
         }
         else{
             for (let f of this.faces) {
                 newVertices.push(
-                    f.v1.clone(),
-                    f.v2.clone(),
-                    f.v3.clone()
+                    f.v1.clone().fixZeroPrecision(),
+                    f.v2.clone().fixZeroPrecision(),
+                    f.v3.clone().fixZeroPrecision()
                 );
             }
         }
         return newVertices;
+    }
+
+    getNormals(matrixWorld) {
+        let newNormals = [];
+        if(matrixWorld){
+            for (let f of this.faces) {
+                newNormals.push(
+                    f.normal.clone().transformDirection(matrixWorld).fixZeroPrecision()
+                );
+            }
+        }
+        else{
+            for (let f of this.faces) {
+                newNormals.push(
+                    f.normal.clone().fixZeroPrecision()
+                );
+            }
+        }
+        return newNormals;
+    }
+
+    getCenter(matrixWorld){
+        let newCenter = this.center.clone();
+        if(matrixWorld) newCenter.applyMatrix4(matrixWorld);
+        return newCenter;
     }
 
 }
@@ -71,14 +98,14 @@ class Face {
             (this.v1.x + this.v2.x + this.v3.x) / 3,
             (this.v1.y + this.v2.y + this.v3.y) / 3,
             (this.v1.z + this.v2.z + this.v3.z) / 3
-        );
+        ).fixZeroPrecision();
 
         // plane = [(X_1 − X_3) × (X_2 − X_3), −X_3T(X_1 × X_2)]
         this.plane = new Vector4();
 
         let topVec1 = new Vector3(0, 0, 0).subVectors(this.v1, this.v3);
         let topVec2 = new Vector3(0, 0, 0).subVectors(this.v2, this.v3);
-        this.normal = new Vector3(0, 0, 0).crossVectors(topVec1, topVec2).normalize();
+        this.normal = new Vector3(0, 0, 0).crossVectors(topVec1, topVec2).normalize().fixZeroPrecision();
         this.plane.copy(this.normal);
 
         let planeW = this.v3.dot(new Vector3(0, 0, 0).crossVectors(this.v1, this.v2));

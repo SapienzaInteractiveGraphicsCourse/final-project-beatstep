@@ -35,7 +35,7 @@ import './style.css';
 import { genFloor } from './components/TempFloor';
 import Staircase from './components/environment/Staircase';
 import Door from './components/environment/Door';
-import { HalfCubeGeometry } from './components/Tools/CustomGeometries';
+import { HalfCubeGeometry, InclinedSurfaceGeometry } from './components/Tools/CustomGeometries';
 import PhysicalFloor from './components/environment/PhysicalFloor';
 
 // const scene = new THREE.Scene();
@@ -69,14 +69,15 @@ function init(){
 
     // Custom geometry test
     const cust_mat = new THREE.MeshNormalMaterial();
-    let cust_geometry = new HalfCubeGeometry(1,2,4);
+    cust_mat.side = THREE.DoubleSide;
+    let cust_geometry = new InclinedSurfaceGeometry(2,4,8);
     const cust_mesh = new THREE.Mesh(cust_geometry, cust_mat);
-    cust_mesh.position.set(0,2,0)
+    cust_mesh.position.set(0,0,0)
     scene.add(cust_mesh);
     let cust_body = new PhysicsBody(0,new PhysicsShapeThree(cust_geometry),new PhysicsMaterial(0.5,0.5,0.5));
     cust_body.position.copy(cust_mesh.position);
     cust_body.preferBoundingBox = true;
-    //world.addBody(cust_body);
+    world.addBody(cust_body);
 
 
     // top light
@@ -123,7 +124,7 @@ function init(){
     cubeBody.position.set(0,20,0);
     cubeBody.shape.preferBoundingBox = true;
     // Adding cube to the scene and world
-    //world.addBody(cubeBody);
+    world.addBody(cubeBody);
     scene.add(cube);
     window.cube = cube;
     window.cubeBody = cubeBody;

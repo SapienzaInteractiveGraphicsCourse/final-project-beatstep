@@ -58,10 +58,10 @@ class Player extends THREE.Object3D {
         this.controls.shouldLock = true;
         this.movement = {
             movementSpeed: 8,
-            jumpForce: 30000,
+            jumpSpeed: 8,
         };
 
-        this.body = new PhysicsBody(80, new PhysicsShapeThree(new THREE.BoxGeometry(1,4,1,2,2,2)), new PhysicsMaterial(0.9,0));
+        this.body = new PhysicsBody(80, new PhysicsShapeThree(new THREE.BoxGeometry(1,4,1)), new PhysicsMaterial(0.9,0));
         this.body.position.copy(this.position);
         //this.body.position.y-1;
         this.body.shape.preferBoundingBox = true;
@@ -76,9 +76,10 @@ class Player extends THREE.Object3D {
             let zVector = _vector2.crossVectors(this.up, _vector1);
             xVector.multiplyScalar(xDir).normalize();
             zVector.multiplyScalar(zDir).normalize();
-            let direction = xVector.add(zVector).normalize().multiplyScalar(this.movement.movementSpeed);
+            let direction = xVector.add(zVector).normalize().multiplyScalar(this.movement.movementSpeed).setY(this.body.linearVelocity.y);
 
-            this.body.linearVelocity.copy(direction);
+            if(direction.x || direction.y)
+                this.body.linearVelocity.copy(direction);
 
 
             // if(xDir || zDir){
@@ -87,11 +88,11 @@ class Player extends THREE.Object3D {
             //     this.body.linearVelocity.setX(xDir * this.movement.movementSpeed);
             //     this.body.linearVelocity.copy(direction).multiplyScalar(zDir * this.movement.movementSpeed * 1.5);
             // }
-
+            //this.isOnGround();
             if(this.controls.shouldJump && this.isOnGround()){
-                //this.physicsProperties.velocity.setY(this.movement.jumpSpeed);
-                // this.body.linearVelocity.setY(this.movement.jumpSpeed);
-                this.body.applyForce({x:0,y:this.movement.jumpForce,z:0});
+                // this.physicsProperties.velocity.setY(this.movement.jumpSpeed);
+                this.body.linearVelocity.setY(this.movement.jumpSpeed);
+                // this.body.applyForce({x:0,y:this.movement.jumpForce,z:0});
                 console.log("JUMP");
                 this.controls.shouldJump = false;
             }
@@ -119,7 +120,7 @@ class Player extends THREE.Object3D {
         this.isOnGround = function(){
             //STUB method. Replace with collision detection with ground
             if (this.position.y <= position[1]){ 
-                this.position.y = position[1];
+                //this.position.y = position[1];
                 return true;
             }
             return false;

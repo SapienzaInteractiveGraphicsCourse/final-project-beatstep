@@ -40,7 +40,7 @@ class Raycaster {
         // If the denominator != 0 but the numerator != 0 => there is a single point of intersection
         let d = numerator / denominator;
         return {
-            point: lineDirection.clone().multiplyScalar(d).add(lineOrigin), // intersection = lo + ld*d
+            point: lineDirection.clone().normalize().multiplyScalar(d).add(lineOrigin), // intersection = lo + ld*d
             distance: d
         }
     }
@@ -105,14 +105,14 @@ class Raycaster {
      */
     static raycastToFace(lineOrigin, lineDirection, face, length) {
         // If the origin is further than length from the other face's plane, for sure we don't care about the intersection
-        if (Math.abs(Raycaster.distancePointFromPlane(lineOrigin, face.normal, face.midpoint)) > length) return { point: null, distance: Infinity, raycastedFace: null };;
+        if (Math.abs(Raycaster.distancePointFromPlane(lineOrigin, face.normal, face.midpoint)) > length) return { point: null, distance: Infinity, raycastedFace: null, raycastOrigin: null, raycastDirection: null };
         //Compute the intersection point and its distance. If is further than length, return false
-        let { point: intersectionPoint, distance } = Raycaster.intersectionLineWithPlane(lineOrigin, lineDirection, face.midpoint, face.normal);
-        if (Math.abs(distance) > length) return { point: null, distance, raycastedFace: null };
+        let { point: intersectionPoint, distance } = Raycaster.intersectionLineWithPlane(lineOrigin, lineDirection, face.normal, face.midpoint);
+        if (Math.abs(distance) > length) return { point: null, distance, raycastedFace: null, raycastOrigin: null, raycastDirection: null  };
         // If the intersection point is inside the face, return the intersection point and the distance
-        if (Raycaster.pointInsideFace(intersectionPoint, face, true)) return { point: intersectionPoint, distance, raycastedFace: face };
+        if (Raycaster.pointInsideFace(intersectionPoint, face, true)) return { point: intersectionPoint, distance, raycastedFace: face, raycastOrigin: lineOrigin.clone(), raycastDirection: lineDirection.clone() };
 
-        return { point: null, distance, raycastedFace: null };
+        return { point: null, distance, raycastedFace: null, raycastOrigin: null, raycastDirection: null };
     }
 
     /**
