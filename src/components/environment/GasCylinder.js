@@ -5,6 +5,9 @@ import gas_top_b from '../../asset/textures/gas_top_b.png';
 import gas_side from '../../asset/textures/gas_side.png';
 import gas_side_b from '../../asset/textures/gas_side_b.png';
 import { ObjectPool } from '../Tools/ObjectPool';
+import { PhysicsBody, PhysicsShapeThree, PhysicsMaterial } from '../physics/PhysicsEngine';
+
+
 import { setCollideable } from '../physics/CollisionDetector';
 
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
@@ -50,6 +53,7 @@ const  _gascylinderMaterials = [
 class GasCylinder extends THREE.Mesh{
     constructor(){
         super(_gascylinderGeometry, _gascylinderMaterials);
+        this.body = new PhysicsBody(5,new PhysicsShapeThree(_gascylinderGeometry),new PhysicsMaterial(1,0.5));
 
         this.receiveShadow = true;
 
@@ -71,16 +75,19 @@ class GasCylinder extends THREE.Mesh{
 
     update(delta){
         // TODO
+        this.body.updateMesh(this,true,false);
     }
 
     setPosition(x,y,z){
         // Apply position
         this.position.set(x,y+_gascylinderHeight/2,z);
+        this.body.position.copy(this.position);
     }
 
     setRotation(alpha){
         // TODO
         this.rotation.y = alpha;
+        
     }
 
 }

@@ -58,7 +58,7 @@ class Player extends THREE.Object3D {
         this.controls.shouldLock = true;
         this.movement = {
             movementSpeed: 8,
-            jumpSpeed: 8,
+            jumpSpeed: -8,
         };
         this.lastDeltaTime = 0;
 

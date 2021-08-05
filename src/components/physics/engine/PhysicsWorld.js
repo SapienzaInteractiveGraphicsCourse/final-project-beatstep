@@ -111,7 +111,7 @@ class PhysicsWorld {
                 for (let colInfo of body.collisionInfos) {
                     if(body.linearVelocity.dot(colInfo.normal) >= 0){
                         console.log("UPWARD VELOCITY");
-                        continue;
+                        // continue;
                     }
                     let body2 = colInfo.body;
 

@@ -116,7 +116,7 @@ function init(){
     // Creating cube
     let cube = new THREE.Mesh(cube_geometry, cube_material);
     cube.castShadow = true;
-    cube.position.set(0,3,0);
+    cube.position.set(0,4,0);
     // Creatind physics cube
     let cubeBody = new PhysicsBody(10,new PhysicsShapeThree(cube_geometry),new PhysicsMaterial(),() => {
         console.log("COLLISION");

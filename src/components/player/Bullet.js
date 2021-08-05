@@ -1,6 +1,6 @@
 import { THREE } from '../setup/ThreeSetup';
 import { detectCollision, setCollideable } from '../physics/CollisionDetector';
-import { world, PhysicsBody, PhysicsMaterial } from '../physics/PhysicsEngine';
+import { world, PhysicsBody, PhysicsMaterial, PhysicsShapeThree } from '../physics/PhysicsEngine';
 
 // Bullet properties
 let _bulletRadius = 0.05;
@@ -21,7 +21,7 @@ class Bullet extends THREE.Mesh{
 
         //this.physicsProperties = new PhysicsProperties(0.5);
 
-        this.body = new PhysicsBody(_bulletMass, null, new PhysicsMaterial(0.01,1,0));
+        this.body = new PhysicsBody(_bulletMass, new PhysicsShapeThree(_bulletGeometry), new PhysicsMaterial(0.01,1,0));
         this.body.gravityInfluence = 0.1;
         this.body.collisionDistance = 0.3;
         //this.body.position.copy(this.position);
