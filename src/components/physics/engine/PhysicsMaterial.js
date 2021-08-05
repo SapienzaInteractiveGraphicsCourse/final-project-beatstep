@@ -7,7 +7,7 @@ class PhysicsMaterial {
      * @param {Number} restitution - A number between 0 and 1 defining the restitution, how much the body bounces back after a collision
      */
     constructor(friction = 0.5, restitution = 0){
-        this.frictionFactor = Math.min(Math.abs(Number(friction)),1);
+        this.frictionFactor = Math.abs(Number(friction)); // Math.min(Math.abs(Number(friction)),1);
         this.restitutionFactor = Math.min(Math.abs(Number(restitution)),1);;
     }
 

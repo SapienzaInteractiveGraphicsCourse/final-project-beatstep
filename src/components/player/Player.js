@@ -60,6 +60,7 @@ class Player extends THREE.Object3D {
             movementSpeed: 8,
             jumpSpeed: 8,
         };
+        this.lastDeltaTime = 0;
 
         this.body = new PhysicsBody(80, new PhysicsShapeThree(new THREE.BoxGeometry(1,4,1)), new PhysicsMaterial(0.9,0));
         this.body.position.copy(this.position);
@@ -89,7 +90,8 @@ class Player extends THREE.Object3D {
             //     this.body.linearVelocity.copy(direction).multiplyScalar(zDir * this.movement.movementSpeed * 1.5);
             // }
             //this.isOnGround();
-            if(this.controls.shouldJump && this.isOnGround()){
+            let onGround = this.body.collisionInfos.filter(info => info.body.jumpable == true).length > 0;
+            if(this.controls.shouldJump &&  onGround){
                 // this.physicsProperties.velocity.setY(this.movement.jumpSpeed);
                 this.body.linearVelocity.setY(this.movement.jumpSpeed);
                 // this.body.applyForce({x:0,y:this.movement.jumpForce,z:0});
@@ -115,6 +117,7 @@ class Player extends THREE.Object3D {
             // if (displacement.x != 0) this.controls.moveRight(displacement.x);
             // if (displacement.y != 0) this.controls.moveUp(displacement.y);
             // if (displacement.z != 0) this.controls.moveForward(displacement.z);
+            this.lastDeltaTime = delta; 
         }.bind(this);
 
         this.isOnGround = function(){

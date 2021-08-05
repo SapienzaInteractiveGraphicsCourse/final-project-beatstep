@@ -31,6 +31,120 @@ class SAT {
 
         let mtv = new Vector3(0, 0, 0);
         let minPenetration = Infinity;
+        let maxEntryTime = 0;
+        let minLeaveTime = Infinity;
+        let relativeVelocity = new Vector3(0, 0, 0).subVectors(body1.linearVelocity, body2.linearVelocity);
+        for (let normal of allNormals) {
+            
+            let speed = normal.dot(relativeVelocity);
+
+            let intervalA = SAT.projection(vertices1, normal);
+            let intervalB = SAT.projection(vertices2, normal);
+
+             // IntervalA initially on the left of intervalB
+             if(intervalA.end < intervalB.start){
+                if(speed <= 0) return null; // The intervals are moving apart
+                let t = (intervalB.start - intervalA.end)/speed; // Begin-intersection time
+                if(t > maxEntryTime){
+                    maxEntryTime = t;
+                    mtv.copy(normal);
+                    minPenetration = 0;
+                }
+                if(maxEntryTime > deltaTime) return null; // The bodies won't intersect during this frame
+                t = (intervalB.end - intervalA.start)/speed; // End-intersection time
+                minLeaveTime = Math.min(t,minLeaveTime);
+                if(maxEntryTime > minLeaveTime) return null; // There is no concurrent intersection on all axis
+            }
+            // IntervalA initially on the right of intervalB
+            else if(intervalB.end < intervalA.start){
+                if(speed >= 0) return null; // The intervals are moving apart
+                let t = (intervalB.end - intervalA.start)/speed; // Begin-intersection time
+                if(t > maxEntryTime){
+                    maxEntryTime = t;
+                    mtv.copy(normal);
+                    minPenetration = 0;
+                }
+                if(maxEntryTime > deltaTime) return null; // The bodies won't intersect during this frame
+                t = (intervalB.start - intervalA.end)/speed; // End-intersection time
+                minLeaveTime = Math.min(t,minLeaveTime);
+                if(maxEntryTime > minLeaveTime) return null; // There is no concurrent intersection on all axis
+            }
+            // The 2 intervals are already overlapping
+            else{
+                if(speed > 0){
+                    let t = (intervalB.end - intervalA.start)/speed;
+                    minLeaveTime = Math.min(t,minLeaveTime);
+                    if(maxEntryTime > minLeaveTime) return null; // There is no concurrent intersection on all axis
+
+                }
+                else if(speed < 0){
+                    let t = (intervalB.start - intervalA.end)/speed;
+                    minLeaveTime = Math.min(t,minLeaveTime);
+                    if(maxEntryTime > minLeaveTime) return null; // There is no concurrent intersection on all axis
+                }
+                let overlap = SAT.overlap(intervalA,intervalB);
+                // If the minPenetration is greater than 0, there are no future intersections, all axis are intersecting right now, so we pick the one with the least penetration
+                if(overlap.length < minPenetration){
+                    minPenetration = overlap.length;
+                    mtv.copy(normal);
+                }
+
+            }
+
+
+        }
+
+        let center1 = body1.getCenter();
+        let center2 = body2.getCenter();
+        center1.sub(center2);
+        if(center1.dot(mtv) < 0){
+            mtv.multiplyScalar(-1);
+        }
+        return { normal: mtv, penetration: minPenetration, collisionTime: maxEntryTime };
+    }
+
+    static checkCollision_1(body1, body2, deltaTime) {
+
+        let allNormals = body1.getNormals();
+        allNormals.push(...body2.getNormals());
+        let vertices1 = body1.getVertices();
+        let vertices2 = body2.getVertices();
+
+        let mtv = new Vector3(0, 0, 0);
+        let mtvLength = Infinity;
+        for (let normal of allNormals) {
+            let intervalA = SAT.projection(vertices1, normal);
+            let intervalB = SAT.projection(vertices2, normal);
+
+            let overlap = SAT.overlap(intervalA, intervalB);
+            if (overlap.length == -1) {
+                return null;
+            }
+            else if (overlap.length < mtvLength) {
+                mtvLength = overlap.length;
+                mtv.copy(normal);
+            }
+        }
+        // The normal could be reveresed respect to body1, reverse it again
+        let center1 = body1.getCenter();
+        let center2 = body2.getCenter();
+        center1.sub(center2);
+        if(center1.dot(mtv) < 0){
+            mtv.multiplyScalar(-1);
+        }
+
+        return { normal: mtv, penetration: mtvLength, collisionTime: 0  };
+    }
+
+    static checkCollision_2(body1, body2, deltaTime) {
+
+        let allNormals = body1.getNormals();
+        allNormals.push(...body2.getNormals());
+        let vertices1 = body1.getVertices();
+        let vertices2 = body2.getVertices();
+
+        let mtv = new Vector3(0, 0, 0);
+        let minPenetration = Infinity;
         let maxEntryTime = -Infinity;
         let minLeaveTime = Infinity;
         let relativeVelocity = new Vector3(0, 0, 0).subVectors(body1.linearVelocity, body2.linearVelocity)
@@ -121,39 +235,6 @@ class SAT {
             mtv.multiplyScalar(-1);
         }
         return { normal: mtv, penetration: minPenetration, collisionTime: maxEntryTime };
-    }
-
-    static checkCollision_1(body1, body2, deltaTime) {
-
-        let allNormals = body1.getNormals();
-        allNormals.push(...body2.getNormals());
-        let vertices1 = body1.getVertices();
-        let vertices2 = body2.getVertices();
-
-        let mtv = new Vector3(0, 0, 0);
-        let mtvLength = Infinity;
-        for (let normal of allNormals) {
-            let intervalA = SAT.projection(vertices1, normal);
-            let intervalB = SAT.projection(vertices2, normal);
-
-            let overlap = SAT.overlap(intervalA, intervalB);
-            if (overlap.length == -1) {
-                return null;
-            }
-            else if (overlap.length < mtvLength) {
-                mtvLength = overlap.length;
-                mtv.copy(normal);
-            }
-        }
-        // The normal could be reveresed respect to body1, reverse it again
-        let center1 = body1.getCenter();
-        let center2 = body2.getCenter();
-        center1.sub(center2);
-        if(center1.dot(mtv) < 0){
-            mtv.multiplyScalar(-1);
-        }
-
-        return { normal: mtv, penetration: mtvLength, collisionTime: 0  };
     }
 
 }

@@ -25,7 +25,7 @@ class PhysicalFloor extends PhysicsBody{
             side: THREE.DoubleSide,
         });
 
-        super(0,new PhysicsShapeThree(geometry),new PhysicsMaterial(0.8,0),()=>{
+        super(0,new PhysicsShapeThree(geometry),new PhysicsMaterial(1.5,0),()=>{
 
         });
 
@@ -42,6 +42,7 @@ class PhysicalFloor extends PhysicsBody{
         // this.quaternion.copy(this.mesh.quaternion);
 
         this.shape.preferBoundingBox = preferBoundingBox;
+        this.jumpable = true;
     }
 
     setPosition(x,y,z){

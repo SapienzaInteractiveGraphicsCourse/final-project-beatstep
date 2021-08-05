@@ -40,7 +40,8 @@ class PhysicsBody {
         this.onCollisionWith = onCollisionWith || function(body, distance, payload, minIntersection, intersections){};
         this.collisionPayload = {}; // A payload to pass along when colliding with another body
 
-        this.mesh = null;
+        this.onBeforeStep = () => {};
+        this.onAfterStep = () => {};
     }
 
     applyForce(force){
@@ -50,7 +51,7 @@ class PhysicsBody {
         }
     }
 
-    updateMesh(mesh, pos = true, rot = false){
+    updateMesh(mesh, pos, rot){
         if(pos) mesh.position.copy(this.position);
         if(rot) mesh.quaternion.copy(this.quaternion);
     }
@@ -71,6 +72,10 @@ class PhysicsBody {
         return this.shape.getCenter(this.matrixWorld);
     }
 
+    isStatic(){
+        return this.mass == 0;
+    }
+
     reset(){
         this.appliedForce.set(0,0,0);
         this.linearVelocity.set(0,0,0);
@@ -84,18 +89,16 @@ class CollisionInfo {
 
     /**
      * An object with the necessary info to resolve a collision 
+     * @param {PhysicsBody} body - The other body
      * @param {Vector3} normal - The normal of the collision surface 
-     * @param {Number} distance - The distance from the collision point
+     * @param {Number} penetration - The penetration of the 2 colliding body
      * @param {Number} collisionTime - The time from the start of this frame, when this collision starts
-     * @param {Number} mass - The mass of the other object
-     * @param {Number} friction - The friction the other object impresses
      */
-    constructor(normal,distance,collisionTime,mass,friction){
+    constructor(body,normal,penetration,collisionTime){
+        this.body = body;
         this.normal = normal;
-        this.distance = distance;
+        this.penetration = penetration;
         this.collisionTime = collisionTime;
-        this.mass = mass;
-        this.friction = friction;
     }
 
 }

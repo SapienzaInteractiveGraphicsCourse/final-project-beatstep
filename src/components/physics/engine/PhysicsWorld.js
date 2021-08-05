@@ -24,7 +24,10 @@ class PhysicsWorld {
 
     addBody(body) {
         if (body instanceof PhysicsBody) {
-            this.bodies.push(body);
+            if(body.isStatic())
+                this.bodies.push(body);
+            else
+                this.bodies.unshift(body);
             body._world = this;
         }
     }
@@ -44,7 +47,10 @@ class PhysicsWorld {
         for (let i = 0; i < this.bodies.length; i++) {
             let body = this.bodies[i];
 
-            if(body.mass == 0) continue;
+            if(body.isStatic()) continue;
+
+            // PhysicsBody callback
+            body.onBeforeStep();
 
             // Applying forces
             body.appliedForce.add(_tempVector.copy(this.gravity).multiplyScalar(body.mass * body.gravityInfluence));
@@ -53,99 +59,100 @@ class PhysicsWorld {
             body.linearVelocity.fixZeroPrecision();
             body.appliedForce.set(0,0,0); // Reset to zero, this way accelleration can't accumulate out of nowhere (without forces applied in the next steps)
 
-            // Computing the current displacement before collision detection, as if there were no collisions possible
-            let allegedDisplacement = new Vector3(0,0,0).copy(body.linearVelocity).multiplyScalar(deltaTime);
+            body.collisionInfos = [];
+        }
+            
+        for (let i = 0; i < this.bodies.length; i++) {
+            let body = this.bodies[i];
+
+            if(body.isStatic()) continue;
+
 
             //Collision detection
             for (let j = i + 1; j < this.bodies.length; j++) {
                 let body2 = this.bodies[j];
 
-                // Ignore the body if the bounding boxes aren't close enough
-                // if (Math.abs(this.roughDistance(body, body2)) > collisionLength) continue;
-
-                // let body2Faces = body2.getFaces();
-                // let intersections = [];
-                // for (let vertex of bodyVertices) {
-                //     let int = Raycaster.raycastToFaces(vertex, allegedDisplacement, body2Faces, collisionLength, false);
-                //     intersections.push(...int);
-                // }
-                // if (intersections.length == 0) continue;  // No collision with this body
-
-                // // Get the closest intersection point with this body2
-                // let minIntersection = intersections[0];
-                // for(let int of intersections){
-                //     if(Math.abs(int.distance) < Math.abs(minIntersection.distance)) minIntersection = int;
-                // }
-
-                // body.collisionInfos.push(new CollisionInfo(
-                //     minIntersection.raycastedFace.normal.clone(),
-                //     minIntersection.distance,
-                //     body2.mass,
-                //     body2.material.frictionFactor
-                // ));
-
-                // if(body2.mass != 0){
-                //     body2.collisionInfos.push(new CollisionInfo(
-                //         minIntersection.raycastedFace.normal.clone().multiplyScalar(-1), // Newton's first law, reaction from body's push
-                //         minIntersection.distance,
-                //         body.mass,
-                //         body.material.frictionFactor
-                //     ));
-                // }
-
                 let collision = SAT.checkCollision_1(body,body2,deltaTime);
                 if(!collision) continue;
 
                 body.collisionInfos.push(new CollisionInfo(
+                    body2,
                     collision.normal,
                     collision.penetration,
-                    collision.collisionTime,
-                    body2.mass,
-                    body2.material.frictionFactor
+                    collision.collisionTime
                 ));
 
-                if(body2.mass != 0){
+                if(!body2.isStatic()){
                     body2.collisionInfos.push(new CollisionInfo(
+                        body,
                         collision.normal.clone().multiplyScalar(-1), // Newton's first law, reaction from body's push
                         collision.penetration,
-                        collision.collisionTime,
-                        body.mass,
-                        body.material.frictionFactor
+                        collision.collisionTime
                     ));
                 }
             }
 
             if(body.collisionInfos.length > 0){
                 // Collision resolution
-                body.collisionInfos.sort( (a, b) => Math.abs(a.distance) - Math.abs(b.distance) ); // Sort collisions by distance
+                body.collisionInfos.sort( (a, b) => Math.abs(a.collisionTime) - Math.abs(b.collisionTime) ); // Sort collisions by distance
+
                 // Moving the body to the closest collision point, then computing collision resolution
-                //let noCollisionDisplacement = _tempVector.copy(allegedDisplacement).setLength(body.collisionInfos[0].distance);
                 let noCollisionDeltaTime = body.collisionInfos[0].collisionTime;
-                let noCollisionDisplacement = _tempVector.copy(body.linearVelocity).multiplyScalar(noCollisionDeltaTime);
-                //body.position.add(noCollisionDisplacement);
+                let noCollisionDisplacement;
+                if(noCollisionDeltaTime != 0){
+                    noCollisionDisplacement = _tempVector.copy(body.linearVelocity).multiplyScalar(noCollisionDeltaTime);
+                }
+                else{
+                    noCollisionDisplacement = _tempVector.copy(body.collisionInfos[0].normal).multiplyScalar(-1*body.collisionInfos[0].penetration);
+                }
+                body.lastDisplacement.copy(noCollisionDisplacement);
 
-                // Computing collision resolution for all collisions, starting from the closest one onward
+                // Computing collision resolution for all collisions, starting from the first one onward
                 for (let colInfo of body.collisionInfos) {
-                    
-                    // The perpendicular component to the bouncing surface is afected by the restitution factor
-                    let vPerpendicular = _tempVector.copy(colInfo.normal).multiplyScalar(body.linearVelocity.dot(colInfo.normal));
-                    // If the perpendicular component isn't going against the normal, the bodya is not pushing against the other body
-                    if(colInfo.normal.dot(vPerpendicular) < 0){
-                        // The parallel component will be dampened by the friction
-                        let vParallel = body.linearVelocity.sub(vPerpendicular);
-
-                        vPerpendicular.multiplyScalar(body.material.restitutionFactor);
-                        vParallel.multiplyScalar(colInfo.friction);
-
-                        // The sum of the normal component and the parallel component is the new velocity. We subtract cause the parallel is considered going in the surface (against the normal)
-                        body.linearVelocity.subVectors(vParallel, vPerpendicular);                                   
-                        body.linearVelocity.fixZeroPrecision();
+                    if(body.linearVelocity.dot(colInfo.normal) >= 0){
+                        console.log("UPWARD VELOCITY");
+                        continue;
                     }
+                    let body2 = colInfo.body;
+
+                    // DEBUG
+                    if(body2.name == "stairs"){
+                        console.log(body.linearVelocity.dot(colInfo.normal));
+                    }
+
                     
+                    let e = body.material.restitutionFactor;
+                    let m1 = body.mass;
+                    let m2 = body2.isStatic() ? Infinity : body2.mass
+                    let normal = colInfo.normal
+                    
+                    let relativeVelocity = new Vector3(0,0,0).subVectors(body.linearVelocity,body2.linearVelocity);
+                    let tangent = new Vector3(0,0,0).subVectors(relativeVelocity,_tempVector.copy(normal).multiplyScalar(normal.dot(relativeVelocity))).normalize();
+
+                    // Impulse resulting from the collision
+                    let reactionImpulse = (-1*(1+e)*(relativeVelocity.dot(normal)))/((1/m1)+(1/m2));
+
+                    // Impule resulting from the friction with the surface
+                    let maxFrictionImpulse = reactionImpulse*body2.material.frictionFactor;
+                    let frictionImpulse = 0
+                    let tangentMomentum = m1*relativeVelocity.dot(tangent);
+                    if(tangentMomentum <= maxFrictionImpulse){
+                        frictionImpulse = -1*tangentMomentum;
+                    }
+                    else{
+                        frictionImpulse = -1*maxFrictionImpulse;
+                    }
+
+                    let reactionVelocity = _tempVector.copy(normal).multiplyScalar(reactionImpulse/m1).fixZeroPrecision();
+                    let frictionVelocity = tangent.multiplyScalar(frictionImpulse/m1).fixZeroPrecision();
+                    
+
+                    body.linearVelocity.add(reactionVelocity).add(frictionVelocity);
                 }
 
+
+
                 // Computing final position post-collision
-                body.lastDisplacement.copy(noCollisionDisplacement);
                 let afterCollisionDisplacement = _tempVector.copy(body.linearVelocity).multiplyScalar(deltaTime-noCollisionDeltaTime);
                 body.lastDisplacement.add(afterCollisionDisplacement);
                 body.lastDisplacement.fixZeroPrecision();
@@ -153,18 +160,17 @@ class PhysicsWorld {
 
                 
                 // Once the collisions have been used, reset them for the next step
-                body.collisionInfos = [];
+                // body.collisionInfos = [];
             }
             else{
-                body.lastDisplacement.copy(allegedDisplacement);
+                let displacement = _tempVector.copy(body.linearVelocity).multiplyScalar(deltaTime);
+                body.lastDisplacement.copy(displacement);
                 body.lastDisplacement.fixZeroPrecision();
                 body.position.add(body.lastDisplacement);
             }
 
-            if(body.mass == 80 && body.linearVelocity.y > 0){
-                console.log(body.linearVelocity)
-            }
-
+            // PhysicsBody callback
+            body.onAfterStep();
 
         }
 

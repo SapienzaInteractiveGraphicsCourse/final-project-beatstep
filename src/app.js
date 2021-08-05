@@ -14,7 +14,6 @@ import Robot from './components/enemies/Robot';
 
 // Walls
 import Wall from './components/environment/Wall';
-import wall1 from './asset/textures/wall1.png';
 
 // Pickups
 import { pickupHealthPool, pickupAmmoPool, pickupShieldPool } from './components/environment/Pickup';
@@ -47,7 +46,7 @@ import PhysicalFloor from './components/environment/PhysicalFloor';
 // renderer.setSize(window.innerWidth, window.innerHeight);
 function init(){
     // Player and camera setup
-    let player = new Player(camera, renderer.domElement, [0, 2, 5], [0, 2, 0]);
+    let player = new Player(camera, renderer.domElement, [0, 2, 10], [0, 2, 0]);
     scene.add(player);
 
     // Floor(s)
@@ -77,6 +76,8 @@ function init(){
     let cust_body = new PhysicsBody(0,new PhysicsShapeThree(cust_geometry),new PhysicsMaterial(0.5,0.5,0.5));
     cust_body.position.copy(cust_mesh.position);
     cust_body.preferBoundingBox = true;
+    cust_body.name = "stairs";
+    cust_body.jumpable = true;
     world.addBody(cust_body);
 
 
@@ -110,19 +111,20 @@ function init(){
     particles.setLife(0.2);
 
     // Creating cube properties
-    let cube_geometry = new THREE.BoxGeometry(1,1,1,5,5,5);
+    let cube_geometry = new THREE.BoxGeometry(1,1,1);
     let cube_material = new THREE.MeshToonMaterial({ color: 0x00ff00 });
     // Creating cube
     let cube = new THREE.Mesh(cube_geometry, cube_material);
     cube.castShadow = true;
-    cube.position.set(0,20,0);
+    cube.position.set(0,3,0);
     // Creatind physics cube
-    let cubeBody = new PhysicsBody(0,new PhysicsShapeThree(cube_geometry),new PhysicsMaterial(),() => {
+    let cubeBody = new PhysicsBody(10,new PhysicsShapeThree(cube_geometry),new PhysicsMaterial(),() => {
         console.log("COLLISION");
     });
-    cubeBody.mesh = cube;
-    cubeBody.position.set(0,20,0);
+    cubeBody.position.copy(cube.position);
     cubeBody.shape.preferBoundingBox = true;
+    cubeBody.onAfterStep = () => {cubeBody.updateMesh(cube,true,true)}
+    cubeBody.name = "cube";
     // Adding cube to the scene and world
     world.addBody(cubeBody);
     scene.add(cube);
@@ -222,13 +224,13 @@ function init(){
         world.step(delta);
     
         // Detect collisions
-        stair.detectCollision(1,true);
-        stair2.detectCollision(1,true);
-        cylinderi.detectCollision(1,false);
-        player.detectCollision(1.5,true);
-        pickupHealth1.detectCollision(1,false);
-        pickupShield1.detectCollision(1,false);
-        pickupAmmo1.detectCollision(1,false);
+        // stair.detectCollision(1,true);
+        // stair2.detectCollision(1,true);
+        // cylinderi.detectCollision(1,false);
+        // player.detectCollision(1.5,true);
+        // pickupHealth1.detectCollision(1,false);
+        // pickupShield1.detectCollision(1,false);
+        // pickupAmmo1.detectCollision(1,false);
 
         // Enemies
         for(let robot of robots){
