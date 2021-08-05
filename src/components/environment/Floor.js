@@ -2,23 +2,36 @@ import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 import floor1 from '../../asset/textures/floor1.jpg';
 
+import floor1_b from '../../asset/textures/floor1_b.png';
+
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
 const _floorTexture = loader.load(floor1);
+const _floorBumpMap = loader.load(floor1_b);
 // Apply repetition
 _floorTexture.wrapS = THREE.RepeatWrapping;
 _floorTexture.wrapT = THREE.RepeatWrapping;
 _floorTexture.magFilter = THREE.NearestFilter;
+
+_floorBumpMap.wrapS = THREE.RepeatWrapping;
+_floorBumpMap.wrapT = THREE.RepeatWrapping;
+_floorBumpMap.magFilter = THREE.NearestFilter;
 
 class Floor extends THREE.Mesh{
     constructor(x,y,z,width,height){
         let geometry = new THREE.PlaneGeometry(width,height);
         let texture = _floorTexture.clone();
         texture.needsUpdate = true;
-        texture.repeat.set(width/2,width/2);
+        texture.repeat.set(width/2,height/2);
+
+        let texture_b = _floorBumpMap.clone();
+        texture_b.needsUpdate = true;
+        texture_b.repeat.set(width/2,height/2);
 
         const _floorMaterial = new THREE.MeshPhongMaterial({
             map: texture,
             side: THREE.DoubleSide,
+            bumpMap: texture_b,
+            bumpScale  :  0.25,
         });
 
         super(geometry, _floorMaterial);
