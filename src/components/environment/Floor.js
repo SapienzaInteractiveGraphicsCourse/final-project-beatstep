@@ -12,6 +12,7 @@ _floorTexture.magFilter = THREE.NearestFilter;
 class Floor extends THREE.Mesh{
     constructor(x,y,z,width,height){
         let geometry = new THREE.PlaneGeometry(width,height);
+        geometry.rotateX(-Math.PI/2); // Rotating the plane geometry
         let texture = _floorTexture.clone();
         texture.needsUpdate = true;
         texture.repeat.set(width/2,width/2);
@@ -30,12 +31,24 @@ class Floor extends THREE.Mesh{
         this.setPosition(x,y,z);
 
         // Apply Rotation
-        this.rotation.x = Math.PI/2;
+        // this.rotation.x = Math.PI/2;
     }
 
     setPosition(x,y,z){
         // Apply position
         this.position.set(x,y,z);
+    } 
+
+    onCollision(collisionResult,obj,delta){
+        if(obj.position.y <= this.position.y){
+            obj.position.y = this.position.y;
+            if(obj.movementEngine.velocity.y < 0) {
+                obj.movementEngine.velocity.y = 0;
+                obj.movementEngine.displacement.y = 0;
+            }
+            // Since we are on the ground, the object can jump
+            obj.canJump = true;
+        }
     }
 
 }

@@ -4,11 +4,13 @@ import {
     EventDispatcher,
     Vector3
 } from 'three';
+import { MovementEngine } from "../physics/MovementEngine";
 
 import { world, PhysicsBody, PhysicsMaterial, PhysicsShapeThree } from '../physics/PhysicsEngine';
 
 const _euler = new Euler(0, 0, 0, 'YXZ');
-const _vector = new Vector3();
+const _xAxis = new Vector3();
+const _zAxis = new Vector3();
 
 const _changeEvent = { type: 'change' };
 const _lockEvent = { type: 'lock' };
@@ -53,20 +55,17 @@ class Player extends Object3D{
 
         this.speed = 8;
         this.jumpSpeed = 10;
+        this.canJump = false;
 
-        this.body = new PhysicsBody(80, new PhysicsShapeThree(new THREE.BoxGeometry(1,height,1)), new PhysicsMaterial(0.9,0));
-        this.body.position.copy(this.position);
-        this.body.shape.preferBoundingBox = true;
-        world.addBody(this.body);
+        // this.body = new PhysicsBody(80, new PhysicsShapeThree(new THREE.BoxGeometry(1,height,1)), new PhysicsMaterial(0.9,0));
+        // this.body.position.copy(this.position);
+        // this.body.shape.preferBoundingBox = true;
+        // world.addBody(this.body);
+        this.movementEngine = new MovementEngine();
+
 
         this.setUpControls(angularSensitivity);
         
-    }
-
-    
-
-    update(deltaTime){
-
     }
 
     setUpControls(angularSensitivity){
@@ -165,7 +164,7 @@ class Player extends Object3D{
 				case 'ArrowRight':
 				case 'KeyD': scope.controls.shouldMoveRight = false; break;
 
-                case 'Space': scope.controls.controls.shouldJump = false; break;
+                case 'Space': scope.controls.shouldJump = false; break;
 
 			}
 		}
@@ -179,4 +178,28 @@ class Player extends Object3D{
 
     }
 
+    update(deltaTime){
+        let xDir = Number(this.controls.shouldMoveRight) - Number(this.controls.shouldMoveLeft);
+        let zDir = Number(this.controls.shouldMoveForward) - Number(this.controls.shouldMoveBackward);
+
+        if(xDir || zDir){
+            
+            this.matrixWorld.extractBasis(_Xvector,_Yvector,_Zvector);
+            _xAxis.setFromMatrixColumn( this.matrixWorld, 0).normalize().multiplyScalar(xDir * this.movement.movementSpeed);
+		    _yAxis.setFromMatrixColumn( this.matrixWorld, 2).normalize().multiplyScalar(zDir * this.movement.movementSpeed);
+
+            this.movementEngine.velocity.add(_xAxis).add(_zAxis);
+        }
+
+        if(this.controls.shouldJump && this.canJump){
+            this.movementEngine.velocity.setY(this.movement.jumpSpeed);
+            console.log("JUMP");
+        }
+
+        this.position.add(this.movementEngine.displacement);
+
+    }
+
 }
+
+export { Player }
