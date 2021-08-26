@@ -26,6 +26,8 @@ class Floor extends THREE.Mesh{
 
         this.receiveShadow = true;
         this.castShadow = false;
+        
+        this.friction = 0.8;
 
         // Apply position
         this.setPosition(x,y,z);
@@ -40,12 +42,23 @@ class Floor extends THREE.Mesh{
     } 
 
     onCollision(collisionResult,obj,delta){
-        if(obj.position.y <= this.position.y){
-            obj.position.y = this.position.y;
+        // console.log("FLOOR collision with " + obj.constructor.name);
+        // console.log("Player y: " + this.position.y);
+        // console.log("Player velocity: " + obj.movementEngine.velocity.toArray().toString());
+        if(obj.feetPosition.y <= this.position.y){
+            obj.feetPosition.y = this.position.y;
+            // Faking the normal reaction
             if(obj.movementEngine.velocity.y < 0) {
                 obj.movementEngine.velocity.y = 0;
                 obj.movementEngine.displacement.y = 0;
             }
+
+            // Faking friction
+            let xFriction = obj.movementEngine.velocity.x * this.friction;
+            let zFriction = obj.movementEngine.velocity.z * this.friction;
+            obj.movementEngine.velocity.x -= xFriction;
+            obj.movementEngine.velocity.z -= zFriction;
+
             // Since we are on the ground, the object can jump
             obj.canJump = true;
         }

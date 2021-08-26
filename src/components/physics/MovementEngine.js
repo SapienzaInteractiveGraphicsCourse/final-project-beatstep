@@ -1,8 +1,9 @@
 import { Vector3 } from "three";
+Vector3.prototype.addY = function(val){this.y += val; return this;};
 
 class MovementEngine {
 
-    constructor(gravity = 10, initialVelocity = [0,0,0], initialAcceleration = [0,0,0]){
+    constructor(gravity = -10, initialVelocity = [0,0,0], initialAcceleration = [0,0,0]){
         this.gravity = gravity;
 
         this.initialVelocity = initialVelocity
@@ -27,7 +28,7 @@ class MovementEngine {
     }
 
     update(deltaT){
-        let deltaV = this._tempVec.copy(this.acceleration).add(this.gravity).multiplyScalar(deltaT);
+        let deltaV = this._tempVec.copy(this.acceleration).addY(this.gravity).multiplyScalar(deltaT);
         this.acceleration.set(0,0,0);
         this.velocity.add(deltaV);
         this.displacement.copy(this.velocity).multiplyScalar(deltaT);

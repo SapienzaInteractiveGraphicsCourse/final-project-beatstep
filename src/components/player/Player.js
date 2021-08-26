@@ -1,12 +1,12 @@
 import { THREE } from '../setup/ThreeSetup';
 
 import { PointerLockControlsPlus } from '../Tools/PointerLockControlsPlus';
-import { world, PhysicsBody, PhysicsMaterial, PhysicsShapeThree } from '../physics/PhysicsEngine';
+// import { world, PhysicsBody, PhysicsMaterial, PhysicsShapeThree } from '../physics/PhysicsEngine';
 import HUD from "./HUD";
 
 import { addRifle } from "../TempRifle";
 import { BulletEmitter } from './BulletEmitter';
-import { setCollideable } from '../physics/CollisionDetector';
+// import { setCollideable } from '../physics/CollisionDetector';
 
 const _vector1 = new THREE.Vector3(0,0,0);
 const _vector2 = new THREE.Vector3(0,0,0);
@@ -62,25 +62,25 @@ class Player extends THREE.Object3D {
         };
         this.lastDeltaTime = 0;
 
-        this.body = new PhysicsBody(80, new PhysicsShapeThree(new THREE.BoxGeometry(1,4,1)), new PhysicsMaterial(0.9,0));
-        this.body.position.copy(this.position);
-        //this.body.position.y-1;
-        this.body.shape.preferBoundingBox = true;
-        world.addBody(this.body);
+        // this.body = new PhysicsBody(80, new PhysicsShapeThree(new THREE.BoxGeometry(1,4,1)), new PhysicsMaterial(0.9,0));
+        // this.body.position.copy(this.position);
+        // //this.body.position.y-1;
+        // this.body.shape.preferBoundingBox = true;
+        // world.addBody(this.body);
 
         // Updating movement in the space (not view)
         this.movementUpdate = function ( delta ) {
-            let xDir = Number(this.controls.shouldMoveRight) - Number(this.controls.shouldMoveLeft);
-            let zDir = Number(this.controls.shouldMoveForward) - Number(this.controls.shouldMoveBackward);
+            // let xDir = Number(this.controls.shouldMoveRight) - Number(this.controls.shouldMoveLeft);
+            // let zDir = Number(this.controls.shouldMoveForward) - Number(this.controls.shouldMoveBackward);
 
-            let xVector = _vector1.setFromMatrixColumn(this.matrixWorld, 0);
-            let zVector = _vector2.crossVectors(this.up, _vector1);
-            xVector.multiplyScalar(xDir).normalize();
-            zVector.multiplyScalar(zDir).normalize();
-            let direction = xVector.add(zVector).normalize().multiplyScalar(this.movement.movementSpeed).setY(this.body.linearVelocity.y);
+            // let xVector = _vector1.setFromMatrixColumn(this.matrixWorld, 0);
+            // let zVector = _vector2.crossVectors(this.up, _vector1);
+            // xVector.multiplyScalar(xDir).normalize();
+            // zVector.multiplyScalar(zDir).normalize();
+            // let direction = xVector.add(zVector).normalize().multiplyScalar(this.movement.movementSpeed).setY(this.body.linearVelocity.y);
 
-            if(direction.x || direction.y)
-                this.body.linearVelocity.copy(direction);
+            // if(direction.x || direction.y)
+                // this.body.linearVelocity.copy(direction);
 
 
             // if(xDir || zDir){
@@ -89,16 +89,16 @@ class Player extends THREE.Object3D {
             //     this.body.linearVelocity.setX(xDir * this.movement.movementSpeed);
             //     this.body.linearVelocity.copy(direction).multiplyScalar(zDir * this.movement.movementSpeed * 1.5);
             // }
-            //this.isOnGround();
-            let onGround = this.body.collisionInfos.filter(info => info.body.jumpable == true).length > 0;
-            if(this.controls.shouldJump &&  onGround){
+            // this.isOnGround();
+            // let onGround = this.body.collisionInfos.filter(info => info.body.jumpable == true).length > 0;
+            // if(this.controls.shouldJump &&  onGround){
                 // this.physicsProperties.velocity.setY(this.movement.jumpSpeed);
-                this.body.linearVelocity.setY(this.movement.jumpSpeed);
+                // this.body.linearVelocity.setY(this.movement.jumpSpeed);
                 // this.body.applyForce({x:0,y:this.movement.jumpForce,z:0});
-                console.log("JUMP");
-                this.controls.shouldJump = false;
-            }
-            //this.controls.shouldJump = false;
+            //     console.log("JUMP");
+            //     this.controls.shouldJump = false;
+            // }
+            // this.controls.shouldJump = false;
 
             // this.physicsProperties.constraints = this.isOnGround() ? 
             //                                      this.physicsProperties.constraints | PhysicsProperties.BOTTOM_CONSTRAINT :
@@ -117,7 +117,7 @@ class Player extends THREE.Object3D {
             // if (displacement.x != 0) this.controls.moveRight(displacement.x);
             // if (displacement.y != 0) this.controls.moveUp(displacement.y);
             // if (displacement.z != 0) this.controls.moveForward(displacement.z);
-            this.lastDeltaTime = delta; 
+            // this.lastDeltaTime = delta; 
         }.bind(this);
 
         this.isOnGround = function(){
@@ -184,14 +184,14 @@ class Player extends THREE.Object3D {
 
 
         // Adding collision detection
-        setCollideable(this,new THREE.BoxGeometry(1,2,1),
-            (intersections)=>{ // On personal collsion
+        // setCollideable(this,new THREE.BoxGeometry(1,2,1),
+        //     (intersections)=>{ // On personal collsion
 
-            },
-            (object, distance, intersection)=>{ // On collision with
-                console.log(this.constructor.name+" on collision with "+ object.constructor.name);
-            }
-        );
+        //     },
+        //     (object, distance, intersection)=>{ // On collision with
+        //         console.log(this.constructor.name+" on collision with "+ object.constructor.name);
+        //     }
+        // );
 
         
         
@@ -206,7 +206,7 @@ class Player extends THREE.Object3D {
 
     update(delta){
         this.movementUpdate(delta);
-        this.body.updateMesh(this,true,false);
+        // this.body.updateMesh(this,true,false);
         //this.position.set(this.body.position.x,this.body.position.y+1,this.body.position.z);
         if(this.mixer){
             this.mixer.update(delta);

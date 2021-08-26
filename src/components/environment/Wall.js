@@ -10,28 +10,46 @@ _wallTexture.wrapT = THREE.RepeatWrapping;
 _wallTexture.magFilter = THREE.NearestFilter;
 _wallTexture.repeat.set(3,3);
 
-class Wall {
+class Wall extends THREE.Mesh{
     constructor(x,y,z,width,height,rotationRadians=0){
-        this.geometry = new THREE.PlaneGeometry(width,height);
-        this.material = new THREE.MeshPhongMaterial({
+        let geometry = new THREE.PlaneGeometry(width,height);
+        let material = new THREE.MeshPhongMaterial({
             map: _wallTexture,
             side: THREE.DoubleSide,
         });
-        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        super(geometry, material);
 
-        this.mesh.receiveShadow = true;
-        this.mesh.castShadow = false;
+        this.receiveShadow = true;
+        this.castShadow = false;
 
         // Apply position
-        this.mesh.position.set(x,y+height/2,z);
+        this.position.set(x,y+height/2,z);
 
         // Apply Rotation
-        this.mesh.rotation.y = Math.PI * rotationRadians;
+        this.rotation.y = Math.PI * rotationRadians;
+
+        // onCollision with dynamic object callback
+        this.onCollision = function(collisionResult,obj,delta){
+
+            // Move back the player if he penetrated into the wall
+            let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
+            obj.position.add(backVec);
+
+            // Don't allow the player to move inside the wall
+            let dot = collisionResult.normal.dot(obj.movementEngine.displacement);
+            if(dot < 0){
+                backVec = collisionResult.normal.multiplyScalar(dot);
+                obj.movementEngine.displacement.sub(backVec);
+            }
+
+        }
     }
 
     get obj(){
-        return this.mesh;
+        return this;
     }
+
+    
 }
 
 

@@ -2,7 +2,7 @@ import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 
 import robot1 from '../../asset/models/robot1/robot_1.glb';
-import { setCollideable } from '../physics/CollisionDetector';
+// import { setCollideable } from '../physics/CollisionDetector';
 
 const loader = DefaultGeneralLoadingManager.getHandler("gltf");
 let _robot1Model;
@@ -71,18 +71,18 @@ class Robot {
         this.animation_shootPose = this.createAnimationShootPose();
 
         // Adding collision detection
-        setCollideable(this.wheels,_robotCollisionGeometry,
-            (intersections)=>{ // On personal collsion
-                console.log("personal collsion");
-            },
-            (object, distance, intersection)=>{ // On collision with
-                console.log(this.constructor.name+" on collision with "+ object.constructor.name);
-                if(object.constructor.name == "Player"){
-                    // Make physical
-                }
-            }
-        );
-        this.detectCollision = (...args) => this.wheels.detectCollision(...args);
+        // setCollideable(this.wheels,_robotCollisionGeometry,
+        //     (intersections)=>{ // On personal collsion
+        //         console.log("personal collsion");
+        //     },
+        //     (object, distance, intersection)=>{ // On collision with
+        //         console.log(this.constructor.name+" on collision with "+ object.constructor.name);
+        //         if(object.constructor.name == "Player"){
+        //             // Make physical
+        //         }
+        //     }
+        // );
+        // this.detectCollision = (...args) => this.wheels.detectCollision(...args);
     }
 
     setPosition(x,y,z){
@@ -122,7 +122,7 @@ class Robot {
         // Update every animation
         this.mixer.update(delta);
         // Update collision
-        this.detectCollision(2,true);
+        // this.detectCollision(2,true);
 
         let px = player.position.x;
         let py = player.position.y;

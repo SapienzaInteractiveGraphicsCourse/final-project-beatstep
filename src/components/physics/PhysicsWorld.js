@@ -8,7 +8,7 @@ function fixZeroPrecision(){
 Vector3.prototype.fixZeroPrecision = fixZeroPrecision;
 
 import { THREE, scene } from "../setup/ThreeSetup";
-import { movementEngine } from "./MovementEngine";
+import { MovementEngine } from "./MovementEngine";
 
 
 const _tempVector = new Vector3(0, 0, 0);
@@ -23,16 +23,16 @@ class PhysicsWorld {
 
     addObject(mesh,geometry = null,dynamic = false){
         let geom = geometry || mesh.geometry;
-        if(!geom) throw "A geometry or an object with a .geometry property is needed";
+        if(!geom) throw new Error("A geometry or an object with a .geometry property is needed");
         let shape = new PhysicsShape(geom);
-        if(mesh.movementEngine == undefined && dynamic) mesh.movementEngine = new movementEngine(); 
+        if(mesh.movementEngine == undefined && dynamic) mesh.movementEngine = new MovementEngine(); 
         let phObject = new PhysicsObject(mesh,shape);
 
         if(dynamic) this.dynamicObjects.push(phObject);
         else this.staticObjects.push(phObject);
 
-        if(mesh instanceof THREE.Object3D) scene.add(mesh);
-        else if(mesh.addToScene) mesh.addToScene(scene);
+        // if(mesh instanceof THREE.Object3D) scene.add(mesh);
+        // else if(mesh.addToScene) mesh.addToScene(scene);
     }
 
     addDynamicObject(mesh,geometry = null){
@@ -93,7 +93,9 @@ class PhysicsObject{
     constructor(mesh,shape){
         this.mesh = mesh;
         this.shape = shape;
+        this.boundingBox = this.shape.boundingBox.clone().applyMatrix4(this.mesh.matrixWorld);
         if(this.mesh.onCollision) this.onCollision = this.mesh.onCollision.bind(this.mesh);
+        else this.onCollision = () => {};
     }
 
     getFaces(){
@@ -113,7 +115,7 @@ class PhysicsObject{
     }
 
     getBoundingBox(){
-        return this.shape.boundingBox.applyMatrix4(this.mesh.matrixWorld);
+        return this.boundingBox.copy(this.shape.boundingBox).applyMatrix4(this.mesh.matrixWorld);
     }
 
 }
@@ -343,4 +345,5 @@ class SAT {
 
 }
 
-export { PhysicsWorld }
+const world = new PhysicsWorld();
+export { PhysicsWorld, world }

@@ -1,7 +1,7 @@
 import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 import wall1 from '../../asset/textures/wall1.png';
-import { setCollideable } from '../physics/CollisionDetector';
+// import { setCollideable } from '../physics/CollisionDetector';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
@@ -53,18 +53,18 @@ class Staircase extends THREE.Mesh {
         // Adding collision detection
         let collisionGeometry = new THREE.BoxGeometry(width,height,depth);
         // collisionGeometry = new THREE.CylinderGeometry(0.5,0.5,2,32);
-        setCollideable(this,collisionGeometry,
-            (intersections)=>{ // On personal collsion
-                console.log("personal collsion");
-            },
-            (object, distance, intersection)=>{ // On collision with
-                console.log(this.constructor.name+" on collision with "+ object.constructor.name);
-                if(object.constructor && object.constructor.name == "Player"){
-                    let h = this.calcHeight(object.position.x,object.position.z);
-                    object.position.y = 2 + h; // Uncomment here to see effects
-                }
-            }
-        );
+        // setCollideable(this,collisionGeometry,
+        //     (intersections)=>{ // On personal collsion
+        //         console.log("personal collsion");
+        //     },
+        //     (object, distance, intersection)=>{ // On collision with
+        //         console.log(this.constructor.name+" on collision with "+ object.constructor.name);
+        //         if(object.constructor && object.constructor.name == "Player"){
+        //             let h = this.calcHeight(object.position.x,object.position.z);
+        //             object.position.y = 2 + h; // Uncomment here to see effects
+        //         }
+        //     }
+        // );
 
     }
 

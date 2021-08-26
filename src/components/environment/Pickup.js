@@ -6,7 +6,7 @@ import pickup_shield from '../../asset/textures/pickup_shield.png';
 import pickup_ammo from '../../asset/textures/pickup_ammo.png';
 
 import { ObjectPool } from '../Tools/ObjectPool';
-import { setCollideable } from '../physics/CollisionDetector';
+// import { setCollideable } from '../physics/CollisionDetector';
 
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
 const _pickupTextureHealth = loader.load(pickup_health);
@@ -58,14 +58,14 @@ class Pickup extends THREE.Mesh {
 
         // Apply event touching
         this.onTouch = onTouch;
-        setCollideable(this,_pickupGeometry,
-            ()=>{},
-            (object, distance, intersection)=> {
-                if(object.constructor && object.constructor.name == "Player"){
-                    this.onTouch(object, distance, intersection,this);
-                }
-            }
-        );
+        // setCollideable(this,_pickupGeometry,
+        //     ()=>{},
+        //     (object, distance, intersection)=> {
+        //         if(object.constructor && object.constructor.name == "Player"){
+        //             this.onTouch(object, distance, intersection,this);
+        //         }
+        //     }
+        // );
 
         this.rotation.y = 0;
     }

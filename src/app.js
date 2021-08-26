@@ -1,13 +1,14 @@
 import { THREE, scene, clock, renderer, camera } from './components/setup/ThreeSetup';
 
 // Physics
-import { PhysicsBody, PhysicsMaterial, PhysicsShapeThree, world } from './components/physics/PhysicsEngine';
+// import { PhysicsBody, PhysicsMaterial, PhysicsShapeThree, world } from './components/physics/PhysicsEngine';
+import { world } from './components/physics/PhysicsWorld';
 
 // Tools
 import { DefaultGeneralLoadingManager } from './components/Tools/GeneralLoadingManager';
 
 // Player
-import Player from './components/player/Player';
+import Player from './components/player/Player2';
 
 // Enemies
 import Robot from './components/enemies/Robot';
@@ -35,7 +36,6 @@ import { genFloor } from './components/TempFloor';
 import Staircase from './components/environment/Staircase';
 import Door from './components/environment/Door';
 import { HalfCubeGeometry, InclinedSurfaceGeometry } from './components/Tools/CustomGeometries';
-import PhysicalFloor from './components/environment/PhysicalFloor';
 
 // const scene = new THREE.Scene();
 // const clock = new Clock();
@@ -46,8 +46,11 @@ import PhysicalFloor from './components/environment/PhysicalFloor';
 // renderer.setSize(window.innerWidth, window.innerHeight);
 function init(){
     // Player and camera setup
-    let player = new Player(camera, renderer.domElement, [0, 2, 10], [0, 2, 0]);
+    // let player = new Player(camera, renderer.domElement, [0, 2, 10], [0, 2, 0]);
+    let player = new Player(camera, [0, 0, 10], 2, renderer.domElement);
+    player.controls.shouldLock = true;
     scene.add(player);
+    world.addDynamicObject(player);
 
     // Floor(s)
     // scene.add(genFloor(40));
@@ -57,9 +60,9 @@ function init(){
     scene.add(ceiling1);
 
     // Physical floor
-    let pfloor = new PhysicalFloor(0,0,0, 80,80);
-    scene.add(pfloor.mesh);
-    world.addBody(pfloor);
+    let floor = new Floor(0,0,0, 80,80);
+    scene.add(floor);
+    world.addStaticObject(floor);
 
     // Door
     let door = new Door();
@@ -73,12 +76,6 @@ function init(){
     const cust_mesh = new THREE.Mesh(cust_geometry, cust_mat);
     cust_mesh.position.set(0,0,0)
     scene.add(cust_mesh);
-    let cust_body = new PhysicsBody(0,new PhysicsShapeThree(cust_geometry),new PhysicsMaterial(0.5,0.5,0.5));
-    cust_body.position.copy(cust_mesh.position);
-    cust_body.preferBoundingBox = true;
-    cust_body.name = "stairs";
-    cust_body.jumpable = true;
-    world.addBody(cust_body);
 
 
     // top light
@@ -101,10 +98,6 @@ function init(){
     pointLight.shadow.radius = 2;
     scene.add(pointLight);
 
-    // //TODO: DEBUG, just to see the point light
-    // const helper = new THREE.CameraHelper( pointLight.shadow.camera );
-    // scene.add( helper );
-
     // Adding Particle test
     let particles = new ParticleSystem(scene,camera);
     particles.setPosition(30,5,20);
@@ -116,20 +109,10 @@ function init(){
     // Creating cube
     let cube = new THREE.Mesh(cube_geometry, cube_material);
     cube.castShadow = true;
-    cube.position.set(0,4,0);
-    // Creatind physics cube
-    let cubeBody = new PhysicsBody(10,new PhysicsShapeThree(cube_geometry),new PhysicsMaterial(),() => {
-        console.log("COLLISION");
-    });
-    cubeBody.position.copy(cube.position);
-    cubeBody.shape.preferBoundingBox = true;
-    cubeBody.onAfterStep = () => {cubeBody.updateMesh(cube,true,true)}
-    cubeBody.name = "cube";
-    // Adding cube to the scene and world
-    world.addBody(cubeBody);
+    cube.position.set(0,4,0);    
     scene.add(cube);
+
     window.cube = cube;
-    window.cubeBody = cubeBody;
     window.Vector3 = THREE.Vector3;
 
 
@@ -138,6 +121,8 @@ function init(){
     let wall_2 = new Wall(-20,0,0, 40,20,0.5);
     scene.add(wall_1.obj);
     scene.add(wall_2.obj);
+    world.addStaticObject(wall_1.obj);
+    world.addStaticObject(wall_2.obj);
 
     // // Adding pickups to scene
     // let healthPickup = new Pickup(pickup_health,-6,0.5,-6,()=>{});
@@ -161,10 +146,10 @@ function init(){
     // // Adding gas cylinder to scene
     // let gasCylinder = new GasCylinder(gas_top,gas_top,gas_side,6,0,6,0.5,()=>{});
     // scene.add(gasCylinder.obj);
-    let cylinderi = gasCylinderPool.getFreeObject();
-    cylinderi.setPosition(2,0,-6);
-    cylinderi.setRotation(Math.PI);
-    scene.add(cylinderi);
+    let cylinder = gasCylinderPool.getFreeObject();
+    cylinder.setPosition(2,0,-6);
+    cylinder.setRotation(Math.PI);
+    scene.add(cylinder);
 
     // Adding staircase to scene:
     let stair = new Staircase(  10,0,-6,
@@ -189,17 +174,6 @@ function init(){
     
 
     window.player = player;
-    window.exp = new THREE.Vector3(0,0,0);
-    window.sh = () => {
-        exp.copy(player.getWorldDirection()).multiplyScalar(-1000);
-        exp.setY(Math.abs(exp.y));
-        //player.body.linearVelocity.copy(exp);
-        player.body.applyForce(exp.multiplyScalar(100));
-    }
-
-    window.addEventListener("keyup",(e) =>{
-        if(e.key == "e") sh();
-    })
 
     animate = function () {
         renderer.render(scene, camera);
@@ -207,6 +181,8 @@ function init(){
         
         let delta = clock.getDelta();
         delta = 0.02;
+
+        world.step(delta);
     
         player.update(delta);
         
@@ -221,12 +197,10 @@ function init(){
         // Particles
         particles.step(delta);
     
-        world.step(delta);
-    
         // Detect collisions
         // stair.detectCollision(1,true);
         // stair2.detectCollision(1,true);
-        // cylinderi.detectCollision(1,false);
+        // cylinder.detectCollision(1,false);
         // player.detectCollision(1.5,true);
         // pickupHealth1.detectCollision(1,false);
         // pickupShield1.detectCollision(1,false);
