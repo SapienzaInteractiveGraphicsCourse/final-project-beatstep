@@ -10,6 +10,9 @@ const _robotHeight = 3;
 let _robotSize;
 let _robotCollisionGeometry;
 loader.load(robot1, (gltf)=>{
+    gltf.scene.traverse(function(node){
+        if(node.isMesh) node.castShadow = true;
+    });
     _robot1Model = gltf.scene;
     // Scale
     let boundingBox = new THREE.Box3().setFromObject(_robot1Model).getSize();

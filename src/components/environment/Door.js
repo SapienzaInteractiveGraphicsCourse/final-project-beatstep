@@ -10,6 +10,9 @@ const _doorHeight = 5;
 let _doorSize;
 let _doorCollisionGeometry;
 loader.load(door, (gltf)=>{
+    gltf.scene.traverse(function(node){
+        if(node.isMesh) node.castShadow = true;
+    });
     _doorModel = gltf.scene;
     // Scale
     let boundingBox = new THREE.Box3().setFromObject(_doorModel).getSize();

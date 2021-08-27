@@ -38,6 +38,8 @@ class Staircase extends THREE.Mesh {
         }
         let singleGeometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
         super(singleGeometry,material);
+        
+        this.castShadow = true;
 
         this.collisionGeometry = new HalfCubeGeometry(width/2,height/2,depth/2);
 

@@ -57,6 +57,7 @@ class GasCylinder extends THREE.Mesh{
         // this.body = new PhysicsBody(5,new PhysicsShapeThree(_gascylinderGeometry),new PhysicsMaterial(1,0.5));
 
         this.receiveShadow = true;
+        this.castShadow = true;
 
         this.explosionPower = 20;
         this.health = 100; // TODO: when 0, explode onCollision
