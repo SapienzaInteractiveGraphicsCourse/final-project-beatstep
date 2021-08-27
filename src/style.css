@@ -68,3 +68,19 @@
 .stat_bar.red .sub_bar{
     background-color: rgb(250, 134, 134);
 }
+
+/* Tip text position */
+.tip{
+    position: absolute;
+    bottom: 2%;
+    left: 50%;
+    transform: translate(-50%,0);
+
+    font-size: 2vw;
+    -webkit-text-fill-color: white;
+	-webkit-text-stroke-width: 0.04vw;
+	-webkit-text-stroke-color: black;
+}
+.hidden{
+    display: none;
+}
