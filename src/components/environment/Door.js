@@ -43,15 +43,15 @@ class Door {
         // We need one mixer for each animated object in the scene
         this.mixer = new THREE.AnimationMixer(this.group);
         // Set final position when animation ends
-        this.mixer.addEventListener('finished', ((e) => {
+        this.mixer.addEventListener('finished', (e) => {
             e.action.stop();
             for(let objPosition of e.action.finalCoords.positions){
-                this[objPosition.obj].position.set(...objPosition.value.toArray())
+                objPosition.obj.position.set(...objPosition.value.toArray());
             }
             for(let objRotation of e.action.finalCoords.rotations){
-                this[objRotation.obj].quaternion.set(...objRotation.value.toArray())
+                objRotation.obj.quaternion.set(...objRotation.value.toArray());
             }
-        }).bind(this));
+        });
 
         this.animation_openDoors = this.createOpenAnimation();
         this.animation_closeDoors = this.createCloseAnimation();
@@ -138,8 +138,8 @@ class Door {
         animation.clampWhenFinished = false;
         animation.finalCoords = {
             positions: [
-                {obj:"door_r",value:door_r_p2},
-                {obj:"door_l",value:door_l_p2}
+                {obj:this.door_r,value:door_r_p2},
+                {obj:this.door_l,value:door_l_p2}
             ],
             rotations: [],
         };
@@ -178,8 +178,8 @@ class Door {
         animation.clampWhenFinished = false;
         animation.finalCoords = {
             positions: [
-                {obj:"door_r",value:door_r_p2},
-                {obj:"door_l",value:door_l_p2}
+                {obj:this.door_r,value:door_r_p2},
+                {obj:this.door_l,value:door_l_p2}
             ],
             rotations: [],
         };
