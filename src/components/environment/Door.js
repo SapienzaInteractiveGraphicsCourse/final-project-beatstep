@@ -44,13 +44,19 @@ class Door {
         this.mixer = new THREE.AnimationMixer(this.group);
         // Set final position when animation ends
         this.mixer.addEventListener('finished', (e) => {
-            e.action.stop();
-            for(let objPosition of e.action.finalCoords.positions){
-                objPosition.obj.position.set(...objPosition.value.toArray());
+            // checking if finalCoords exists
+            if(e.action.finalCoords){
+                e.action.stop();
+                if(e.action.finalCoords.positions)
+                    for(let objPosition of e.action.finalCoords.positions){
+                        objPosition.obj.position.set(...objPosition.value.toArray());
+                    }
+                if(e.action.finalCoords.rotations)
+                    for(let objRotation of e.action.finalCoords.rotations){
+                        objRotation.obj.quaternion.set(...objRotation.value.toArray());
+                    }
             }
-            for(let objRotation of e.action.finalCoords.rotations){
-                objRotation.obj.quaternion.set(...objRotation.value.toArray());
-            }
+
         });
 
         this.animation_openDoors = this.createOpenAnimation();
