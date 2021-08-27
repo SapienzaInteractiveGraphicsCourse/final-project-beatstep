@@ -36,6 +36,7 @@ import { genFloor } from './components/TempFloor';
 import Staircase from './components/environment/Staircase';
 import Door from './components/environment/Door';
 import { HalfCubeGeometry, InclinedSurfaceGeometry } from './components/Tools/CustomGeometries';
+import GasCylinder from './components/environment/GasCylinder';
 
 console.watch = function (oObj, sProp, callback) {
     var sPrivateProp = "$_" + sProp + "_$"; // to minimize the name clash risk
@@ -152,12 +153,6 @@ function init(){
     pointLight.shadow.radius = 2;
     scene.add(pointLight);
 
-    // Adding Particle test
-    let particles = new ParticleSystem(scene,camera);
-    particles.setPosition(30,5,20);
-    particles.setLife(0.2);    
-
-
     // Adding walls to scene
     let wall_1 = new Wall(0,0,-20, 40,20);
     let wall_2 = new Wall(-20,0,0, 40,20,0.5);
@@ -191,9 +186,7 @@ function init(){
     // // Adding gas cylinder to scene
     // let gasCylinder = new GasCylinder(gas_top,gas_top,gas_side,6,0,6,0.5,()=>{});
     // scene.add(gasCylinder.obj);
-    let cylinder = gasCylinderPool.getFreeObject();
-    cylinder.setPosition(2,0,-6);
-    cylinder.setRotation(Math.PI);
+    let cylinder = new GasCylinder(2,0,-6, Math.PI);
     scene.add(cylinder);
     world.addStaticObject(cylinder);
 
@@ -241,10 +234,7 @@ function init(){
         pickupShieldPool.update(delta);
     
         // Cylinder
-        gasCylinderPool.update(delta);
-    
-        // Particles
-        particles.step(delta);
+        cylinder.update(delta);
     
         // Detect collisions
         // stair.detectCollision(1,true);

@@ -5,7 +5,8 @@ import gas_top_b from '../../asset/textures/gas_top_b.png';
 import gas_side from '../../asset/textures/gas_side.png';
 import gas_side_b from '../../asset/textures/gas_side_b.png';
 import { ObjectPool } from '../Tools/ObjectPool';
-// import { PhysicsBody, PhysicsShapeThree, PhysicsMaterial } from '../physics/PhysicsEngine';
+import ParticleSystem from './ParticleSystem';
+import { scene, camera } from '../setup/ThreeSetup';
 
 
 // import { setCollideable } from '../physics/CollisionDetector';
@@ -51,7 +52,7 @@ const  _gascylinderMaterials = [
 ];
 
 class GasCylinder extends THREE.Mesh{
-    constructor(){
+    constructor(x,y,z, rotation = Math.PI){
         super(_gascylinderGeometry, _gascylinderMaterials);
         // this.body = new PhysicsBody(5,new PhysicsShapeThree(_gascylinderGeometry),new PhysicsMaterial(1,0.5));
 
@@ -60,23 +61,18 @@ class GasCylinder extends THREE.Mesh{
         this.explosionPower = 20;
         this.health = 100; // TODO: when 0, explode onCollision
 
-        // Adding collision detection
-        // setCollideable(this,_gascylinderGeometry,
-        //     (intersections)=>{ // On personal collsion
-        //         console.log("personal collsion");
-        //     },
-        //     (object, distance, intersection)=>{ // On collision with
-        //         console.log(this.constructor.name+" on collision with "+ object.constructor.name);
-        //         if(object.constructor.name == "Player"){
-        //             // Make physical
-        //         }
-        //     }
-        // );
+        this._explosionParticles = null;
+
+        this.setPosition(x,y,z);
+        this.setRotation(rotation);
     }
 
     update(delta){
         // TODO
         // this.body.updateMesh(this,true,false);
+        if(this._explosionParticles !== null){
+            this._explosionParticles.step(delta);
+        }
     }
 
     setPosition(x,y,z){
@@ -91,16 +87,28 @@ class GasCylinder extends THREE.Mesh{
         
     }
 
+    explode(){
+        if(this._explosionParticles !== null) return;
+        // Disappear
+        this.removeFromPhysicsWorld();
+        this.removeFromParent();
+        // Adding Particles
+        this._explosionParticles = new ParticleSystem(scene,camera, 0.6, ()=>{
+            this._explosionParticles = null;
+        });
+        this._explosionParticles.setPosition(this.position.x,this.position.y,this.position.z);
+    }
+
     onCollision(collisionResult,obj,delta){
 
         //collisionResult.normal.multiplyScalar(-1);
         collisionResult.normal.y = 1;
         collisionResult.normal.multiplyScalar(this.explosionPower);
         obj.movementEngine.velocity.copy(collisionResult.normal);
-        console.log("EXPLOSION VELOCITY: " + obj.movementEngine.velocity.toArray())
-        this.removeFromPhysicsWorld();
-        this.removeFromParent();
+        console.log("EXPLOSION VELOCITY: " + obj.movementEngine.velocity.toArray());
 
+        this.explode();
+        
         console.watch(obj.movementEngine.velocity,"z",function(velo,newZ){
             if(newZ < -8){
                 console.log("VELOCITY.Z being changed in " + newZ);
@@ -111,6 +119,6 @@ class GasCylinder extends THREE.Mesh{
 
 }
 
-const gasCylinderPool = new ObjectPool(GasCylinder,5);
+// const gasCylinderPool = new ObjectPool(GasCylinder,5);
 
-export default gasCylinderPool;
+export default GasCylinder;

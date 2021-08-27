@@ -72,7 +72,10 @@ class ParticleSystem {
      * @param {*} parent the parent containing all the points (can be scene)
      * @param {*} camera the camera object
      */
-    constructor(parent, camera) {
+    constructor(parent, camera, duration = null, onFinish = ()=>{}) {
+
+        this._duration = duration;
+        this._onFinish = onFinish;
 
         // Adding uniforms values to Vertex/Fragment shaders
         const uniforms = {
@@ -130,9 +133,9 @@ class ParticleSystem {
         this._sizeSpline.addPoint(1.0, 1.0);
 
         this._generalPosition = [0,0,0];
-        this._generalVelocity = [0,15,0];
-        this._generalRadious = [2,2,2];
-        this._generalLife = 10;
+        this._generalVelocity = [0,2,0];
+        this._generalRadious = [3,3,3];
+        this._generalLife = 0.6;
 
         this.updateGeometry();
     }
@@ -242,9 +245,26 @@ class ParticleSystem {
     }
 
     step(timeElapsed) {
-        this.addParticles(timeElapsed);
-        this.updateParticles(timeElapsed);
-        this.updateGeometry();
+        if(this._duration !== null){
+            if(this._duration > 0){ 
+                this._duration -= timeElapsed;
+                this.addParticles(timeElapsed);
+            }
+            else{
+                setTimeout(()=>{
+                    this._points.removeFromParent.bind(this._points);
+                    this._onFinish();
+                },this._generalLife*1000);
+            }
+            this.updateParticles(timeElapsed);
+            this.updateGeometry();
+        }
+        else{
+            this.addParticles(timeElapsed);
+            this.updateParticles(timeElapsed);
+            this.updateGeometry();
+        }
+        
     }
 
     setPosition(x,y,z){
