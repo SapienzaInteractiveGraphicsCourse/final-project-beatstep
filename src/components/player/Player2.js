@@ -101,7 +101,7 @@ class Player extends Object3D{
         this.canJump = false;
 
         this.movementEngine = new MovementEngine();
-        this.geometry = new THREE.CylinderGeometry(3,3,height,32);
+        this.geometry = new THREE.CylinderGeometry(1,1,height,16);
         
 
         this.setUpControls(angularSensitivity);
@@ -270,14 +270,16 @@ class Player extends Object3D{
     }
 
     update(deltaTime){
-        let xDir = Number(this.controls.shouldMoveRight) - Number(this.controls.shouldMoveLeft);
+        let xDir = - Number(this.controls.shouldMoveRight) + Number(this.controls.shouldMoveLeft);
         let zDir = - Number(this.controls.shouldMoveForward) + Number(this.controls.shouldMoveBackward);
 
         if(xDir || zDir){
             
             // this.matrixWorld.extractBasis(_Xvector,_Yvector,_Zvector);
-            _xAxis.setFromMatrixColumn( this.camera.matrixWorld, 0).multiplyScalar(xDir).normalize();
-		    _zAxis.setFromMatrixColumn( this.camera.matrixWorld, 2).multiplyScalar(zDir).normalize();
+            _xAxis.setFromMatrixColumn( this.camera.matrixWorld, 2).multiplyScalar(xDir).normalize();
+		    _zAxis.setFromMatrixColumn( this.camera.matrixWorld, 0).multiplyScalar(zDir).normalize();
+            _xAxis.cross(this.up);
+            _zAxis.cross(this.up);
             let newVel = _xAxis.add(_zAxis).normalize().multiplyScalar(this.speed).setY(this.movementEngine.velocity.y);
 
             this.movementEngine.velocity.copy(newVel);

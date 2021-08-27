@@ -92,10 +92,42 @@ function init(){
     // Custom geometry test
     const cust_mat = new THREE.MeshNormalMaterial();
     cust_mat.side = THREE.DoubleSide;
-    let cust_geometry = new InclinedSurfaceGeometry(2,4,8);
+    let cust_geometry = new InclinedSurfaceGeometry(2,8,16);
     const cust_mesh = new THREE.Mesh(cust_geometry, cust_mat);
     cust_mesh.position.set(0,0,0)
     scene.add(cust_mesh);
+    cust_mesh.onCollision = function(collisionResult,obj,delta){
+
+        this.friction = 0.8;
+        // Move back the player if he penetrated into the wall
+        let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
+        obj.position.add(backVec);
+
+        // Don't allow the player to move inside the wall
+        let dotDisplacement = collisionResult.normal.dot(obj.movementEngine.displacement);
+        let dotVelocity = collisionResult.normal.dot(obj.movementEngine.velocity);
+        if(dotVelocity < 0){
+            let backVecDisp = collisionResult.normal.clone().multiplyScalar(dotDisplacement);
+            obj.movementEngine.displacement.sub(backVecDisp);
+            
+            let backVecVel = collisionResult.normal.clone().multiplyScalar(dotVelocity);
+            obj.movementEngine.velocity.sub(backVecVel);
+
+            if(obj.movementEngine.velocity.length() < 1){
+                // Static friction
+                obj.movementEngine.velocity.set(0,0,0);
+                obj.movementEngine.displacement.set(0,0,0);
+            }
+            else{
+                let friction = obj.movementEngine.velocity.clone().multiplyScalar(this.friction);
+                obj.movementEngine.velocity.sub(friction);
+            }
+            
+        }
+
+    }
+    world.addStaticObject(cust_mesh);
+
 
 
     // top light

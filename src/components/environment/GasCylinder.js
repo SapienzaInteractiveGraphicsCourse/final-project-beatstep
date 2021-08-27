@@ -93,7 +93,7 @@ class GasCylinder extends THREE.Mesh{
 
     onCollision(collisionResult,obj,delta){
 
-        collisionResult.normal.multiplyScalar(-1);
+        //collisionResult.normal.multiplyScalar(-1);
         collisionResult.normal.y = 1;
         collisionResult.normal.multiplyScalar(this.explosionPower);
         obj.movementEngine.velocity.copy(collisionResult.normal);

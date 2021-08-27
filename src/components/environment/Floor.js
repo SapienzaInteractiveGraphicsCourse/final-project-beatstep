@@ -42,9 +42,6 @@ class Floor extends THREE.Mesh{
     } 
 
     onCollision(collisionResult,obj,delta){
-        // console.log("FLOOR collision with " + obj.constructor.name);
-        // console.log("Player y: " + this.position.y);
-        // console.log("Player velocity: " + obj.movementEngine.velocity.toArray().toString());
         if(obj.feetPosition.y <= this.position.y){
             obj.feetPosition.y = this.position.y;
             // Faking the normal reaction
