@@ -7,11 +7,12 @@ import light_emissive from '../../asset/models/floorLight/LUCE_emissive.png';
 
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
 const _floorLightTextureEmissive = loader.load(light_emissive);
-_floorLightTextureEmissive.flipY=false
+_floorLightTextureEmissive.flipY=false;
 
 const loaderGLTF = DefaultGeneralLoadingManager.getHandler("gltf");
 let _floorLightModel;
 const _floorLightHeight = 4;
+const _floorLightEmissiveIntensity = 1.5;
 let _floorLightSize;
 loaderGLTF.load(light, (gltf)=>{
     _floorLightModel = gltf.scene;
@@ -26,17 +27,27 @@ loaderGLTF.load(light, (gltf)=>{
         if (child.isMesh){
             child.material.emissive = new THREE.Color( 0xffffff );
             child.material.emissiveMap = _floorLightTextureEmissive;
-            child.material.emissiveIntensity = 1.5;
+            child.material.emissiveIntensity = _floorLightEmissiveIntensity;
             child.castShadow = true;
         } 
     });
 });
 
+// Geometry collision
+const _floorLightRadius = 0.5;
+
+const _cylinderGeometry = new THREE.CylinderGeometry(_floorLightRadius,
+                                                    _floorLightRadius,
+                                                    _floorLightHeight,32);
+
 class FloorLight {
     constructor(x,y,z, rotation = 0, distance = 10, intensity = 0.6, color = 0xFFFFFF){
         this.group = _floorLightModel.clone(true);
+        this.group.geometry = _cylinderGeometry;
 
+        this._intensity = intensity;
         this.light = new THREE.SpotLight(color, intensity, distance);
+        
         this.lightPosition = {
             x: x,
             y: y + _floorLightSize.y - _floorLightSize.y/20,
@@ -51,6 +62,56 @@ class FloorLight {
         this.size = new THREE.Box3().setFromObject(this.group).getSize();
         this.setPosition(x,y,z);
         this.setRotation(rotation);
+        
+        // Interaction text
+        this._tipLight = document.createElement("p");
+        this._tipLight.innerText = "Press E to toggle the light";
+        this._tipLight.classList.add("tip");
+        this._tipLight.classList.add("hidden");
+        document.body.appendChild(this._tipLight);
+
+        // Interaction + Collision
+        this._canBeInteracted = false;
+        document.addEventListener("keydown", ((event) => {
+            if(this._canBeInteracted && event.key.toLowerCase() === "e") { // press e
+                this.toggleLight();
+            }
+        }).bind(this));
+        
+        this.group.onCollision = ((collisionResult,obj,delta)=>{
+
+            let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
+            // obj.position.add(backVec);
+
+            // Don't allow the player to move inside the wall
+            let dot = collisionResult.normal.dot(obj.movementEngine.displacement);
+            if(dot < 0){
+                backVec = collisionResult.normal.multiplyScalar(dot);
+                obj.movementEngine.displacement.sub(backVec);
+            }
+            
+            this._tipLight.classList.remove("hidden");
+            if(obj.constructor.name === "Player") this._canBeInteracted = true;
+
+        }).bind(this);
+
+    }
+
+    toggleLight(){
+        if(this.group.children[0].material.emissiveIntensity == 0){
+            // light is off, turn on
+            this.light.intensity = this._intensity;
+            this.group.children[0].material.emissiveIntensity = _floorLightEmissiveIntensity;
+        }
+        else {
+            this.light.intensity = 0;
+            this.group.children[0].material.emissiveIntensity = 0;
+        }
+    }
+
+    update(delta){
+        this._tipLight.classList.add("hidden");
+        this._canBeInteracted = false;
     }
 
     setPosition(x,y,z){

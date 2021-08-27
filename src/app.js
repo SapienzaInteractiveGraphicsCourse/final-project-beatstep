@@ -105,6 +105,8 @@ function init(){
     // floor light
     let floorLight = new FloorLight(30,0,0, -Math.PI/2);
     floorLight.addToScene(scene);
+    world.addStaticObject(floorLight.group);
+    
 
     // Lighting
     const color = 0xFFFFFF;
@@ -194,6 +196,8 @@ function init(){
         
         let delta = clock.getDelta();
         delta = 0.02;
+
+        floorLight.update(delta);
 
         world.step(delta);
     
