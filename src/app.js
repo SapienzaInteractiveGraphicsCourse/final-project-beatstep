@@ -38,25 +38,6 @@ import Door from './components/environment/Door';
 import { HalfCubeGeometry, InclinedSurfaceGeometry } from './components/Tools/CustomGeometries';
 import GasCylinder from './components/environment/GasCylinder';
 
-console.watch = function (oObj, sProp, callback) {
-    var sPrivateProp = "$_" + sProp + "_$"; // to minimize the name clash risk
-    oObj[sPrivateProp] = oObj[sProp];
-
-    // overwrite with accessor
-    Object.defineProperty(oObj, sProp, {
-        get: function () {
-            return oObj[sPrivateProp];
-        },
-
-        set: function (value) {
-            callback(oObj[sPrivateProp], value); // sets breakpoint
-            oObj[sPrivateProp] = value;
-        }
-    });
-
-    console.log("setting a watch on " + sProp);
-}
-
 // const scene = new THREE.Scene();
 // const clock = new Clock();
 

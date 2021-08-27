@@ -91,18 +91,30 @@ class Pickup extends THREE.Mesh {
 
 const pickupHealthPool = new ObjectPool(Pickup,5,["health",(player, pickup)=>{
     console.log("Health pickup!");
-    pickup.removeFromPhysicsWorld();
-    pickup.removeFromParent();
+    let hInc = 10;
+    if(player.health < player.topHealth){
+        player.health += hInc;
+        pickup.removeFromPhysicsWorld();
+        pickup.removeFromParent();
+    }
 }]);
 const pickupAmmoPool = new ObjectPool(Pickup,5,["ammo",(player, pickup)=>{
     console.log("Ammo pickup!");
-    pickup.removeFromPhysicsWorld();
-    pickup.removeFromParent();
+    let aInc = 10;
+    if(player.ammo < player.topAmmo){
+        player.ammo += aInc;
+        pickup.removeFromPhysicsWorld();
+        pickup.removeFromParent();
+    }
 }]);
 const pickupShieldPool = new ObjectPool(Pickup,5,["shield",(player, pickup)=>{
     console.log("Shield pickup!");
-    pickup.removeFromPhysicsWorld();
-    pickup.removeFromParent();
+    let sInc = 10;
+    if(player.shield < player.topShield){
+        player.shield += sInc;
+        pickup.removeFromPhysicsWorld();
+        pickup.removeFromParent();
+    }
 }]);
 
 export { pickupHealthPool, pickupAmmoPool, pickupShieldPool };

@@ -78,23 +78,35 @@ class Player extends Object3D{
         let _ammo = 1000;
         
         this.topHealth = 100;
-        this.topShield = 0;
+        this.topShield = 50;
         this.topAmmo = 1000;
         
         Object.defineProperties(this,{
             health: {
                 get: function() {return _health},
-                set: function(d) {_health = d; this.hud.healthBar.setPercentage(_health/(this.topHealth*100))}
+                set: function(d) {_health = Math.min(d,this.topHealth); this.hud.healthBar.setPercentage(_health/this.topHealth*100)}
             },
             shield: {
                 get: function() {return _shield},
-                set: function(d) {_shield = d; this.hud.shieldBar.setPercentage(_shield/(this.topShield*100))}
+                set: function(d) {_shield = Math.min(d,this.topShield); this.hud.shieldBar.setPercentage(_shield/this.topShield*100)}
             },
             ammo: {
                 get: function() {return _ammo},
-                set: function(d) {_ammo = d; this.hud.ammoBar.setPercentage(_ammo/(this.topAmmo*100))}
+                set: function(d) {_ammo = Math.min(d,this.topAmmo); this.hud.ammoBar.setPercentage(_ammo/this.topAmmo*100)}
             }
         });
+
+        this.dealDamage = function(n){
+            let s = this.shield - n;
+            let h = 0;
+            if(s < 0){
+                h = this.health + s;
+                s = 0;
+                if(h < 0) h = 0;
+            }
+            this.shield = s;
+            this.health = h;
+        }
 
         this.speed = 8;
         this.jumpSpeed = 10;
@@ -106,6 +118,9 @@ class Player extends Object3D{
 
         this.setUpControls(angularSensitivity);
         this.hud = new HUD(this,camera);
+        this.hud.healthBar.setPercentage(_health/this.topHealth*100);
+        this.hud.shieldBar.setPercentage(_shield/this.topShield*100);
+        this.hud.ammoBar.setPercentage(_ammo/this.topAmmo*100);
 
         this.rifle = rifleModel.mesh;
         this.setUpRifle();

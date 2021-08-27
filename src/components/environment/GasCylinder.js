@@ -105,15 +105,10 @@ class GasCylinder extends THREE.Mesh{
         collisionResult.normal.y = 1;
         collisionResult.normal.multiplyScalar(this.explosionPower);
         obj.movementEngine.velocity.copy(collisionResult.normal);
-        console.log("EXPLOSION VELOCITY: " + obj.movementEngine.velocity.toArray());
 
         this.explode();
-        
-        console.watch(obj.movementEngine.velocity,"z",function(velo,newZ){
-            if(newZ < -8){
-                console.log("VELOCITY.Z being changed in " + newZ);
-            }
-        });
+
+        if(obj.dealDamage) obj.dealDamage(30);
 
     }
 
