@@ -42,6 +42,16 @@ class Door {
 
         // We need one mixer for each animated object in the scene
         this.mixer = new THREE.AnimationMixer(this.group);
+        // Set final position when animation ends
+        this.mixer.addEventListener('finished', ((e) => {
+            e.action.stop();
+            for(let objPosition of e.action.finalCoords.positions){
+                this[objPosition.obj].position.set(...objPosition.value.toArray())
+            }
+            for(let objRotation of e.action.finalCoords.rotations){
+                this[objRotation.obj].quaternion.set(...objRotation.value.toArray())
+            }
+        }).bind(this));
 
         this.animation_openDoors = this.createOpenAnimation();
         this.animation_closeDoors = this.createCloseAnimation();
@@ -99,8 +109,8 @@ class Door {
     }
 
     createOpenAnimation(){
-        let door_r_p1 = this.door_r.position;
-        let door_l_p1 = this.door_l.position;
+        let door_r_p1 = this.door_r.position.clone();
+        let door_l_p1 = this.door_l.position.clone();
         
         let door_r_p2 = this.incrementEuler(door_r_p1, -0.8, 0,0);
         let door_l_p2 = this.incrementEuler(door_l_p1, 0.8, 0,0);
@@ -125,15 +135,22 @@ class Door {
         let animation = this.mixer.clipAction(clip);
         animation.loop = THREE.LoopOnce;
         animation.enabled = false;
-        animation.clampWhenFinished = true;
+        animation.clampWhenFinished = false;
+        animation.finalCoords = {
+            positions: [
+                {obj:"door_r",value:door_r_p2},
+                {obj:"door_l",value:door_l_p2}
+            ],
+            rotations: [],
+        };
 
         return animation;
 
     }
 
     createCloseAnimation(){
-        let door_r_p2 = this.door_r.position;
-        let door_l_p2 = this.door_l.position;
+        let door_r_p2 = this.door_r.position.clone();
+        let door_l_p2 = this.door_l.position.clone();
 
         let door_r_p1 = this.incrementEuler(door_r_p2, -0.8, 0,0);
         let door_l_p1 = this.incrementEuler(door_l_p2, 0.8, 0,0);
@@ -158,7 +175,14 @@ class Door {
         let animation = this.mixer.clipAction(clip);
         animation.loop = THREE.LoopOnce;
         animation.enabled = false;
-        animation.clampWhenFinished = true;
+        animation.clampWhenFinished = false;
+        animation.finalCoords = {
+            positions: [
+                {obj:"door_r",value:door_r_p2},
+                {obj:"door_l",value:door_l_p2}
+            ],
+            rotations: [],
+        };
 
         return animation;
 
