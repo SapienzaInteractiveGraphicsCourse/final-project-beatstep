@@ -3,6 +3,7 @@ import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 import wall1 from '../../asset/textures/wall1.png';
 // import { setCollideable } from '../physics/CollisionDetector';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { HalfCubeGeometry, InclinedSurfaceGeometry } from '../Tools/CustomGeometries';
 
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
 const _staircaseTexture = loader.load(wall1);
@@ -38,6 +39,8 @@ class Staircase extends THREE.Mesh {
         let singleGeometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
         super(singleGeometry,material);
 
+        this.collisionGeometry = new HalfCubeGeometry(width/2,height/2,depth/2);
+
         this.width = width;
         this.height = height;
         this.depth = depth;
@@ -46,25 +49,38 @@ class Staircase extends THREE.Mesh {
         this.setPosition(x,y,z);
 
         // Apply Rotation
-        this.rotation.y = (Math.PI / 2) * direction;
-        this.direction = direction;
-        
+        this.setDirection(direction);
 
-        // Adding collision detection
-        let collisionGeometry = new THREE.BoxGeometry(width,height,depth);
-        // collisionGeometry = new THREE.CylinderGeometry(0.5,0.5,2,32);
-        // setCollideable(this,collisionGeometry,
-        //     (intersections)=>{ // On personal collsion
-        //         console.log("personal collsion");
-        //     },
-        //     (object, distance, intersection)=>{ // On collision with
-        //         console.log(this.constructor.name+" on collision with "+ object.constructor.name);
-        //         if(object.constructor && object.constructor.name == "Player"){
-        //             let h = this.calcHeight(object.position.x,object.position.z);
-        //             object.position.y = 2 + h; // Uncomment here to see effects
-        //         }
-        //     }
-        // );
+        this.friction = 0.8;
+        
+        this.onCollision = ((collisionResult,obj,delta)=>{
+            // Move back the player if he penetrated into the wall
+            let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
+            obj.position.add(backVec);
+    
+            // Don't allow the player to move inside the wall
+            let dotDisplacement = collisionResult.normal.dot(obj.movementEngine.displacement);
+            let dotVelocity = collisionResult.normal.dot(obj.movementEngine.velocity);
+            if(dotVelocity < 0){
+                let backVecDisp = collisionResult.normal.clone().multiplyScalar(dotDisplacement);
+                obj.movementEngine.displacement.sub(backVecDisp);
+                
+                let backVecVel = collisionResult.normal.clone().multiplyScalar(dotVelocity);
+                obj.movementEngine.velocity.sub(backVecVel);
+    
+                if(obj.movementEngine.velocity.length() < 1){
+                    // Static friction
+                    obj.movementEngine.velocity.set(0,0,0);
+                    obj.movementEngine.displacement.set(0,0,0);
+                }
+                else{
+                    let friction = obj.movementEngine.velocity.clone().multiplyScalar(this.friction);
+                    obj.movementEngine.velocity.sub(friction);
+                }
+                
+            }
+    
+        }).bind(this);
 
     }
 
@@ -74,6 +90,7 @@ class Staircase extends THREE.Mesh {
 
     setDirection(direction){
         this.rotation.y = (Math.PI / 2) * direction;
+        this.collisionGeometry.rotateY((Math.PI / 2) * direction);
         this.direction = direction;
     }
 

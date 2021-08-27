@@ -6,7 +6,7 @@ import robot1 from '../../asset/models/robot1/robot_1.glb';
 
 const loader = DefaultGeneralLoadingManager.getHandler("gltf");
 let _robot1Model;
-const _robotHeight = 2;
+const _robotHeight = 3;
 let _robotSize;
 let _robotCollisionGeometry;
 loader.load(robot1, (gltf)=>{
