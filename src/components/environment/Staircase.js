@@ -38,10 +38,11 @@ class Staircase extends THREE.Mesh {
         }
         let singleGeometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
         super(singleGeometry,material);
-        
+
         this.castShadow = true;
 
         this.collisionGeometry = new HalfCubeGeometry(width/2,height/2,depth/2);
+        this.collisionGeometry.rotateY(Math.PI);
 
         this.width = width;
         this.height = height;
@@ -92,7 +93,6 @@ class Staircase extends THREE.Mesh {
 
     setDirection(direction){
         this.rotation.y = (Math.PI / 2) * direction;
-        this.collisionGeometry.rotateY((Math.PI / 2) * direction);
         this.direction = direction;
     }
 
