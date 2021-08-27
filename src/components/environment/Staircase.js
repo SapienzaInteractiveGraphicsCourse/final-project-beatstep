@@ -1,12 +1,12 @@
 import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
-import wall1 from '../../asset/textures/wall1.png';
+import texture from '../../asset/textures/floor1.jpg';
 // import { setCollideable } from '../physics/CollisionDetector';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { HalfCubeGeometry, InclinedSurfaceGeometry } from '../Tools/CustomGeometries';
 
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
-const _staircaseTexture = loader.load(wall1);
+const _staircaseTexture = loader.load(texture);
 // Apply repetition
 _staircaseTexture.wrapS = THREE.RepeatWrapping;
 _staircaseTexture.wrapT = THREE.RepeatWrapping;
