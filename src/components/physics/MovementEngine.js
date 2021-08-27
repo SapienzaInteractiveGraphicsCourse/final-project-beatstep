@@ -30,7 +30,7 @@ class MovementEngine {
     update(deltaT){
         let deltaV = this._tempVec.copy(this.acceleration).addY(this.gravity).multiplyScalar(deltaT);
         this.acceleration.set(0,0,0);
-        this.velocity.add(deltaV);
+        this.velocity.add(deltaV).fixZeroPrecision();
         this.displacement.copy(this.velocity).multiplyScalar(deltaT);
     }
 

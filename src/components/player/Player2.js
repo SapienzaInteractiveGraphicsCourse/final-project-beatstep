@@ -48,7 +48,7 @@ const _zAxis = new Vector3();
 
 class Player extends Object3D{
 
-    constructor(camera, position = [0,0,0], height = 2, canvas = null, {angularSensitivity} = {angularSensitivity: null}){
+    constructor(camera, position = [0,0,0], height = 1, canvas = null, {angularSensitivity} = {angularSensitivity: null}){
         super();
         this.position.set(position[0],position[1]+(height/2),position[2]);
         this.feetPosition = new Proxy(this.position,{
@@ -69,7 +69,7 @@ class Player extends Object3D{
         this.height = height;
         this.camera = camera;
         this.canvas = canvas || document.querySelector("canvas");
-        this.camera.position.set(0,height,-1);
+        this.camera.position.set(0,height,-0.2);
         this.camera.quaternion.copy(this.quaternion);
         this.add(camera);
 
@@ -102,6 +102,7 @@ class Player extends Object3D{
 
         this.movementEngine = new MovementEngine();
         this.geometry = new THREE.CylinderGeometry(3,3,height,32);
+        
 
         this.setUpControls(angularSensitivity);
         this.hud = new HUD(this,camera);
@@ -142,12 +143,12 @@ class Player extends Object3D{
             const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
             const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
-            _euler.setFromQuaternion(scope.quaternion);
+            _euler.setFromQuaternion(scope.camera.quaternion);
             _euler.y -= movementX * scope.controls.angularSensitivity;
             _euler.x -= movementY * scope.controls.angularSensitivity;
             _euler.x = Math.max(_PI_2 - scope.controls.maxPolarAngle, Math.min(_PI_2 - scope.controls.minPolarAngle, _euler.x));
 
-            scope.quaternion.setFromEuler(_euler);
+            scope.camera.quaternion.setFromEuler(_euler);
 
             scope.controls.dispatchEvent(scope.controls.changeEvent);
 
@@ -226,7 +227,7 @@ class Player extends Object3D{
         let initAngle = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.05, Math.PI/14, 0, "XYZ"));
         let shootAngle = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.05+(Math.PI/12), Math.PI/14, 0, "XYZ"));
 
-        rifle.position.set(0.3, this.height-0.25, -1);
+        rifle.position.set(0.3, -0.25, -1);
         rifle.quaternion.set(initAngle.x, initAngle.y, initAngle.z, initAngle.w);
 
         // Load animations
@@ -265,7 +266,7 @@ class Player extends Object3D{
         // let box = rifle.geometry.boundingBox;
         // rifle.add(this.bulletEmitter);
         // this.bulletEmitter.position.set(0,box.max.y,box.min.z);
-        this.add(rifle);
+        this.camera.add(rifle);
     }
 
     update(deltaTime){
@@ -275,8 +276,8 @@ class Player extends Object3D{
         if(xDir || zDir){
             
             // this.matrixWorld.extractBasis(_Xvector,_Yvector,_Zvector);
-            _xAxis.setFromMatrixColumn( this.matrixWorld, 0).multiplyScalar(xDir).normalize();
-		    _zAxis.setFromMatrixColumn( this.matrixWorld, 2).multiplyScalar(zDir).normalize();
+            _xAxis.setFromMatrixColumn( this.camera.matrixWorld, 0).multiplyScalar(xDir).normalize();
+		    _zAxis.setFromMatrixColumn( this.camera.matrixWorld, 2).multiplyScalar(zDir).normalize();
             let newVel = _xAxis.add(_zAxis).normalize().multiplyScalar(this.speed).setY(this.movementEngine.velocity.y);
 
             this.movementEngine.velocity.copy(newVel);

@@ -25,11 +25,17 @@ class PhysicsWorld {
         let geom = geometry || mesh.geometry;
         if(!geom) throw new Error("A geometry or an object with a .geometry property is needed");
         let shape = new PhysicsShape(geom);
-        if(mesh.movementEngine == undefined && dynamic) mesh.movementEngine = new MovementEngine(); 
+        if(mesh.movementEngine == undefined) mesh.movementEngine = new MovementEngine(); 
         let phObject = new PhysicsObject(mesh,shape);
+        mesh.movementEngine.phObject = phObject;
 
         if(dynamic) this.dynamicObjects.push(phObject);
         else this.staticObjects.push(phObject);
+
+        let scope = this;
+        mesh.removeFromPhysicsWorld = function(){
+            scope.removeObject(phObject);
+        }
 
         // if(mesh instanceof THREE.Object3D) scene.add(mesh);
         // else if(mesh.addToScene) mesh.addToScene(scene);
@@ -41,6 +47,25 @@ class PhysicsWorld {
 
     addStaticObject(mesh,geometry = null){
         this.addObject(mesh,geometry,false);
+    }
+
+    removeObject(object){
+        if( !(object instanceof PhysicsObject) && object.movementEngine ){
+            object = object.movementEngine.phObject;
+        }
+
+        let i = this.staticObjects.indexOf(object);
+        if(i != -1){
+            this.staticObjects.splice(i,1);
+            return;
+        }
+
+        i = this.dynamicObjects.indexOf(object);
+        if(i != -1){
+            this.dynamicObjects.splice(i,1);
+            return;
+        }
+        
     }
 
     /**
@@ -63,7 +88,7 @@ class PhysicsWorld {
                     let collisionResult = SAT.checkCollision(obj,staticObj);
                     if(collisionResult){
                         obj.onCollision(collisionResult,staticObj.mesh,delta);
-                        staticObj.onCollision(collisionResult,obj.mesh,delta);
+                        staticObj.onCollision(collisionResult.clone(),obj.mesh,delta);
                     }
                 }
             }
@@ -76,7 +101,7 @@ class PhysicsWorld {
                     let collisionResult = SAT.checkCollision(obj,dynObj);
                     if(collisionResult){
                         obj.onCollision(collisionResult,dynObj.mesh,delta);
-                        dynObj.onCollision(collisionResult,obj.mesh,delta);
+                        dynObj.onCollision(collisionResult.clone().reverse(),obj.mesh,delta);
                     }
                 }
             }
@@ -94,6 +119,7 @@ class PhysicsObject{
         this.mesh = mesh;
         this.shape = shape;
         this.boundingBox = this.shape.boundingBox.clone().applyMatrix4(this.mesh.matrixWorld);
+
         if(this.mesh.onCollision) this.onCollision = this.mesh.onCollision.bind(this.mesh);
         else this.onCollision = () => {};
     }
@@ -339,8 +365,14 @@ class SAT {
         if(center1.dot(mtv) < 0){
             mtv.multiplyScalar(-1); // This way the normal's direction is always from body2 to body1
         }
-
-        return { normal: mtv, penetration: mtvLength };
+        let result = { normal: mtv, penetration: mtvLength };
+        result.clone = function(){
+            return { normal: this.normal.clone(), penetration: this.penetration };
+        }.bind(result);
+        result.reverse = function(){
+            this.normal.multiplyScalar(-1);
+        }.bind(result);
+        return result;
     }
 
 }

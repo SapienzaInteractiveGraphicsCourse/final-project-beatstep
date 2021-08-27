@@ -36,7 +36,7 @@ const _pickupMaterialAmmo = new THREE.MeshPhongMaterial({
 });
 
 class Pickup extends THREE.Mesh {
-    constructor(type = "health", onTouch = (player, distance, intersection, pickup)=>{}){
+    constructor(type = "health", onTouch = (player, pickup)=>{}){
         
         switch(type){
             default:
@@ -79,18 +79,29 @@ class Pickup extends THREE.Mesh {
         this.position.set(x,y+dimension,z);
     }
 
+    onCollision(collisionResult,obj,delta){
+
+        if(obj.constructor.name != "Player") return;
+
+        this.onTouch(obj,this);
+
+    }
+
 }
 
-const pickupHealthPool = new ObjectPool(Pickup,5,["health",(player, distance, intersection, pickup)=>{
+const pickupHealthPool = new ObjectPool(Pickup,5,["health",(player, pickup)=>{
     console.log("Health pickup!");
+    pickup.removeFromPhysicsWorld();
     pickup.removeFromParent();
 }]);
-const pickupAmmoPool = new ObjectPool(Pickup,5,["ammo",(player, distance, intersection, pickup)=>{
+const pickupAmmoPool = new ObjectPool(Pickup,5,["ammo",(player, pickup)=>{
     console.log("Ammo pickup!");
+    pickup.removeFromPhysicsWorld();
     pickup.removeFromParent();
 }]);
-const pickupShieldPool = new ObjectPool(Pickup,5,["shield",(player, distance, intersection, pickup)=>{
+const pickupShieldPool = new ObjectPool(Pickup,5,["shield",(player, pickup)=>{
     console.log("Shield pickup!");
+    pickup.removeFromPhysicsWorld();
     pickup.removeFromParent();
 }]);
 

@@ -57,6 +57,7 @@ class GasCylinder extends THREE.Mesh{
 
         this.receiveShadow = true;
 
+        this.explosionPower = 20;
         this.health = 100; // TODO: when 0, explode onCollision
 
         // Adding collision detection
@@ -88,6 +89,24 @@ class GasCylinder extends THREE.Mesh{
         // TODO
         this.rotation.y = alpha;
         
+    }
+
+    onCollision(collisionResult,obj,delta){
+
+        collisionResult.normal.multiplyScalar(-1);
+        collisionResult.normal.y = 1;
+        collisionResult.normal.multiplyScalar(this.explosionPower);
+        obj.movementEngine.velocity.copy(collisionResult.normal);
+        console.log("EXPLOSION VELOCITY: " + obj.movementEngine.velocity.toArray())
+        this.removeFromPhysicsWorld();
+        this.removeFromParent();
+
+        console.watch(obj.movementEngine.velocity,"z",function(velo,newZ){
+            if(newZ < -8){
+                console.log("VELOCITY.Z being changed in " + newZ);
+            }
+        });
+
     }
 
 }

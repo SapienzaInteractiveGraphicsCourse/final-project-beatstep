@@ -37,6 +37,25 @@ import Staircase from './components/environment/Staircase';
 import Door from './components/environment/Door';
 import { HalfCubeGeometry, InclinedSurfaceGeometry } from './components/Tools/CustomGeometries';
 
+console.watch = function (oObj, sProp, callback) {
+    var sPrivateProp = "$_" + sProp + "_$"; // to minimize the name clash risk
+    oObj[sPrivateProp] = oObj[sProp];
+
+    // overwrite with accessor
+    Object.defineProperty(oObj, sProp, {
+        get: function () {
+            return oObj[sPrivateProp];
+        },
+
+        set: function (value) {
+            callback(oObj[sPrivateProp], value); // sets breakpoint
+            oObj[sPrivateProp] = value;
+        }
+    });
+
+    console.log("setting a watch on " + sProp);
+}
+
 // const scene = new THREE.Scene();
 // const clock = new Clock();
 
@@ -68,6 +87,7 @@ function init(){
     let door = new Door();
     door.setPosition(10,0,0);
     scene.add(door.group);
+    world.addStaticObject(door.group);
 
     // Custom geometry test
     const cust_mat = new THREE.MeshNormalMaterial();
@@ -101,19 +121,7 @@ function init(){
     // Adding Particle test
     let particles = new ParticleSystem(scene,camera);
     particles.setPosition(30,5,20);
-    particles.setLife(0.2);
-
-    // Creating cube properties
-    let cube_geometry = new THREE.BoxGeometry(1,1,1);
-    let cube_material = new THREE.MeshToonMaterial({ color: 0x00ff00 });
-    // Creating cube
-    let cube = new THREE.Mesh(cube_geometry, cube_material);
-    cube.castShadow = true;
-    cube.position.set(0,4,0);    
-    scene.add(cube);
-
-    window.cube = cube;
-    window.Vector3 = THREE.Vector3;
+    particles.setLife(0.2);    
 
 
     // Adding walls to scene
@@ -134,14 +142,17 @@ function init(){
     let pickupHealth1 = pickupHealthPool.getFreeObject();
     pickupHealth1.setPosition(-6,0,-6);
     scene.add(pickupHealth1);
+    world.addStaticObject(pickupHealth1);
 
     let pickupShield1 = pickupShieldPool.getFreeObject();
     pickupShield1.setPosition(-4.5,0,-6);
     scene.add(pickupShield1);
+    world.addStaticObject(pickupShield1);
 
     let pickupAmmo1 = pickupAmmoPool.getFreeObject();
     pickupAmmo1.setPosition(-3,0,-6);
     scene.add(pickupAmmo1);
+    world.addStaticObject(pickupAmmo1);
 
     // // Adding gas cylinder to scene
     // let gasCylinder = new GasCylinder(gas_top,gas_top,gas_side,6,0,6,0.5,()=>{});
@@ -150,6 +161,7 @@ function init(){
     cylinder.setPosition(2,0,-6);
     cylinder.setRotation(Math.PI);
     scene.add(cylinder);
+    world.addStaticObject(cylinder);
 
     // Adding staircase to scene:
     let stair = new Staircase(  10,0,-6,
@@ -174,6 +186,7 @@ function init(){
     
 
     window.player = player;
+    window.Vector3 = THREE.Vector3;
 
     animate = function () {
         renderer.render(scene, camera);
