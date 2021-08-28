@@ -42,23 +42,44 @@ class Floor extends THREE.Mesh{
     } 
 
     onCollision(collisionResult,obj,delta){
-        if(obj.feetPosition.y <= this.position.y){
-            obj.feetPosition.y = this.position.y;
-            // Faking the normal reaction
-            if(obj.movementEngine.velocity.y < 0) {
-                obj.movementEngine.velocity.y = 0;
-                obj.movementEngine.displacement.y = 0;
+        // Floor
+        if(collisionResult.normal.y > 0){
+            if(obj.feetPosition.y <= this.position.y){
+                obj.feetPosition.y = this.position.y;
+                // Faking the normal reaction
+                if(obj.movementEngine.velocity.y < 0) {
+                    obj.movementEngine.velocity.y = 0;
+                    obj.movementEngine.displacement.y = 0;
+                }
+    
+                // Faking friction
+                let xFriction = obj.movementEngine.velocity.x * this.friction;
+                let zFriction = obj.movementEngine.velocity.z * this.friction;
+                obj.movementEngine.velocity.x -= xFriction;
+                obj.movementEngine.velocity.z -= zFriction;
+    
+                // Since we are on the ground, the object can jump
+                obj.canJump = true;
             }
-
-            // Faking friction
-            let xFriction = obj.movementEngine.velocity.x * this.friction;
-            let zFriction = obj.movementEngine.velocity.z * this.friction;
-            obj.movementEngine.velocity.x -= xFriction;
-            obj.movementEngine.velocity.z -= zFriction;
-
-            // Since we are on the ground, the object can jump
-            obj.canJump = true;
         }
+        // Ceiling
+        else{
+            if(obj.feetPosition.y+obj.height >= this.position.y){
+                obj.feetPosition.y = this.position.y-obj.height;
+                // Faking the normal reaction
+                if(obj.movementEngine.velocity.y > 0) {
+                    obj.movementEngine.velocity.y = 0;
+                    obj.movementEngine.displacement.y = 0;
+                }
+    
+                // Faking friction
+                let xFriction = obj.movementEngine.velocity.x * this.friction;
+                let zFriction = obj.movementEngine.velocity.z * this.friction;
+                obj.movementEngine.velocity.x -= xFriction;
+                obj.movementEngine.velocity.z -= zFriction;
+            }
+        }
+        
     }
 
 }

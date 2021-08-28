@@ -44,8 +44,9 @@ class PhysicsWorld {
         // else if(mesh.addToScene) mesh.addToScene(scene);
 
         if(this.debugDraw){
-            let dbSize = shape.boundingBox.max.clone().sub(shape.boundingBox.min).toArray();
+            let dbSize = shape.boundingBox.getSize().toArray();
             let dbGeom = new THREE.BoxBufferGeometry(...dbSize);
+            dbGeom.translate(...shape.center.toArray());
             let dbBox = new THREE.Mesh(dbGeom,_debugMaterial);
             phObject.debugBox = dbBox;
             phObject.mesh.add(dbBox);
@@ -163,8 +164,6 @@ class PhysicsObject{
 class PhysicsShape {
 
     constructor(geometry) {
-        // The center of the shape
-        this.center = new Vector3(0,0,0);
 
         // Eventually if Rigid Bodies Dynamic will be needed
         let faces = [];
@@ -187,6 +186,12 @@ class PhysicsShape {
         // Setting the bounding box
         geometry.computeBoundingBox();
         this.boundingBox = geometry.boundingBox;
+
+        // The center of the shape
+        this.center = new Vector3(0,0,0);
+        this.center.x = (geometry.boundingBox.max.x + geometry.boundingBox.min.x) / 2;
+        this.center.y = (geometry.boundingBox.max.y + geometry.boundingBox.min.y) / 2;
+        this.center.z = (geometry.boundingBox.max.z + geometry.boundingBox.min.z) / 2;
     }
 
     getFaces(matrixWorld) {
