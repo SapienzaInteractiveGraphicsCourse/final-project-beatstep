@@ -22,15 +22,6 @@ loaderGLTF.load(light, (gltf)=>{
     let scaleFactor = _floorLightHeight / boundingBox.y;
     _floorLightModel.scale.set(scaleFactor, scaleFactor, scaleFactor);
     _floorLightSize = new THREE.Box3().setFromObject(_floorLightModel).getSize();
-
-    _floorLightModel.traverse(function (child) {
-        if (child.isMesh){
-            child.material.emissive = new THREE.Color( 0xffffff );
-            child.material.emissiveMap = _floorLightTextureEmissive;
-            child.material.emissiveIntensity = _floorLightEmissiveIntensity;
-            child.castShadow = true;
-        } 
-    });
 });
 
 // Geometry collision
@@ -43,6 +34,17 @@ const _cylinderGeometry = new THREE.CylinderGeometry(_floorLightRadius,
 class FloorLight {
     constructor(x,y,z, rotation = 0, distance = 10, intensity = 0.6, color = 0xFFFFFF){
         this.group = _floorLightModel.clone(true);
+
+        this.group.traverse(function (child) {
+            if (child.isMesh){
+                child.material = child.material.clone(true);
+                child.material.emissive = new THREE.Color( 0xffffff );
+                child.material.emissiveMap = _floorLightTextureEmissive;
+                child.material.emissiveIntensity = _floorLightEmissiveIntensity;
+                child.castShadow = true;
+            } 
+        });
+
         this.group.geometry = _cylinderGeometry;
 
         this._intensity = intensity;
@@ -64,6 +66,7 @@ class FloorLight {
         this.setRotation(rotation);
         
         // Interaction text
+        // TODO: put in HUD
         this._tipLight = document.createElement("p");
         this._tipLight.innerText = "Press E to toggle the light";
         this._tipLight.classList.add("tip");

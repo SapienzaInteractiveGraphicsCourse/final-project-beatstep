@@ -20,6 +20,7 @@ import Staircase from '../environment/Staircase';
 class LevelCreator {
     constructor(){
         this.objectsToUpdate = [];
+        this.player = null;
     }
 
     clearLevel(){
@@ -27,6 +28,7 @@ class LevelCreator {
         world.staticObjects = [];
         world.dynamicObjects = [];
         this.objectsToUpdate = [];
+        this.player = null;
     }
 
     addPlayer(x,y,z, height){
@@ -36,10 +38,11 @@ class LevelCreator {
         world.addDynamicObject(player);
 
         this.objectsToUpdate.push(player);
+        this.player = player;
     }
 
     addRobot(x,y,z, rotationRadians = 0){
-        let robot = new Robot();
+        let robot = new Robot(this.player);
         robot.setPosition(x,y,z);
         robot.setRotation(rotationRadians);
         scene.add(robot.group);
@@ -127,7 +130,7 @@ class LevelCreator {
     }
 
     /** The sun of the game */
-    addPointLight(x,y,z, color = 0xFFFFFF, intensity = 0.5){
+    addPointLight(x,y,z, color = 0xFFFFFF, intensity = 0.3){
         const pointLight = new THREE.PointLight(color, intensity);
         pointLight.position.set(x,y,z);
         pointLight.castShadow = true;
@@ -144,5 +147,50 @@ class LevelCreator {
         world.step(delta);
     }
 
+    /** Level 1 */
+    createLevel1(){
+        let wallHeight = 16;
+        let doorHeight = 5;
+
+        this.addAmbientLight();
+        this.addPointLight(0,40,0, 0xFFFFFF, 0.1);
+
+        this.addPlayer(0,0,20, 2);
+
+        this.addFloor(0,0,0, 200,200);
+        this.addFloor(0,wallHeight,0, 200,200); // ceiling = floor on higher level
+
+        this.addWall(-10,0,0, 60,wallHeight, Math.PI/2);
+        this.addWall(10,0,0, 60,wallHeight, Math.PI/2);
+        this.addWall(0,0,30, 20,wallHeight, 0);
+
+        let _wallAndDoorDim_1 = 20;
+        let _wallAndDoorPos_1 = [0,0,-30];
+        let _wallDim_1 = (_wallAndDoorDim_1 - doorHeight)/2;
+        this.addDoor(_wallAndDoorPos_1[0],
+                     _wallAndDoorPos_1[1],
+                     _wallAndDoorPos_1[2], doorHeight, 0);
+        this.addWall(_wallAndDoorPos_1[0] - (_wallAndDoorDim_1 + doorHeight)/4,
+                     _wallAndDoorPos_1[1],
+                     _wallAndDoorPos_1[2], _wallDim_1,wallHeight, 0);
+        this.addWall(_wallAndDoorPos_1[0] + (_wallAndDoorDim_1 + doorHeight)/4,
+                     _wallAndDoorPos_1[1],
+                     _wallAndDoorPos_1[2], _wallDim_1,wallHeight, 0);
+        this.addWall(_wallAndDoorPos_1[0],
+                     _wallAndDoorPos_1[1] + doorHeight,
+                     _wallAndDoorPos_1[2], doorHeight,wallHeight, 0);
+
+        this.addFloorLight(7,0,-6,-Math.PI/4);
+        this.addFloorLight(-7,0,-6,Math.PI/4);
+        this.addTopLight(0,wallHeight,20);
+        this.addTopLight(0,wallHeight,0);
+        this.addTopLight(0,wallHeight,-20);
+
+        this.addRobot(0,0,-20, 0);
+
+    }
+
 
 }
+
+export default LevelCreator;

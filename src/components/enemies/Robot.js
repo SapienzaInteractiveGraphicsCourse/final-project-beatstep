@@ -28,7 +28,8 @@ loader.load(robot1, (gltf)=>{
 
 
 class Robot {
-    constructor(){
+    constructor(playerToFollow){
+        this.playerToFollow = playerToFollow || null;
         // Groups part (ordered by hierarchy)
         this.group = _robot1Model.clone(true);
             this.wheels_base = this.group.getObjectByName("base_ruote");
@@ -125,11 +126,16 @@ class Robot {
         return Math.abs(this.group.position.y - py) < (this.size.y*2);
     }
 
-    update(delta, player){
+    update(delta){
         // Update every animation
         this.mixer.update(delta);
         // Update collision
         // this.detectCollision(2,true);
+        let player = this.playerToFollow;
+
+        this.group.position.add(this.group.movementEngine.displacement);
+
+        if(player == null) return;
 
         let px = player.position.x;
         let py = player.position.y;
@@ -152,7 +158,7 @@ class Robot {
             this.setRotation(-r);
         } else this.isFollowing = false;
 
-        this.group.position.add(this.group.movementEngine.displacement);
+        
     }
 
     createAnimationShootPose(){

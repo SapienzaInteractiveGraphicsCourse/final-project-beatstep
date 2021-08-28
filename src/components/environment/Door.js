@@ -33,6 +33,8 @@ class Door {
         let _doorCollisionGeometry = new THREE.BoxGeometry( _doorSize.x,
                                                             _doorSize.y,
                                                             _doorSize.z);
+        _doorCollisionGeometry.translate(0,_doorSize.y/2,0);
+
         this.group.geometry = _doorCollisionGeometry;
 
         this.door_r = this.group.getObjectByName("door_r");
