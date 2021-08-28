@@ -22,7 +22,7 @@ class PhysicsWorld {
 
 
     addObject(mesh,geometry = null,dynamic = false){
-        let geom = geometry || mesh.collisionGeometry || mesh.geometry;
+        let geom = geometry || mesh.geometry;
         if(!geom) throw new Error("A geometry or an object with a .geometry property is needed");
         let shape = new PhysicsShape(geom);
         if(mesh.movementEngine == undefined) mesh.movementEngine = new MovementEngine(); 

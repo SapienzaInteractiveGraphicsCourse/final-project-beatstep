@@ -82,6 +82,9 @@ class Staircase extends THREE.Mesh {
                 }
                 
             }
+
+            // Since we are on the ground, the object can jump
+            obj.canJump = true;
     
         }).bind(this);
 

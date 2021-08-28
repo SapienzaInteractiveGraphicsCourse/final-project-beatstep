@@ -138,9 +138,9 @@ function init(){
                                 4,4,8,
                                 10,2);
     scene.add(stair);
-    world.addStaticObject(stair);
+    world.addStaticObject(stair,stair.collisionGeometry);
     scene.add(stair2);
-    world.addStaticObject(stair2);
+    world.addStaticObject(stair2,stair2.collisionGeometry);
 
     // Adding enemies
     let robots = [];
