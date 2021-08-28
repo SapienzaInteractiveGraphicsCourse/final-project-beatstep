@@ -38,13 +38,12 @@ class LevelCreator {
         this.objectsToUpdate.push(player);
     }
 
-    // TODO: add physics
     addRobot(x,y,z, rotationRadians = 0){
         let robot = new Robot();
         robot.setPosition(x,y,z);
         robot.setRotation(rotationRadians);
         scene.add(robot.group);
-        robots.push(robot);
+        world.addDynamicObject(robot.group);
 
         this.objectsToUpdate.push(robot);
     }
