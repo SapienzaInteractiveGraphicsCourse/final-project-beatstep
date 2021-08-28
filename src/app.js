@@ -146,9 +146,10 @@ function init(){
     let nr = 1;
     for(let i = 0; i<nr; i++){
         let robot = new Robot();
-        robot.setPosition(-12,0,0+i*3);
+        robot.setPosition(-12,4,0+i*3);
         // robot.setRotation(0);
         scene.add(robot.group);
+        world.addDynamicObject(robot.group);
         robots.push(robot);
     }
     

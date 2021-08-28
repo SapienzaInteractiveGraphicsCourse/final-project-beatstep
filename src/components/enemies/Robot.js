@@ -41,6 +41,10 @@ class Robot {
                             this.hand_sx = this.group.getObjectByName("mano_sx");
                     this.head = this.group.getObjectByName("testa");
                 this.wheels = this.group.getObjectByName("ruote");
+
+        this.group.geometry = _robotCollisionGeometry;
+
+        this.group.feetPosition = this.group.position;
         
         // Useful for animation
         this.wheels_base_path = "base_ruote";
@@ -118,7 +122,7 @@ class Robot {
     }
 
     isOnSameLevel(py){
-        return Math.abs(this.group.position.y + this.size.y - py) < (this.size.y*3/4);
+        return Math.abs(this.group.position.y - py) < (this.size.y*1.5);
     }
 
     update(delta, player){
@@ -147,6 +151,8 @@ class Robot {
             let r = Math.atan2(v.z,v.x);
             this.setRotation(-r);
         } else this.isFollowing = false;
+
+        this.group.position.add(this.group.movementEngine.displacement);
     }
 
     createAnimationShootPose(){
