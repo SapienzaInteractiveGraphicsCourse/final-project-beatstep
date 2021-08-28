@@ -12,12 +12,15 @@ import { MovementEngine } from "./MovementEngine";
 
 
 const _tempVector = new Vector3(0, 0, 0);
+const _debugMaterial = new THREE.MeshBasicMaterial({color: new THREE.Color( 0x00ff00 ), wireframe: true});
 
 class PhysicsWorld {
 
     constructor(){
         this.staticObjects = [];
         this.dynamicObjects = [];
+        this.debugDraw = false;
+        this.debugBoxes = [];
     }
 
 
@@ -39,6 +42,15 @@ class PhysicsWorld {
 
         // if(mesh instanceof THREE.Object3D) scene.add(mesh);
         // else if(mesh.addToScene) mesh.addToScene(scene);
+
+        if(this.debugDraw){
+            let dbSize = shape.boundingBox.max.clone().sub(shape.boundingBox.min).toArray();
+            let dbGeom = new THREE.BoxBufferGeometry(...dbSize);
+            let dbBox = new THREE.Mesh(dbGeom,_debugMaterial);
+            phObject.debugBox = dbBox;
+            phObject.mesh.add(dbBox);
+            this.debugBoxes.push(dbBox);
+        }
     }
 
     addDynamicObject(mesh,geometry = null){
@@ -122,6 +134,8 @@ class PhysicsObject{
 
         if(this.mesh.onCollision) this.onCollision = this.mesh.onCollision.bind(this.mesh);
         else this.onCollision = () => {};
+
+        this.debugBox = null;
     }
 
     getFaces(){
@@ -365,17 +379,28 @@ class SAT {
         if(center1.dot(mtv) < 0){
             mtv.multiplyScalar(-1); // This way the normal's direction is always from body2 to body1
         }
-        let result = { normal: mtv, penetration: mtvLength };
-        result.clone = function(){
-            return { normal: this.normal.clone(), penetration: this.penetration };
-        }.bind(result);
-        result.reverse = function(){
-            this.normal.multiplyScalar(-1);
-        }.bind(result);
+
+        let result = new SatCollisionResult(mtv, mtvLength);
         return result;
     }
 
 }
 
+class SatCollisionResult {
+    constructor(normal,penetration){
+        this.normal = normal;
+        this.penetration = penetration;
+    }
+
+    clone(){
+        return new SatCollisionResult(this.normal.clone(), this.penetration);
+    }
+
+    reverse(){
+        this.normal.multiplyScalar(-1);
+    }
+}
+
 const world = new PhysicsWorld();
+world.debugDraw = true;
 export { PhysicsWorld, world }
