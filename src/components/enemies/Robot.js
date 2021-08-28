@@ -121,7 +121,7 @@ class Robot {
         return Math.abs(this.group.position.y + this.size.y - py) < (this.size.y*3/4);
     }
 
-    step(delta, player){
+    update(delta, player){
         // Update every animation
         this.mixer.update(delta);
         // Update collision

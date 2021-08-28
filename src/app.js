@@ -17,7 +17,7 @@ import Robot from './components/enemies/Robot';
 import Wall from './components/environment/Wall';
 
 // Pickups
-import { pickupHealthPool, pickupAmmoPool, pickupShieldPool } from './components/environment/Pickup';
+import { PickupHealth } from './components/environment/Pickup';
 
 // Gas Cylinder
 import gasCylinderPool from './components/environment/GasCylinder';
@@ -66,8 +66,7 @@ function init(){
     world.addStaticObject(floor);
 
     // Door
-    let door = new Door();
-    door.setPosition(10,0,0);
+    let door = new Door(10,0,0);
     scene.add(door.group);
     world.addStaticObject(door.group);
 
@@ -95,7 +94,7 @@ function init(){
 
     // Adding walls to scene
     let wall_1 = new Wall(0,0,-20, 40,20);
-    let wall_2 = new Wall(-20,0,0, 40,20,0.5);
+    let wall_2 = new Wall(-20,0,0, 40,20,Math.PI/2);
     scene.add(wall_1.obj);
     scene.add(wall_2.obj);
     world.addStaticObject(wall_1.obj);
@@ -108,20 +107,20 @@ function init(){
     // scene.add(healthPickup.obj);
     // scene.add(shieldPickup.obj);
     // scene.add(ammoPickup.obj);
-    let pickupHealth1 = pickupHealthPool.getFreeObject();
-    pickupHealth1.setPosition(-6,0,-6);
+    let pickupHealth1 = new PickupHealth(-6,0,-6)
+    // pickupHealth1.setPosition(-6,0,-6);
     scene.add(pickupHealth1);
     world.addStaticObject(pickupHealth1);
 
-    let pickupShield1 = pickupShieldPool.getFreeObject();
-    pickupShield1.setPosition(-4.5,0,-6);
-    scene.add(pickupShield1);
-    world.addStaticObject(pickupShield1);
+    // let pickupShield1 = pickupShieldPool.getFreeObject();
+    // pickupShield1.setPosition(-4.5,0,-6);
+    // scene.add(pickupShield1);
+    // world.addStaticObject(pickupShield1);
 
-    let pickupAmmo1 = pickupAmmoPool.getFreeObject();
-    pickupAmmo1.setPosition(-3,0,-6);
-    scene.add(pickupAmmo1);
-    world.addStaticObject(pickupAmmo1);
+    // let pickupAmmo1 = pickupAmmoPool.getFreeObject();
+    // pickupAmmo1.setPosition(-3,0,-6);
+    // scene.add(pickupAmmo1);
+    // world.addStaticObject(pickupAmmo1);
 
     // // Adding gas cylinder to scene
     // let gasCylinder = new GasCylinder(gas_top,gas_top,gas_side,6,0,6,0.5,()=>{});
@@ -166,14 +165,14 @@ function init(){
 
         floorLight.update(delta);
 
-        world.step(delta);
+        
     
         player.update(delta);
         
         // Pickup
-        pickupHealthPool.update(delta);
-        pickupAmmoPool.update(delta);
-        pickupShieldPool.update(delta);
+        pickupHealth1.update(delta);
+        // pickupAmmoPool.update(delta);
+        // pickupShieldPool.update(delta);
     
         // Cylinder
         cylinder.update(delta);
@@ -189,10 +188,12 @@ function init(){
 
         // Enemies
         for(let robot of robots){
-            robot.step(delta,player);
+            robot.update(delta,player);
         }
         // Doors
-        door.step(delta);
+        door.update(delta);
+
+        world.step(delta);
     };
 
 }

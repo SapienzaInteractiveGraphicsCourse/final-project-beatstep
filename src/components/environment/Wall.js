@@ -26,7 +26,7 @@ class Wall extends THREE.Mesh{
         this.position.set(x,y+height/2,z);
 
         // Apply Rotation
-        this.rotation.y = Math.PI * rotationRadians;
+        this.rotation.y = rotationRadians;
 
         // onCollision with dynamic object callback
         this.onCollision = function(collisionResult,obj,delta){

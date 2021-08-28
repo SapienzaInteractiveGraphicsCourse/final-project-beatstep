@@ -6,37 +6,40 @@ import door from '../../asset/models/door/doorSquared.glb';
 
 const loader = DefaultGeneralLoadingManager.getHandler("gltf");
 let _doorModel;
-const _doorHeight = 5;
-let _doorSize;
-let _doorCollisionGeometry;
+// const _doorHeight = 5;
+// let _doorSize;
+// let _doorCollisionGeometry;
 loader.load(door, (gltf)=>{
     gltf.scene.traverse(function(node){
         if(node.isMesh) node.castShadow = true;
     });
     _doorModel = gltf.scene;
-    // Scale
-    let boundingBox = new THREE.Box3().setFromObject(_doorModel).getSize();
-    let scaleFactor = _doorHeight / boundingBox.y;
-    _doorModel.scale.set(scaleFactor, scaleFactor, scaleFactor);
-    _doorSize = new THREE.Box3().setFromObject(_doorModel).getSize();
-    _doorCollisionGeometry = new THREE.BoxGeometry(_doorSize.x,
-                                                    _doorSize.y,
-                                                    _doorSize.z);
+    
     // _doorCollisionGeometry.translate(0,...,0);
 
 });
 
 
 class Door {
-    constructor(x,y,z,width,height,rotationRadians=0){
+    constructor(x,y,z,height = 5,rotationRadians=0){
         this.group = _doorModel.clone(true);
+
+        // Scale
+        let boundingBox = new THREE.Box3().setFromObject(this.group).getSize();
+        let scaleFactor = height / boundingBox.y;
+        this.group.scale.set(scaleFactor, scaleFactor, scaleFactor);
+        let _doorSize = new THREE.Box3().setFromObject(_doorModel).getSize();
+
+        let _doorCollisionGeometry = new THREE.BoxGeometry( _doorSize.x,
+                                                            _doorSize.y,
+                                                            _doorSize.z);
         this.group.geometry = _doorCollisionGeometry;
 
         this.door_r = this.group.getObjectByName("door_r");
         this.door_l = this.group.getObjectByName("door_l");
 
         // Size
-        this.size = new THREE.Box3().setFromObject(this.group).getSize();
+        this.size = _doorSize;
 
         this.setPosition(x,y,z);
         this.setRotation(rotationRadians);
@@ -105,7 +108,7 @@ class Door {
         this.isOpen = false;
     }
 
-    step(delta){
+    update(delta){
         // Update every animation
         this.mixer.update(delta);
     }
@@ -207,7 +210,7 @@ class Door {
     }
 
     setRotation(alpha){
-        this.group.rotation.y = alpha * Math.PI;
+        this.group.rotation.y = alpha;
     }
 }
 

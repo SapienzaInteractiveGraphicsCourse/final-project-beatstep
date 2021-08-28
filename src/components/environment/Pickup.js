@@ -36,7 +36,7 @@ const _pickupMaterialAmmo = new THREE.MeshPhongMaterial({
 });
 
 class Pickup extends THREE.Mesh {
-    constructor(type = "health", onTouch = (player, pickup)=>{}){
+    constructor(x,y,z, type = "health", onTouch = (player, pickup)=>{}){
         
         switch(type){
             default:
@@ -58,14 +58,8 @@ class Pickup extends THREE.Mesh {
 
         // Apply event touching
         this.onTouch = onTouch;
-        // setCollideable(this,_pickupGeometry,
-        //     ()=>{},
-        //     (object, distance, intersection)=> {
-        //         if(object.constructor && object.constructor.name == "Player"){
-        //             this.onTouch(object, distance, intersection,this);
-        //         }
-        //     }
-        // );
+
+        this.setPosition(x,y,z);
 
         this.rotation.y = 0;
     }
@@ -89,32 +83,43 @@ class Pickup extends THREE.Mesh {
 
 }
 
-const pickupHealthPool = new ObjectPool(Pickup,5,["health",(player, pickup)=>{
-    console.log("Health pickup!");
-    let hInc = 10;
-    if(player.health < player.topHealth){
-        player.health += hInc;
-        pickup.removeFromPhysicsWorld();
-        pickup.removeFromParent();
+class PickupHealth extends Pickup {
+    constructor(x,y,z){
+        super(x,y,z,"health",(player, pickup)=>{
+            let hInc = 10;
+            if(player.health < player.topHealth){
+                player.health += hInc;
+                pickup.removeFromPhysicsWorld();
+                pickup.removeFromParent();
+            }
+        });
     }
-}]);
-const pickupAmmoPool = new ObjectPool(Pickup,5,["ammo",(player, pickup)=>{
-    console.log("Ammo pickup!");
-    let aInc = 10;
-    if(player.ammo < player.topAmmo){
-        player.ammo += aInc;
-        pickup.removeFromPhysicsWorld();
-        pickup.removeFromParent();
-    }
-}]);
-const pickupShieldPool = new ObjectPool(Pickup,5,["shield",(player, pickup)=>{
-    console.log("Shield pickup!");
-    let sInc = 10;
-    if(player.shield < player.topShield){
-        player.shield += sInc;
-        pickup.removeFromPhysicsWorld();
-        pickup.removeFromParent();
-    }
-}]);
+}
 
-export { pickupHealthPool, pickupAmmoPool, pickupShieldPool };
+class PickupAmmo extends Pickup {
+    constructor(x,y,z){
+        super(x,y,z,"ammo",(player, pickup)=>{
+            let aInc = 10;
+            if(player.ammo < player.topAmmo){
+                player.ammo += aInc;
+                pickup.removeFromPhysicsWorld();
+                pickup.removeFromParent();
+            }
+        });
+    }
+}
+
+class PickupShield extends Pickup {
+    constructor(x,y,z){
+        super(x,y,z,"shield",(player, pickup)=>{
+            let sInc = 10;
+            if(player.shield < player.topShield){
+                player.shield += sInc;
+                pickup.removeFromPhysicsWorld();
+                pickup.removeFromParent();
+            }
+        });
+    }
+}
+
+export { PickupHealth, PickupAmmo, PickupShield };
