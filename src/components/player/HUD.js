@@ -43,15 +43,19 @@ class HUD {
 
         })(this);
 
-        this.createBar = (function(name, color){
+        this.createBar = (function(name, color, text = "Test"){
             let bar = document.createElement("div");
             bar.classList.add("stat_bar");
-            bar.classList.add(color);
+            bar.classList.add(color);            
+
+            bar.label = document.createElement("div");
+            bar.label.classList.add("bar");
+            bar.label.innerText = text;
+            bar.appendChild(bar.label);
 
             bar.indicator = document.createElement("div");
             bar.indicator.classList.add("bar");
             bar.appendChild(bar.indicator);
-
 
             bar.subIndicator = document.createElement("div");
             bar.subIndicator.classList.add("bar");

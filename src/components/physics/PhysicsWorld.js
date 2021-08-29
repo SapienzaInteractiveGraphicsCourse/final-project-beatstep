@@ -124,6 +124,8 @@ class PhysicsWorld {
 
     }
 
+    raycast(origin, direction, distance){}
+
 }
 
 class PhysicsObject{
@@ -165,33 +167,37 @@ class PhysicsShape {
 
     constructor(geometry) {
 
-        // Eventually if Rigid Bodies Dynamic will be needed
-        let faces = [];
-        let vertices = geometry.getAttribute("position");
-        let indices = geometry.index ? geometry.index.array : [...Array(vertices.count).keys()];
-
-        let va = vertices.array;
-        for (let i = 0; i < indices.length; i += 3) {
-            // Extracting the 3 vertices to create a face
-            let i1 = indices[i], i2 = indices[i + 1], i3 = indices[i + 2];
-            let v1 = [va[i1 * 3], va[i1 * 3 + 1], va[i1 * 3 + 2]];
-            let v2 = [va[i2 * 3], va[i2 * 3 + 1], va[i2 * 3 + 2]];
-            let v3 = [va[i3 * 3], va[i3 * 3 + 1], va[i3 * 3 + 2]];
-            // Creating the face
-            faces.push(new Face(v1, v2, v3));
-        }
-
-        this.faces = faces;
-
-        // Setting the bounding box
-        geometry.computeBoundingBox();
-        this.boundingBox = geometry.boundingBox;
-
         // The center of the shape
         this.center = new Vector3(0,0,0);
-        this.center.x = (geometry.boundingBox.max.x + geometry.boundingBox.min.x) / 2;
-        this.center.y = (geometry.boundingBox.max.y + geometry.boundingBox.min.y) / 2;
-        this.center.z = (geometry.boundingBox.max.z + geometry.boundingBox.min.z) / 2;
+        // The faces of the shape
+        this.faces = [];
+
+        if(geometry){
+            let faces = this.faces;
+
+            let vertices = geometry.getAttribute("position");
+            let indices = geometry.index ? geometry.index.array : [...Array(vertices.count).keys()];
+
+            let va = vertices.array;
+            for (let i = 0; i < indices.length; i += 3) {
+                // Extracting the 3 vertices to create a face
+                let i1 = indices[i], i2 = indices[i + 1], i3 = indices[i + 2];
+                let v1 = [va[i1 * 3], va[i1 * 3 + 1], va[i1 * 3 + 2]];
+                let v2 = [va[i2 * 3], va[i2 * 3 + 1], va[i2 * 3 + 2]];
+                let v3 = [va[i3 * 3], va[i3 * 3 + 1], va[i3 * 3 + 2]];
+                // Creating the face
+                faces.push(new Face(v1, v2, v3));
+            }
+
+            // Setting the bounding box
+            geometry.computeBoundingBox();
+            this.boundingBox = geometry.boundingBox;
+
+            
+            this.center.x = (geometry.boundingBox.max.x + geometry.boundingBox.min.x) / 2;
+            this.center.y = (geometry.boundingBox.max.y + geometry.boundingBox.min.y) / 2;
+            this.center.z = (geometry.boundingBox.max.z + geometry.boundingBox.min.z) / 2;
+        }
     }
 
     getFaces(matrixWorld) {
@@ -252,24 +258,81 @@ class PhysicsShape {
 
 }
 
+const _cube = [
+    new THREE.Vector3(-1, -1,  1),  // 0
+    new THREE.Vector3( 1, -1,  1),  // 1
+    new THREE.Vector3(-1,  1,  1),  // 2
+    new THREE.Vector3( 1,  1,  1),  // 3
+    new THREE.Vector3(-1, -1, -1),  // 4
+    new THREE.Vector3( 1, -1, -1),  // 5
+    new THREE.Vector3(-1,  1, -1),  // 6
+    new THREE.Vector3( 1,  1, -1),  // 7
+];
+
+class BoundingPhysicsShape extends PhysicsShape {
+
+    constructor(width, height, depth){
+        super();
+        this.width = width;
+        this.height = height;
+        this.depth = depth;
+
+        let w2 = width/2;
+        let h2 = height/2;
+        let d2 = depth/2;
+
+        this._pointsChosen = [
+            // bottom
+            _cube[0],_cube[4],_cube[1],
+            _cube[4],_cube[5],_cube[1],
+            // back
+            _cube[4],_cube[6],_cube[5],
+            _cube[5],_cube[6],_cube[7],
+            // left
+            _cube[1],_cube[5],_cube[7],
+            // right_
+            _cube[6],_cube[4],_cube[0],
+            // top-f_ront
+            _cube[0],_cube[1],_cube[6],
+            _cube[6],_cube[1],_cube[7],
+        ];
+
+    }
+
+}
+
 class Face {
     /**
      * 
      * @param {Array|Vector3} v1 - Array containing x,y,z of the vertex or Vector3 of the vertex
      * @param {Array|Vector3} v2 - Array containing x,y,z of the vertex or Vector3 of the vertex
      * @param {Array|Vector3} v3 - Array containing x,y,z of the vertex or Vector3 of the vertex
+     * @param {Array|Vector3} v4 - Array containing x,y,z of the vertex or Vector3 of the vertex
      */
-    constructor(v1 = [0, 0, 0], v2 = [0, 0, 0], v3 = [0, 0, 0]) {
+    constructor(v1 = [0, 0, 0], v2 = [0, 0, 0], v3 = [0, 0, 0], v4 = null) {
 
         this.v1 = Array.isArray(v1) ? new Vector3().fromArray(v1) : v1;
         this.v2 = Array.isArray(v2) ? new Vector3().fromArray(v2) : v2;
         this.v3 = Array.isArray(v3) ? new Vector3().fromArray(v3) : v3;
+        if(v4)
+            this.v4 = Array.isArray(v4) ? new Vector3().fromArray(v4) : v4;
+        else   
+            this.v4 = null;
 
-        this.midpoint = new Vector3(
-            (this.v1.x + this.v2.x + this.v3.x) / 3,
-            (this.v1.y + this.v2.y + this.v3.y) / 3,
-            (this.v1.z + this.v2.z + this.v3.z) / 3
-        ).fixZeroPrecision();
+        if(!this.v4){
+            this.midpoint = new Vector3(
+                (this.v1.x + this.v2.x + this.v3.x) / 3,
+                (this.v1.y + this.v2.y + this.v3.y) / 3,
+                (this.v1.z + this.v2.z + this.v3.z) / 3
+            ).fixZeroPrecision();
+        }
+        else{
+            this.midpoint = new Vector3(
+                (this.v1.x + this.v2.x + this.v3.x + this.v4.x) / 4,
+                (this.v1.y + this.v2.y + this.v3.y + this.v4.y) / 4,
+                (this.v1.z + this.v2.z + this.v3.z + this.v4.z) / 4
+            ).fixZeroPrecision();
+        }
 
         // plane = [(X_1 − X_3) × (X_2 − X_3), −X_3T(X_1 × X_2)]
         this.plane = new Vector4();
@@ -292,6 +355,8 @@ class Face {
         this.v1.copy(face.v1);
         this.v2.copy(face.v2);
         this.v3.copy(face.v3);
+        if(this.v4)
+            this.v4.copy(face.v4);
 
         this.midpoint.copy(face.midpoint);
         this.normal.copy(face.normal);
@@ -302,6 +367,8 @@ class Face {
             this.v1.applyMatrix4(matrixWorld);
             this.v2.applyMatrix4(matrixWorld);
             this.v3.applyMatrix4(matrixWorld);
+            if(this.v4)
+                this.v4.applyMatrix4(matrixWorld);
 
             this.midpoint.applyMatrix4(matrixWorld);
             this.normal.transformDirection(matrixWorld);
@@ -320,14 +387,16 @@ class Face {
             return new Face(
                 this.v1.clone(),
                 this.v2.clone(),
-                this.v3.clone()
+                this.v3.clone(),
+                this.v4 ? this.v4.clone() : null
             );
         }
         if (matrixWorld) {
             return new Face(
                 this.v1.clone().applyMatrix4(matrixWorld),
                 this.v2.clone().applyMatrix4(matrixWorld),
-                this.v3.clone().applyMatrix4(matrixWorld)
+                this.v3.clone().applyMatrix4(matrixWorld),
+                this.v4 ? this.v4.clone().applyMatrix4(matrixWorld) : null
             );
         }
     }
@@ -403,6 +472,7 @@ class SatCollisionResult {
 
     reverse(){
         this.normal.multiplyScalar(-1);
+        return this;
     }
 }
 
