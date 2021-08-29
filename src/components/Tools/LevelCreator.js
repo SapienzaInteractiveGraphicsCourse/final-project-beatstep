@@ -31,6 +31,10 @@ class LevelCreator {
         this.player = null;
     }
 
+    addFogExp2(color = 0xFFFFFF, density = 0.02){
+        scene.fog = new THREE.FogExp2(color, density);
+    }
+
     addPlayer(x,y,z, height){
         let player = new Player(camera, [x, y, z], height, renderer.domElement);
         player.controls.shouldLock = true;
@@ -154,6 +158,7 @@ class LevelCreator {
 
         this.addAmbientLight();
         this.addPointLight(0,40,0, 0xFFFFFF, 0.1);
+        // this.addFogExp2();
 
         this.addPlayer(35,0,-34, 2);
 

@@ -26,17 +26,34 @@ class HalfCubeGeometry extends THREE.BufferGeometry {
         super();
         
         this._pointsChosen = [
+            // top-front
+            _cube[0],_cube[1],_cube[6],
+            _cube[6],_cube[1],_cube[7],
             // bottom
-            _cube[0],_cube[4],_cube[1],
-            _cube[4],_cube[5],_cube[1],
+            // _cube[0],_cube[4],_cube[1],
+            // _cube[4],_cube[5],_cube[1],
             // back
             _cube[4],_cube[6],_cube[5],
             _cube[5],_cube[6],_cube[7],
             // left
             _cube[1],_cube[5],_cube[7],
-            // right_
-            _cube[6],_cube[4],_cube[0],
-            // top-f_ront
+            // right
+            _cube[6],_cube[4],_cube[0],  
+        ];
+
+        this.setFromPoints(this._pointsChosen);
+        this.computeVertexNormals();
+        this.scale(scaleX,scaleY,scaleZ);
+
+    }
+}
+
+class HalfCubeGeometryHollowed extends THREE.BufferGeometry {
+    constructor(scaleX = 1,scaleY = 1,scaleZ = 1){
+        super();
+        
+        this._pointsChosen = [
+            // top-front
             _cube[0],_cube[1],_cube[6],
             _cube[6],_cube[1],_cube[7],
         ];
@@ -84,4 +101,4 @@ class InclinedSurfaceGeometry extends THREE.BufferGeometry {
     }
 }
 
-export { HalfCubeGeometry, InclinedSurfaceGeometry };
+export { HalfCubeGeometry, InclinedSurfaceGeometry, HalfCubeGeometryHollowed };

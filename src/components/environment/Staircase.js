@@ -3,7 +3,7 @@ import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 import texture from '../../asset/textures/floor1.jpg';
 // import { setCollideable } from '../physics/CollisionDetector';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { HalfCubeGeometry, InclinedSurfaceGeometry } from '../Tools/CustomGeometries';
+import { HalfCubeGeometry, HalfCubeGeometryHollowed, InclinedSurfaceGeometry } from '../Tools/CustomGeometries';
 
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
 const _staircaseTexture = loader.load(texture);
@@ -58,8 +58,8 @@ class Staircase extends THREE.Mesh {
         
         this.onCollision = ((collisionResult,obj,delta)=>{
             // Move back the player if he penetrated into the wall
-            let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
-            obj.position.add(backVec);
+            // let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
+            // obj.position.add(backVec);
     
             // Don't allow the player to move inside the wall
             let dotDisplacement = collisionResult.normal.dot(obj.movementEngine.displacement);

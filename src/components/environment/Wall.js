@@ -8,13 +8,15 @@ const _wallTexture = loader.load(wall1);
 _wallTexture.wrapS = THREE.RepeatWrapping;
 _wallTexture.wrapT = THREE.RepeatWrapping;
 _wallTexture.magFilter = THREE.NearestFilter;
-_wallTexture.repeat.set(3,3);
 
 class Wall extends THREE.Mesh{
     constructor(x,y,z,width,height,rotationRadians=0){
         let geometry = new THREE.PlaneGeometry(width,height);
+        let texture = _wallTexture.clone(true);
+        texture.needsUpdate = true;
+        texture.repeat.set( width/10 , height/10 );
         let material = new THREE.MeshPhongMaterial({
-            map: _wallTexture,
+            map: texture,
             side: THREE.DoubleSide,
         });
         super(geometry, material);
