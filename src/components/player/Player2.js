@@ -108,11 +108,11 @@ class Player extends Object3D{
             this.health = h;
         }
 
-        this.speed = 8;
-        this.jumpSpeed = 10;
+        this.speed = 15;
+        this.jumpSpeed = 15;
         this.canJump = false;
 
-        this.movementEngine = new MovementEngine();
+        this.movementEngine = new MovementEngine(-25);
         this.geometry = new THREE.CylinderGeometry(1,1,height,16);
         
 
