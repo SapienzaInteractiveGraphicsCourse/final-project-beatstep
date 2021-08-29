@@ -251,10 +251,10 @@ class ParticleSystem {
                 this.addParticles(timeElapsed);
             }
             else{
-                setTimeout(()=>{
+                if(this._particles.length === 0){
                     this._points.removeFromParent.bind(this._points);
                     this._onFinish();
-                },this._generalLife*1000 + 1000);
+                }
             }
             this.updateParticles(timeElapsed);
             this.updateGeometry();

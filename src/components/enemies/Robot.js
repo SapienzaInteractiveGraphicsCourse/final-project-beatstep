@@ -18,10 +18,10 @@ loader.load(robot1, (gltf)=>{
     let boundingBox = new THREE.Box3().setFromObject(_robot1Model).getSize();
     let scaleFactor = _robotHeight / boundingBox.y;
     _robot1Model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-    _robotSize = new THREE.Box3().setFromObject(_robot1Model).getSize();
+    _robotSize = boundingBox.clone();
     _robotCollisionGeometry = new THREE.CylinderGeometry(   _robotSize.x,
                                                             _robotSize.x,
-                                                            _robotSize.y,10, 1, true);
+                                                            _robotSize.y,10, 1, false);
     _robotCollisionGeometry.translate(0,_robotSize.y/2,0);
 
 });
