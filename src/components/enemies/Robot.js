@@ -2,6 +2,7 @@ import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 
 import robot1 from '../../asset/models/robot1/robot_1.glb';
+import { MovementEngine } from '../physics/MovementEngine';
 // import { setCollideable } from '../physics/CollisionDetector';
 
 const loader = DefaultGeneralLoadingManager.getHandler("gltf");
@@ -46,6 +47,8 @@ class Robot {
         this.group.geometry = _robotCollisionGeometry;
 
         this.group.feetPosition = this.group.position;
+
+        this.group.movementEngine = new MovementEngine(-25);
         
         // Useful for animation
         this.wheels_base_path = "base_ruote";
@@ -79,18 +82,19 @@ class Robot {
         this.animation_shootPose = this.createAnimationShootPose();
 
         // Adding collision detection
-        // setCollideable(this.wheels,_robotCollisionGeometry,
-        //     (intersections)=>{ // On personal collsion
-        //         console.log("personal collsion");
-        //     },
-        //     (object, distance, intersection)=>{ // On collision with
-        //         console.log(this.constructor.name+" on collision with "+ object.constructor.name);
-        //         if(object.constructor.name == "Player"){
-        //             // Make physical
-        //         }
-        //     }
-        // );
-        // this.detectCollision = (...args) => this.wheels.detectCollision(...args);
+        this.group.onCollision = function(collisionResult,obj,delta){
+            // Move back the robot if he penetrated into the wall
+            let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
+            obj.position.add(backVec);
+
+            // Don't allow the robot to move inside the wall
+            let dot = collisionResult.normal.dot(obj.movementEngine.displacement);
+            if(dot < 0){
+                backVec = collisionResult.normal.multiplyScalar(dot);
+                obj.movementEngine.displacement.sub(backVec);
+            }
+        }.bind(this);
+
     }
 
     setPosition(x,y,z){
