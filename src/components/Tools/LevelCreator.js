@@ -15,6 +15,7 @@ import Wall from '../environment/Wall';
 import { PickupAmmo, PickupHealth, PickupShield } from '../environment/Pickup';
 import GasCylinder from '../environment/GasCylinder';
 import Staircase from '../environment/Staircase';
+import ParticleSystem from '../environment/ParticleSystem';
 
 
 class LevelCreator {
@@ -143,6 +144,19 @@ class LevelCreator {
         scene.add(pointLight);
     }
 
+    addParticleEffect(x,y,z, duration,radius,particleSize,generalLife,generalVelocity){
+        const ps = new ParticleSystem(camera,duration,(()=>{
+            this.objectsToUpdate = this.objectsToUpdate.filter(item => item !== ps);
+        }).bind(this));
+        ps.setGeneralPosition(x,y,z);
+        ps.setGeneralRadius(...radius);
+        ps.setParticleSize(particleSize);
+        ps.setGeneralLife(generalLife);
+        ps.setGeneralVelocity(...generalVelocity);
+        scene.add(ps);
+        this.objectsToUpdate.push(ps);
+    }
+
     /** Update game */
     step(delta){
         for(let o of this.objectsToUpdate){
@@ -262,6 +276,8 @@ class LevelCreator {
         this.addWall(-10,0,0, 60,wallHeight, Math.PI/2);
 
         this.addRobot(0,0,-20,0);
+
+        this.addParticleEffect(0,2,0, 4, [8,8,8], 8, 0.5, [0,10,0]);
     }
 
 }

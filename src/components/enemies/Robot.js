@@ -88,6 +88,8 @@ class Robot {
             // checking if finalCoords exists
             if(e.action.finalCoords){
                 e.action.stop();
+
+                console.log(e.action)
                 if(e.action.finalCoords.positions){
                     for(let objPosition of e.action.finalCoords.positions){
                         objPosition.obj.position.set(...objPosition.value.toArray());
@@ -95,7 +97,8 @@ class Robot {
                 }
                 if(e.action.finalCoords.rotations){
                     for(let objRotation of e.action.finalCoords.rotations){
-                        objRotation.obj.quaternion.set(...objRotation.value.toArray());
+                        objRotation.obj.setRotationFromQuaternion(objRotation.value.normalize());
+                        objRotation.obj.updateMatrix();
                     }
                 }
             }
@@ -263,14 +266,14 @@ class Robot {
 
         // Putting everything toghether
         const shootPose_clip = new THREE.AnimationClip('shootPose_clip', -1, [
-            arm_dx_1_rotation, arm_dx_2_rotation,
-            hand_dx_rotation
+            //arm_dx_1_rotation, arm_dx_2_rotation,
+            //hand_dx_rotation
         ]);
 
         let animation_shootPose = this.mixer.clipAction(shootPose_clip);
         animation_shootPose.loop = THREE.LoopOnce;
         animation_shootPose.enabled = false;
-        animation_shootPose.clampWhenFinished = true;
+        animation_shootPose.clampWhenFinished = false;
         animation_shootPose.finalCoords = {
             positions: [],
             rotations: [
@@ -318,7 +321,7 @@ class Robot {
         );
 
         // Putting everything toghether
-        const shootPoseRev_clip = new THREE.AnimationClip('shootPose_clip', -1, [
+        const shootPoseRev_clip = new THREE.AnimationClip('shootPose_clip_rev', -1, [
             arm_dx_1_rotation, arm_dx_2_rotation,
             hand_dx_rotation
         ]);
@@ -326,15 +329,15 @@ class Robot {
         let animation_shootPoseRev = this.mixer.clipAction(shootPoseRev_clip);
         animation_shootPoseRev.loop = THREE.LoopOnce;
         animation_shootPoseRev.enabled = false;
-        animation_shootPoseRev.clampWhenFinished = true;
-        animation_shootPoseRev.finalCoords = {
-            positions: [],
-            rotations: [
-                {obj:this.arm_dx_1,value:arm_dx_1_a2},
-                {obj:this.arm_dx_2,value:arm_dx_2_a2},
-                {obj:this.hand_dx,value:hand_dx_a2},
-            ],
-        };
+        animation_shootPoseRev.clampWhenFinished = false;
+        // animation_shootPoseRev.finalCoords = {
+        //     positions: [],
+        //     rotations: [
+        //         {obj:this.arm_dx_1,value:arm_dx_1_a2},
+        //         {obj:this.arm_dx_2,value:arm_dx_2_a2},
+        //         {obj:this.hand_dx,value:hand_dx_a2},
+        //     ],
+        // };
 
         return animation_shootPoseRev;
     }

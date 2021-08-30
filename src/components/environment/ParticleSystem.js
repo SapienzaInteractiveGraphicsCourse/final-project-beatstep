@@ -66,17 +66,14 @@ class LinearSpline {
 }
 
 
-class ParticleSystem {
+class ParticleSystem extends THREE.Points {
     /**
-     * 
-     * @param {*} parent the parent containing all the points (can be scene)
-     * @param {*} camera the camera object
+     * https://www.youtube.com/watch?v=YwfAAv3aIB8 - Cuz everything is better with 
+     * particles, duh.
+     * @param {Number} duration If null, the duration is infinite, else is in seconds
+     * @param {Function} onFinish The callback function when the effect finishes
      */
-    constructor(parent, camera, duration = null, onFinish = ()=>{}) {
-
-        this._duration = duration;
-        this._onFinish = onFinish;
-
+    constructor(camera,duration = null, onFinish = ()=>{}) {
         // Adding uniforms values to Vertex/Fragment shaders
         const uniforms = {
             diffuseTexture: {
@@ -87,7 +84,7 @@ class ParticleSystem {
             },
         }
 
-        this._material = new THREE.ShaderMaterial({
+        let material = new THREE.ShaderMaterial({
             uniforms: uniforms,
             vertexShader: _PS_VS,
             fragmentShader: _PS_FS,
@@ -98,19 +95,24 @@ class ParticleSystem {
             vertexColors: true
         });
 
-        this._camera = camera;
-        this._particles = [];
-
         // Points system (creating buffer)
-        this._geometry = new THREE.BufferGeometry();
-        this._geometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3));
-        this._geometry.setAttribute('size', new THREE.Float32BufferAttribute([], 1));
-        this._geometry.setAttribute('colour', new THREE.Float32BufferAttribute([], 4));
-        this._geometry.setAttribute('angle', new THREE.Float32BufferAttribute([], 1));
+        let geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3));
+        geometry.setAttribute('size', new THREE.Float32BufferAttribute([], 1));
+        geometry.setAttribute('colour', new THREE.Float32BufferAttribute([], 4));
+        geometry.setAttribute('angle', new THREE.Float32BufferAttribute([], 1));
 
-        this._points = new THREE.Points(this._geometry, this._material);
-        this._points.frustumCulled = false;
-        parent.add(this._points);
+        super(geometry, material);
+        this._camera = camera;
+
+        this.frustumCulled = false;
+
+        this._particles = [];
+        this._duration = duration;
+        this._durationStart = duration;
+        this._onFinish = onFinish;
+
+        this._isStopped = false;
 
         this._alphaSpline = new LinearSpline((t, a, b) => {
             return a + t * (b - a);
@@ -134,8 +136,9 @@ class ParticleSystem {
 
         this._generalPosition = [0,0,0];
         this._generalVelocity = [0,2,0];
-        this._generalRadious = [3,3,3];
+        this._generalRadius = [3,3,3];
         this._generalLife = 0.6;
+        this._particleSize = 4.0;
 
         this.updateGeometry();
     }
@@ -153,19 +156,19 @@ class ParticleSystem {
             angles.push(p.rotation);
         }
 
-        this._geometry.setAttribute(
+        this.geometry.setAttribute(
             'position', new THREE.Float32BufferAttribute(positions, 3));
-        this._geometry.setAttribute(
+        this.geometry.setAttribute(
             'size', new THREE.Float32BufferAttribute(sizes, 1));
-        this._geometry.setAttribute(
+        this.geometry.setAttribute(
             'colour', new THREE.Float32BufferAttribute(colours, 4));
-        this._geometry.setAttribute(
+        this.geometry.setAttribute(
             'angle', new THREE.Float32BufferAttribute(angles, 1));
 
-        this._geometry.attributes.position.needsUpdate = true;
-        this._geometry.attributes.size.needsUpdate = true;
-        this._geometry.attributes.colour.needsUpdate = true;
-        this._geometry.attributes.angle.needsUpdate = true;
+        this.geometry.attributes.position.needsUpdate = true;
+        this.geometry.attributes.size.needsUpdate = true;
+        this.geometry.attributes.colour.needsUpdate = true;
+        this.geometry.attributes.angle.needsUpdate = true;
     }
 
     updateParticles(timeElapsed) {
@@ -230,10 +233,10 @@ class ParticleSystem {
             const initPos = this._generalPosition;
             this._particles.push({
                 position: new THREE.Vector3(
-                    initPos[0] + (Math.random() * this._generalRadious[0] - 1) * 1.0,
-                    initPos[1] + (Math.random() * this._generalRadious[1] - 1) * 1.0,
-                    initPos[2] + (Math.random() * this._generalRadious[2] - 1) * 1.0),
-                size: (Math.random() * 0.5 + 0.5) * 4.0,
+                    initPos[0] + (Math.random() * this._generalRadius[0] - 1) * 1.0,
+                    initPos[1] + (Math.random() * this._generalRadius[1] - 1) * 1.0,
+                    initPos[2] + (Math.random() * this._generalRadius[2] - 1) * 1.0),
+                size: (Math.random() * 0.5 + 0.5) * this._particleSize,
                 colour: new THREE.Color(),
                 alpha: 1.0,
                 life: life,
@@ -244,7 +247,8 @@ class ParticleSystem {
         }
     }
 
-    step(timeElapsed) {
+    update(timeElapsed) {
+        if(this._isStopped) return;
         if(this._duration !== null){
             if(this._duration > 0){ 
                 this._duration -= timeElapsed;
@@ -252,7 +256,7 @@ class ParticleSystem {
             }
             else{
                 if(this._particles.length === 0){
-                    this._points.removeFromParent.bind(this._points);
+                    this.removeFromParent();
                     this._onFinish();
                 }
             }
@@ -267,20 +271,42 @@ class ParticleSystem {
         
     }
 
-    setPosition(x,y,z){
+    setGeneralPosition(x,y,z){
         this._generalPosition = [x,y,z];
     }
 
-    setVelocity(x,y,z){
+    setGeneralVelocity(x,y,z){
         this._generalVelocity = [x,y,z];
     }
 
-    setRadious(x,y,z){
-        this._generalRadious = [x,y,z];
+    setGeneralRadius(x,y,z){
+        this._generalRadius = [x,y,z];
     }
 
-    setLife(t = 10){
+    setParticleSize(size){
+        this._particleSize = size;
+    }
+
+    setGeneralLife(t = 0.6){
         this._generalLife = t;
+    }
+
+    setDuration(seconds = null){
+        this._durationStart = seconds;
+    }
+
+    reset(){
+        this._duration = this._durationStart;
+        this._isStopped = true;
+    }
+
+    start(){
+        this._isStopped = false;
+    }
+
+    restart(){
+        this.reset();
+        this.start();
     }
 
 }
