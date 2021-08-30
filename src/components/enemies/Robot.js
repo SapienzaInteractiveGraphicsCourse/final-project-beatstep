@@ -69,7 +69,7 @@ class Robot {
         // Properties to interact
         this.isFollowing = false; // if needs to follow player or not
         this.isInShooting = false;
-        this.velocity = 0.1; // Step
+        this.velocity = 8; // Step
         this.rotationVelocity = this.velocity;
         this.minVicinityWithPlayer = 2;
         this.maxVicinityWithPlayer = this.minVicinityWithPlayer + 2;
@@ -83,17 +83,22 @@ class Robot {
         this.animation_shootPose = this.createAnimationShootPose();
 
         // Adding collision detection
+        this.group.isDynamic = true;
         this.group.onCollision = function(collisionResult,obj,delta){
-            // Move back the robot if he penetrated into the wall
-            let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
-            obj.position.add(backVec);
+        
+            if(obj.isDynamic){
+                // Move back the robot if he penetrated into the wall
+                let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
+                obj.position.sub(backVec);
 
-            // Don't allow the robot to move inside the wall
-            let dot = collisionResult.normal.dot(obj.movementEngine.displacement);
-            if(dot < 0){
-                backVec = collisionResult.normal.multiplyScalar(dot);
-                obj.movementEngine.displacement.sub(backVec);
+                // Don't allow the robot to move inside the other robot!
+                // let dot = collisionResult.normal.dot(obj.movementEngine.displacement);
+                // if(dot < 0){
+                //     backVec = collisionResult.normal.multiplyScalar(dot);
+                //     obj.movementEngine.displacement.sub(backVec);
+                // }
             }
+
         }.bind(this);
 
     }
@@ -138,8 +143,6 @@ class Robot {
         // this.detectCollision(2,true);
         let player = this.playerToFollow;
 
-        this.group.position.add(this.group.movementEngine.displacement);
-
         if(player == null) return;
 
         let px = player.position.x;
@@ -157,11 +160,14 @@ class Robot {
             
             let v = { x: movement.x/dist, z: movement.z/dist };
             if( dist > this.maxVicinityWithPlayer){
-                this.addPosition(v.x*this.velocity,0,v.z*this.velocity);
+                this.group.movementEngine.velocity.setX(v.x*this.velocity);
+                this.group.movementEngine.velocity.setZ(v.z*this.velocity);
             }
             let r = Math.atan2(v.z,v.x);
             this.setRotation(-r);
         } else this.isFollowing = false;
+
+        this.group.position.add(this.group.movementEngine.displacement);
 
         
     }
