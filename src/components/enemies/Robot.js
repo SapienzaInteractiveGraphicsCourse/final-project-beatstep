@@ -70,6 +70,8 @@ class Robot {
         // Properties to interact
         this.isFollowing = false; // if needs to follow player or not
         this.isInShooting = false;
+        this.angryDurationMax = 10;
+        this.angryDuration = 0;
         this.isHit = false;
         this.health = 100; // TODO: when 0, explode onCollision
         this.velocity = 8; // Step
@@ -133,6 +135,7 @@ class Robot {
 
     hit(){
         this.health -= 20;
+        this.angryDuration =  this.angryDurationMax;
         if(this.health <= 0) this.explode();
     }
 
@@ -199,14 +202,15 @@ class Robot {
         let movement = this.computeDistance(px,pz);
         let dist = Math.sqrt( movement.x**2 + movement.z**2 );
         if( this.isOnSameLevel(py) && ( (dist < this.eyeRadiusDistanceMin && !this.isFollowing) || 
-                                        (dist < this.eyeRadiusDistanceMax && this.isFollowing) ) ){
+                                        (dist < this.eyeRadiusDistanceMax && this.isFollowing) || this.angryDuration > 0 ) ){
             if(!this.isFollowing){
                 this.isFollowing = true;
                 this.startAnimation(this.animation_alert);
             }
-            
+            if(this.angryDuration > 0) this.angryDuration -= delta;
             let v = { x: movement.x/dist, z: movement.z/dist };
-            if( dist > this.maxVicinityWithPlayer){
+            if(dist > this.maxVicinityWithPlayer){
+                
                 if(this.isInShooting) this.startAnimation(this.animation_shootPoseRev);
                 this.isInShooting = false;
                 this.group.movementEngine.velocity.setX(v.x*this.velocity);
