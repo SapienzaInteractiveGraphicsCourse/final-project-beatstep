@@ -94,7 +94,7 @@ class GasCylinder extends THREE.Mesh{
         this.removeFromPhysicsWorld();
         this.removeFromParent();
         // Adding Particles
-        this._explosionParticles = new ParticleSystem(scene,camera, 0.6, ()=>{
+        this._explosionParticles = new ParticleSystem(scene,camera, 0.6, null, ()=>{
             this._explosionParticles = null;
         });
         this._explosionParticles.setGeneralPosition(this.position.x,this.position.y,this.position.z);

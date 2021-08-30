@@ -17,6 +17,12 @@ import GasCylinder from '../environment/GasCylinder';
 import Staircase from '../environment/Staircase';
 import ParticleSystem from '../environment/ParticleSystem';
 
+// Particle Test
+import smoke from '../../asset/textures/smoke.png';
+import { DefaultGeneralLoadingManager } from './GeneralLoadingManager';
+const loader = DefaultGeneralLoadingManager.getHandler("texture");
+const smokeImg = loader.load(smoke);
+
 
 class LevelCreator {
     constructor(){
@@ -144,8 +150,8 @@ class LevelCreator {
         scene.add(pointLight);
     }
 
-    addParticleEffect(x,y,z, duration,radius,particleSize,generalLife,generalVelocity){
-        const ps = new ParticleSystem(scene,camera,duration,(()=>{
+    addParticleEffect(x,y,z, duration,radius,particleSize,generalLife,generalVelocity,particleImage){
+        const ps = new ParticleSystem(scene,camera,duration,particleImage,(()=>{
             // this.objectsToUpdate = this.objectsToUpdate.filter(item => item !== ps);
         }).bind(this));
         ps.setGeneralPosition(x,y,z);
@@ -278,7 +284,7 @@ class LevelCreator {
 
         this.addGasCylinder(5,0,5, Math.PI*0.8);
 
-        this.addParticleEffect(0,2,0, 4, [8,8,8], 8, 0.5, [0,10,0]);
+        this.addParticleEffect(0,2,0, 4, [8,8,8], 8, 0.5, [0,10,0], smokeImg);
     }
 
 }

@@ -73,11 +73,11 @@ class ParticleSystem extends THREE.Points {
      * @param {Number} duration If null, the duration is infinite, else is in seconds
      * @param {Function} onFinish The callback function when the effect finishes
      */
-    constructor(scene,camera,duration = null, onFinish = ()=>{}) {
+    constructor(scene,camera,duration = null, particleImage = null, onFinish = ()=>{}) {
         // Adding uniforms values to Vertex/Fragment shaders
         const uniforms = {
             diffuseTexture: {
-                value: _PS_fire
+                value: particleImage || _PS_fire
             },
             pointMultiplier: { // TODO: check here
                 value: window.innerHeight / (2.0 * Math.tan(0.5 * 60.0 * Math.PI / 180.0))
