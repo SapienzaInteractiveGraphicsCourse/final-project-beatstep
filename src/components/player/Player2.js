@@ -1,10 +1,11 @@
 import { Object3D } from "three";
 import { Euler,EventDispatcher,Vector3 } from 'three';
-import { THREE } from "../setup/ThreeSetup";
+import { THREE, scene } from "../setup/ThreeSetup";
 
 import { world } from "../physics/PhysicsWorld";
 import { MovementEngine } from "../physics/MovementEngine";
 import HUD from "./HUD";
+import ParticleSystem from "../environment/ParticleSystem";
 
 import { DefaultGeneralLoadingManager } from "../Tools/GeneralLoadingManager";
 import RifleModel from '../../asset/models/rifle/rifle.obj';
@@ -41,6 +42,10 @@ const rifleModel = {};
         },
     );
 })()
+
+import smoke from '../../asset/textures/fire2.png';
+const loader = DefaultGeneralLoadingManager.getHandler("texture");
+const smokeImg = loader.load(smoke);
 
 const _PI_2 = Math.PI / 2;
 const _euler = new Euler(0, 0, 0, 'YXZ');
@@ -127,27 +132,16 @@ class Player extends Object3D{
         this.setUpRifle();
         document.addEventListener("mousedown",((event)=>{
             if(event.button == 2){ // shoot
-                this.shootAnimation.reset();
-                this.shootAnimation.play();
-                // let origin = this.rifle.localToWorld(this.rifle.tipPosition.clone());
-                let origin = new Vector3();
-                this.camera.getWorldPosition(origin);
-                let direction = _zAxis.setFromMatrixColumn( this.camera.matrixWorld, 2).multiplyScalar(-1).normalize().clone();
-                let distance = 100;
-                let hits = world.raycast(origin,direction,distance);
-                // Sorting hits by distance, closer first
-                hits.sort((a, b) => { 
-                    let dif = a.distance - b.distance;
-                    return dif;
-                });
-                
-                for (const h of hits) {
-                    console.log(h.objectIntersected);
-                    console.log(h.distance);
-                }
-                console.log("---------------")
+                this.shoot()
             }
         }).bind(this));
+        this.rifleExplosion = new ParticleSystem(camera, camera, 0.05, smokeImg);
+        this.rifleExplosion.setParticleSize(0.1)
+        this.rifleExplosion.setGeneralRadius(0.1,0.1,0.1);
+        this.rifleExplosion.setGeneralVelocity(0.01,0.01,0.01);
+        this.rifleExplosion.setGeneralPosition(...this.rifle.tipPosition.toArray());
+        this.rifleExplosion.setGeneralPosition(1.1,0.95,-0.65);
+        window.exp = this.rifleExplosion;
         
     }
 
@@ -305,6 +299,41 @@ class Player extends Object3D{
         this.camera.add(rifle);
     }
 
+    shoot(){
+        this.shootAnimation.reset();
+        this.shootAnimation.play();
+        // Explosion
+        // if(!this._explosionParticles){
+        //     let worldTipPosition = this.rifle.localToWorld(this.rifle.tipPosition).toArray()
+        //     this._explosionParticles = new ParticleSystem(scene,this.camera, 0.05, ()=>{
+        //         this._explosionParticles = null;
+        //     });
+        //     this._explosionParticles.setPosition(...worldTipPosition);
+        //     this._explosionParticles.setRadious(10,10,10);
+        //     this._explosionParticles.setPosition(0,0,0);
+
+        // }
+        //this.rifleExplosion.setGeneralPosition(0,2,0);
+        this.rifleExplosion.restart();
+
+
+        // let origin = this.rifle.localToWorld(this.rifle.tipPosition.clone());
+        let origin = new Vector3();
+        this.camera.getWorldPosition(origin);
+        let direction = _zAxis.setFromMatrixColumn( this.camera.matrixWorld, 2).multiplyScalar(-1).normalize().clone();
+        let distance = 100;
+        let hits = world.raycast(origin,direction,distance);
+        // Sorting hits by distance, closer first
+        hits.sort((a, b) => { 
+            let dif = a.distance - b.distance;
+            return dif;
+        });
+
+        let hit = hits[0];
+        if(hit.objectIntersected.constructor.name == "Player") hit = hits[1];
+        if(hit.objectIntersected.hit) hit.objectIntersected.hit(direction, hit.distance);
+    }
+
     update(deltaTime){
         let xDir = - Number(this.controls.shouldMoveRight) + Number(this.controls.shouldMoveLeft);
         let zDir = - Number(this.controls.shouldMoveForward) + Number(this.controls.shouldMoveBackward);
@@ -333,6 +362,7 @@ class Player extends Object3D{
         if(this.mixer){
             this.mixer.update(deltaTime);
         }
+        this.rifleExplosion.update(deltaTime);
     }
 
 }

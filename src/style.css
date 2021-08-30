@@ -37,6 +37,19 @@
     background-color: rgb(88, 88, 88);
 }
 
+.stat_bar .bar_text{
+    z-index: 11;
+    position: absolute;
+    left: 10px;
+    height: 100%;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: black;
+    font-weight: bold;
+    font-family: sans-serif;
+}
 
 /* Colors */
 .stat_bar.green .bar{

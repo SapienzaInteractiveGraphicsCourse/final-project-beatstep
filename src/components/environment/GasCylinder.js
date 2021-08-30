@@ -114,6 +114,10 @@ class GasCylinder extends THREE.Mesh{
 
     }
 
+    hit(){
+        this.explode();
+    }
+
 }
 
 // const gasCylinderPool = new ObjectPool(GasCylinder,5);

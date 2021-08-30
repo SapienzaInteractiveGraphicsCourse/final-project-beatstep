@@ -43,13 +43,13 @@ class HUD {
 
         })(this);
 
-        this.createBar = (function(name, color, text = "Test"){
+        this.createBar = (function(name, color, text = ""){
             let bar = document.createElement("div");
             bar.classList.add("stat_bar");
             bar.classList.add(color);            
 
             bar.label = document.createElement("div");
-            bar.label.classList.add("bar");
+            bar.label.classList.add("bar_text");
             bar.label.innerText = text;
             bar.appendChild(bar.label);
 
@@ -77,13 +77,13 @@ class HUD {
             this[name] = bar;
         }).bind(this)
 
-        this.createBar("healthBar","green");
+        this.createBar("healthBar","green","Health");
         this.healthBar.setPercentage(100);
         this.objects.push(this.healthBar);
-        this.createBar("shieldBar","blue");
+        this.createBar("shieldBar","blue", "Shield");
         this.shieldBar.setPercentage(100);
         this.objects.push(this.shieldBar);
-        this.createBar("ammoBar","red");
+        this.createBar("ammoBar","red", "Ammo");
         this.ammoBar.setPercentage(100);
         this.objects.push(this.ammoBar);
     }
