@@ -132,8 +132,6 @@ class Player extends Object3D{
                 // let origin = this.rifle.localToWorld(this.rifle.tipPosition.clone());
                 let origin = new Vector3();
                 this.camera.getWorldPosition(origin);
-                origin.z -= 0.8;
-                origin.y -= 0.2;
                 let direction = _zAxis.setFromMatrixColumn( this.camera.matrixWorld, 2).multiplyScalar(-1).normalize().clone();
                 let distance = 100;
                 let hits = world.raycast(origin,direction,distance);
@@ -142,6 +140,7 @@ class Player extends Object3D{
                     let dif = a.distance - b.distance;
                     return dif;
                 });
+                
                 for (const h of hits) {
                     console.log(h.objectIntersected);
                     console.log(h.distance);

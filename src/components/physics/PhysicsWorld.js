@@ -131,7 +131,7 @@ class PhysicsWorld {
             // If the object is further than the ray's length, ignore this object
             if(obj.boundingBox.distanceToPoint(origin) > distance) continue;
 
-            let ints = Raycaster.raycastToFaces(origin,direction,obj.getBoundingFaces(),distance,true,1);
+            let ints = Raycaster.raycastToFaces(origin,direction,obj.getBoundingFaces(),distance,true,0);
             if(ints.length > 0){
                 ints[0].objectIntersected = obj.mesh;
                 intersections.push(ints[0]);
@@ -143,7 +143,7 @@ class PhysicsWorld {
             // If the object is further than the ray's length, ignore this object
             if(obj.boundingBox.distanceToPoint(origin) > distance) continue;
 
-            let ints = Raycaster.raycastToFaces(origin,direction,obj.getBoundingFaces(),distance,true,1);
+            let ints = Raycaster.raycastToFaces(origin,direction,obj.getBoundingFaces(),distance,true,0);
             if(ints.length > 0){
                 ints[0].objectIntersected = obj.mesh;
                 intersections.push(ints[0]);
@@ -151,7 +151,7 @@ class PhysicsWorld {
             
         }
 
-        return intersections
+        return intersections;
     }
 
     raycastPrecise(origin, direction, distance){
@@ -180,7 +180,7 @@ class PhysicsWorld {
             
         }
 
-        return intersections
+        return intersections;
     }
 
 }
@@ -379,7 +379,7 @@ class BoundingPhysicsShape extends PhysicsShape {
         super();
 
         geometry.computeBoundingBox();
-        let size = geometry.boundingBox.getSize();
+        let size = geometry.boundingBox.getSize().fixZeroPrecision();
 
         this.width = size.x;
         this.height = size.y;
