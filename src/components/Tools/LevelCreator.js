@@ -276,6 +276,8 @@ class LevelCreator {
 
         this.addRobot(0,0,-20,0);
 
+        this.addGasCylinder(5,0,5, Math.PI*0.8);
+
         this.addParticleEffect(0,2,0, 4, [8,8,8], 8, 0.5, [0,10,0]);
     }
 

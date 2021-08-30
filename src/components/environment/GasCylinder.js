@@ -72,7 +72,7 @@ class GasCylinder extends THREE.Mesh{
         // TODO
         // this.body.updateMesh(this,true,false);
         if(this._explosionParticles !== null){
-            this._explosionParticles.step(delta);
+            this._explosionParticles.update(delta);
         }
     }
 
@@ -97,7 +97,7 @@ class GasCylinder extends THREE.Mesh{
         this._explosionParticles = new ParticleSystem(scene,camera, 0.6, ()=>{
             this._explosionParticles = null;
         });
-        this._explosionParticles.setPosition(this.position.x,this.position.y,this.position.z);
+        this._explosionParticles.setGeneralPosition(this.position.x,this.position.y,this.position.z);
     }
 
     onCollision(collisionResult,obj,delta){
