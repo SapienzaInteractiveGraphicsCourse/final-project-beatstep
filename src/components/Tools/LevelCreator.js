@@ -244,6 +244,20 @@ class LevelCreator {
         this.addGasCylinder(16,0,-38, -Math.PI*0.2);
     }
 
+    createTestLevel(){
+        let wallHeight = 16;
+        let doorHeight = 5;
+
+        this.addAmbientLight();
+        this.addPointLight(0,40,0, 0xFFFFFF, 0.1);
+
+        this.addPlayer(0,0,30, 2);
+
+        this.addFloor(0,0,0, 200,200);
+        this.addWall(-10,0,0, 60,wallHeight, Math.PI/2);
+
+        this.addRobot(0,0,-20,0);
+    }
 
 }
 

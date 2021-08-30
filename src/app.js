@@ -12,6 +12,9 @@ let levels = new LevelCreator();
 
 function init(){
     levels.createLevel1();
+    // levels.createTestLevel();
+
+
     // Player and camera setup
     // let player = new Player(camera, renderer.domElement, [0, 2, 10], [0, 2, 0]);
     // let player = new Player(camera, [0, 0, 10], 2, renderer.domElement);

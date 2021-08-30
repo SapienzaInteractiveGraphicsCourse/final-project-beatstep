@@ -2,6 +2,7 @@ import { Object3D } from "three";
 import { Euler,EventDispatcher,Vector3 } from 'three';
 import { THREE } from "../setup/ThreeSetup";
 
+import { world } from "../physics/PhysicsWorld";
 import { MovementEngine } from "../physics/MovementEngine";
 import HUD from "./HUD";
 
@@ -69,7 +70,7 @@ class Player extends Object3D{
         this.height = height;
         this.camera = camera;
         this.canvas = canvas || document.querySelector("canvas");
-        this.camera.position.set(0,height,-0.2);
+        this.camera.position.set(0,height/2,-0.2);
         this.camera.quaternion.copy(this.quaternion);
         this.add(camera);
 
@@ -124,6 +125,30 @@ class Player extends Object3D{
 
         this.rifle = rifleModel.mesh;
         this.setUpRifle();
+        document.addEventListener("mousedown",((event)=>{
+            if(event.button == 2){ // shoot
+                this.shootAnimation.reset();
+                this.shootAnimation.play();
+                // let origin = this.rifle.localToWorld(this.rifle.tipPosition.clone());
+                let origin = new Vector3();
+                this.camera.getWorldPosition(origin);
+                origin.z -= 0.8;
+                origin.y -= 0.2;
+                let direction = _zAxis.setFromMatrixColumn( this.camera.matrixWorld, 2).multiplyScalar(-1).normalize().clone();
+                let distance = 100;
+                let hits = world.raycast(origin,direction,distance);
+                // Sorting hits by distance, closer first
+                hits.sort((a, b) => { 
+                    let dif = a.distance - b.distance;
+                    return dif;
+                });
+                for (const h of hits) {
+                    console.log(h.objectIntersected);
+                    console.log(h.distance);
+                }
+                console.log("---------------")
+            }
+        }).bind(this));
         
     }
 
@@ -274,13 +299,10 @@ class Player extends Object3D{
         //         this.bulletEmitter.shoot(vel);
         //     }
         // }).bind(this));
-
-        // camera.add(obj);
         
-        // rifle.geometry.computeBoundingBox();
-        // let box = rifle.geometry.boundingBox;
-        // rifle.add(this.bulletEmitter);
-        // this.bulletEmitter.position.set(0,box.max.y,box.min.z);
+        rifle.geometry.computeBoundingBox();
+        let box = rifle.geometry.boundingBox;
+        rifle.tipPosition = new Vector3(0,box.max.y,box.min.z);
         this.camera.add(rifle);
     }
 
@@ -308,6 +330,10 @@ class Player extends Object3D{
 
         this.position.add(this.movementEngine.displacement);
 
+        
+        if(this.mixer){
+            this.mixer.update(deltaTime);
+        }
     }
 
 }

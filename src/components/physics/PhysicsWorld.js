@@ -1,4 +1,4 @@
-import { Vector3, Vector4 } from "three";
+import { Matrix4, Vector3, Vector4 } from "three";
 function fixZeroPrecision(){
     if(Math.abs(this.x) < 0.0001) this.x = 0;
     if(Math.abs(this.y) < 0.0001) this.y = 0;
@@ -9,6 +9,7 @@ Vector3.prototype.fixZeroPrecision = fixZeroPrecision;
 
 import { THREE, scene } from "../setup/ThreeSetup";
 import { MovementEngine } from "./MovementEngine";
+import { Raycaster } from "./Raycaster";
 
 
 const _tempVector = new Vector3(0, 0, 0);
@@ -124,7 +125,63 @@ class PhysicsWorld {
 
     }
 
-    raycast(origin, direction, distance){}
+    raycast(origin, direction, distance){
+        let intersections = [];
+        for (let obj of this.dynamicObjects) {
+            // If the object is further than the ray's length, ignore this object
+            if(obj.boundingBox.distanceToPoint(origin) > distance) continue;
+
+            let ints = Raycaster.raycastToFaces(origin,direction,obj.getBoundingFaces(),distance,true,1);
+            if(ints.length > 0){
+                ints[0].objectIntersected = obj.mesh;
+                intersections.push(ints[0]);
+            }
+            
+        }
+
+        for (let obj of this.staticObjects) {
+            // If the object is further than the ray's length, ignore this object
+            if(obj.boundingBox.distanceToPoint(origin) > distance) continue;
+
+            let ints = Raycaster.raycastToFaces(origin,direction,obj.getBoundingFaces(),distance,true,1);
+            if(ints.length > 0){
+                ints[0].objectIntersected = obj.mesh;
+                intersections.push(ints[0]);
+            }
+            
+        }
+
+        return intersections
+    }
+
+    raycastPrecise(origin, direction, distance){
+        let intersections = [];
+        for (let obj of this.dynamicObjects) {
+            // If the object is further than the ray's length, ignore this object
+            if(obj.boundingBox.distanceToPoint(origin) > distance) continue;
+
+            let ints = Raycaster.raycastToFaces(origin,direction,obj.getFaces(),distance,false,0);
+            if(ints.length > 0){
+                ints[0].objectIntersected = obj.mesh;
+                intersections.push(ints[0]);
+            }
+            
+        }
+
+        for (let obj of this.staticObjects) {
+            // If the object is further than the ray's length, ignore this object
+            if(obj.boundingBox.distanceToPoint(origin) > distance) continue;
+
+            let ints = Raycaster.raycastToFaces(origin,direction,obj.getFaces(),distance,false,0);
+            if(ints.length > 0){
+                ints[0].objectIntersected = obj.mesh;
+                intersections.push(ints[0]);
+            }
+            
+        }
+
+        return intersections
+    }
 
 }
 
@@ -133,7 +190,8 @@ class PhysicsObject{
     constructor(mesh,shape){
         this.mesh = mesh;
         this.shape = shape;
-        this.boundingBox = this.shape.boundingBox.clone().applyMatrix4(this.mesh.matrixWorld);
+        this.boundingBox = this.shape.boundingBox.clone();
+        this.boundingShape = new BoundingPhysicsShape(this.shape.geometry);
 
         if(this.mesh.onCollision) this.onCollision = this.mesh.onCollision.bind(this.mesh);
         else this.onCollision = () => {};
@@ -143,6 +201,10 @@ class PhysicsObject{
 
     getFaces(){
         return this.shape.getFaces(this.mesh.matrixWorld);
+    }
+
+    getBoundingFaces(){
+        return this.boundingShape.getFaces(this.mesh.matrixWorld);
     }
 
     getVertices(){
@@ -166,13 +228,14 @@ class PhysicsObject{
 class PhysicsShape {
 
     constructor(geometry) {
-
+        this.geometry = null;
         // The center of the shape
         this.center = new Vector3(0,0,0);
         // The faces of the shape
         this.faces = [];
 
         if(geometry){
+            this.geometry = geometry;
             let faces = this.faces;
 
             let vertices = geometry.getAttribute("position");
@@ -258,6 +321,15 @@ class PhysicsShape {
 
 }
 
+//    6--------7
+//   /|       /|
+//  / |      / |
+// 2--|-----3  |
+// |  |     |  |
+// |  4-----|--5
+// | /      | /
+// |/       |/ 
+// 0--------1
 const _cube = [
     new THREE.Vector3(-1, -1,  1),  // 0
     new THREE.Vector3( 1, -1,  1),  // 1
@@ -269,33 +341,104 @@ const _cube = [
     new THREE.Vector3( 1,  1, -1),  // 7
 ];
 
+const cubeFaces = [
+    // front
+    [_cube[0],_cube[1],_cube[3],_cube[2]],
+    // back
+    [_cube[4],_cube[6],_cube[7],_cube[5]],
+    // right
+    [_cube[1],_cube[5],_cube[7],_cube[3]],
+    // left
+    [_cube[4],_cube[0],_cube[2],_cube[6]],
+    // bottom
+    [_cube[0],_cube[4],_cube[5],_cube[1]],
+    // top
+    [_cube[2],_cube[3],_cube[7],_cube[6]],
+
+];
+
+// front (no depth)
+const xyPlane = [
+    _cube[0],_cube[1],_cube[3],_cube[2]
+];
+
+// right (no width)
+const yzPlane = [
+    _cube[1],_cube[5],_cube[7],_cube[3]
+];
+
+// top (no height)
+const xzPlane = [
+    _cube[2],_cube[3],_cube[7],_cube[6]
+];
+
+
 class BoundingPhysicsShape extends PhysicsShape {
 
-    constructor(width, height, depth){
+    constructor(geometry){
         super();
-        this.width = width;
-        this.height = height;
-        this.depth = depth;
 
-        let w2 = width/2;
-        let h2 = height/2;
-        let d2 = depth/2;
+        geometry.computeBoundingBox();
+        let size = geometry.boundingBox.getSize();
 
-        this._pointsChosen = [
-            // bottom
-            _cube[0],_cube[4],_cube[1],
-            _cube[4],_cube[5],_cube[1],
-            // back
-            _cube[4],_cube[6],_cube[5],
-            _cube[5],_cube[6],_cube[7],
-            // left
-            _cube[1],_cube[5],_cube[7],
-            // right_
-            _cube[6],_cube[4],_cube[0],
-            // top-f_ront
-            _cube[0],_cube[1],_cube[6],
-            _cube[6],_cube[1],_cube[7],
-        ];
+        this.width = size.x;
+        this.height = size.y;
+        this.depth = size.z;
+
+        let w2 = this.width/2;
+        let h2 = this.height/2;
+        let d2 = this.depth/2;
+            
+        this.center.x = (geometry.boundingBox.max.x + geometry.boundingBox.min.x) / 2;
+        this.center.y = (geometry.boundingBox.max.y + geometry.boundingBox.min.y) / 2;
+        this.center.z = (geometry.boundingBox.max.z + geometry.boundingBox.min.z) / 2;
+
+        let transformMatrix = new Matrix4();
+        transformMatrix.makeScale(w2,h2,d2);
+        transformMatrix.setPosition(this.center);
+
+        // 2D shape, no depth
+        if(d2 == 0){
+            let face = new Face(
+                xyPlane[0].clone().applyMatrix4(transformMatrix),
+                xyPlane[1].clone().applyMatrix4(transformMatrix),
+                xyPlane[2].clone().applyMatrix4(transformMatrix),
+                xyPlane[3].clone().applyMatrix4(transformMatrix),
+            );
+            this.faces.push(face);
+        }
+        // 2D shape, no width
+        else if(w2 == 0){
+            let face = new Face(
+                yzPlane[0].clone().applyMatrix4(transformMatrix),
+                yzPlane[1].clone().applyMatrix4(transformMatrix),
+                yzPlane[2].clone().applyMatrix4(transformMatrix),
+                yzPlane[3].clone().applyMatrix4(transformMatrix),
+            );
+            this.faces.push(face);
+        }
+        // 2D shape, no height
+        else if(h2 == 0){
+            let face = new Face(
+                xzPlane[0].clone().applyMatrix4(transformMatrix),
+                xzPlane[1].clone().applyMatrix4(transformMatrix),
+                xzPlane[2].clone().applyMatrix4(transformMatrix),
+                xzPlane[3].clone().applyMatrix4(transformMatrix),
+            );
+            this.faces.push(face);
+        }
+        // 3D shape
+        else{
+            for(let f of cubeFaces){
+                let face = new Face(
+                    f[0].clone().applyMatrix4(transformMatrix),
+                    f[1].clone().applyMatrix4(transformMatrix),
+                    f[2].clone().applyMatrix4(transformMatrix),
+                    f[3].clone().applyMatrix4(transformMatrix),
+                );
+                this.faces.push(face);
+            }
+        }
 
     }
 
@@ -346,6 +489,26 @@ class Face {
         this.plane.setW(planeW);
     }
 
+
+    /**
+     * Transforms each vertex, the normal and the plane using the given matrix
+     * @param {Matrix4} matrix - The transformation matrix to apply 
+     * @returns this object for chaining
+     */
+    applyMatrix4(matrix){
+        this.v1.applyMatrix4(matrix);
+        this.v2.applyMatrix4(matrix);
+        this.v3.applyMatrix4(matrix);
+        if(this.v4)
+            this.v4.applyMatrix4(matrix);
+
+        this.midpoint.applyMatrix4(matrix);
+        this.normal.transformDirection(matrix);
+
+        this.plane.applyMatrix4(matrix);
+        return this;
+    }
+
     /**
      * Sets this face to be equal to the supplied face. If a matrixWorld is provided, is applied to this face
      * @param {Face} face - The face to copy
@@ -364,16 +527,7 @@ class Face {
         this.plane.copy(face.plane);
 
         if (matrixWorld) {
-            this.v1.applyMatrix4(matrixWorld);
-            this.v2.applyMatrix4(matrixWorld);
-            this.v3.applyMatrix4(matrixWorld);
-            if(this.v4)
-                this.v4.applyMatrix4(matrixWorld);
-
-            this.midpoint.applyMatrix4(matrixWorld);
-            this.normal.transformDirection(matrixWorld);
-
-            this.plane.applyMatrix4(matrixWorld);
+            this.applyMatrix4(matrixWorld);
         }
         return this;
     }

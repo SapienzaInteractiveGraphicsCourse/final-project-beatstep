@@ -45,6 +45,7 @@ class Robot {
                 this.wheels = this.group.getObjectByName("ruote");
 
         this.group.geometry = _robotCollisionGeometry;
+        this.group.name = "Robot";
 
         this.group.feetPosition = this.group.position;
 
