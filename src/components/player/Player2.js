@@ -135,7 +135,7 @@ class Player extends Object3D{
                 this.shoot()
             }
         }).bind(this));
-        this.rifleExplosion = new ParticleSystem(camera, camera, 0.05, smokeImg);
+        this.rifleExplosion = new ParticleSystem(camera, camera, 0.03, smokeImg);
         this.rifleExplosion.setParticleSize(0.1)
         this.rifleExplosion.setGeneralRadius(0.1,0.1,0.1);
         this.rifleExplosion.setGeneralVelocity(0.01,0.01,0.01);
@@ -323,15 +323,19 @@ class Player extends Object3D{
         let direction = _zAxis.setFromMatrixColumn( this.camera.matrixWorld, 2).multiplyScalar(-1).normalize().clone();
         let distance = 100;
         let hits = world.raycast(origin,direction,distance);
-        // Sorting hits by distance, closer first
-        hits.sort((a, b) => { 
-            let dif = a.distance - b.distance;
-            return dif;
-        });
 
-        let hit = hits[0];
-        if(hit.objectIntersected.constructor.name == "Player") hit = hits[1];
-        if(hit.objectIntersected.hit) hit.objectIntersected.hit(direction, hit.distance);
+        if(hits.length > 0){
+            // Sorting hits by distance, closer first
+            hits.sort((a, b) => { 
+                let dif = a.distance - b.distance;
+                return dif;
+            });
+
+            let hit = hits[0];
+            if(hit.objectIntersected.constructor.name == "Player" && hits.length > 1) hit = hits[1];
+            if(hit.objectIntersected.hit) hit.objectIntersected.hit(direction, hit.distance);
+        }
+        
     }
 
     update(deltaTime){
