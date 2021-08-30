@@ -1,4 +1,4 @@
-import { THREE } from '../setup/ThreeSetup';
+import { THREE, scene, camera } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 
 import robot1 from '../../asset/models/robot1/robot_1.glb';
@@ -98,7 +98,6 @@ class Robot {
                 if(e.action.finalCoords.rotations){
                     for(let objRotation of e.action.finalCoords.rotations){
                         objRotation.obj.setRotationFromQuaternion(objRotation.value.normalize());
-                        objRotation.obj.updateMatrix();
                     }
                 }
             }
@@ -128,18 +127,26 @@ class Robot {
 
         }.bind(this);
 
+        this.group.hit = this.hit.bind(this);
+
+    }
+
+    hit(){
+        this.health -= 20;
+        if(this.health <= 0) this.explode();
     }
 
     explode(){
         if(this._explosionParticles !== null) return;
+        // Adding Particles
+        this._explosionParticles = new ParticleSystem(scene,camera, 0.6, null, ()=>{
+            this._explosionParticles = null;
+        });
+        this._explosionParticles.setGeneralPosition(this.group.position.x,this.group.position.y,this.group.position.z);
+        this._explosionParticles.restart();
         // Disappear
         this.group.removeFromPhysicsWorld();
         this.group.removeFromParent();
-        // Adding Particles
-        this._explosionParticles = new ParticleSystem(scene,camera, 0.6, ()=>{
-            this._explosionParticles = null;
-        });
-        this._explosionParticles.setPosition(this.group.position.x,this.group.position.y,this.group.position.z);
     }
 
     setPosition(x,y,z){
@@ -175,14 +182,12 @@ class Robot {
         return Math.abs(this.group.position.y - py) < (this.size.y*2);
     }
 
-    hit(){
-        this.isHit = true;
-        // TODO: hit here
-    }
-
     update(delta){
         // Update every animation
         this.mixer.update(delta);
+        if(this._explosionParticles !== null){
+            this._explosionParticles.update(delta);
+        }
         let player = this.playerToFollow;
 
         if(player == null) return;
@@ -231,13 +236,14 @@ class Robot {
     }
 
     createAnimationShootPose(){
+        let velocity = 0.6;
         // this.arm_dx_1
         let arm_dx_1_a1 = this.arm_dx_1.quaternion;
         let arm_dx_1_a2 = this.incrementQuaternionFromEuler(arm_dx_1_a1, 0,Math.PI/8,Math.PI/3);
 
         const arm_dx_1_rotation = new THREE.QuaternionKeyframeTrack(
             this.arm_dx_1_path+'.quaternion',
-            [0, 0.3],
+            [0, velocity],
             [...arm_dx_1_a1.toArray(),
              ...arm_dx_1_a2.toArray()],
         );
@@ -248,7 +254,7 @@ class Robot {
 
         const arm_dx_2_rotation = new THREE.QuaternionKeyframeTrack(
             this.arm_dx_2_path+'.quaternion',
-            [0, 0.3],
+            [0, velocity],
             [...arm_dx_2_a1.toArray(),
              ...arm_dx_2_a2.toArray()],
         );
@@ -259,15 +265,15 @@ class Robot {
 
         const hand_dx_rotation = new THREE.QuaternionKeyframeTrack(
             this.hand_dx_path+'.quaternion',
-            [0, 0.3],
+            [0, velocity],
             [...hand_dx_a1.toArray(),
              ...hand_dx_a2.toArray()],
         );
 
         // Putting everything toghether
         const shootPose_clip = new THREE.AnimationClip('shootPose_clip', -1, [
-            //arm_dx_1_rotation, arm_dx_2_rotation,
-            //hand_dx_rotation
+            arm_dx_1_rotation, arm_dx_2_rotation,
+            hand_dx_rotation
         ]);
 
         let animation_shootPose = this.mixer.clipAction(shootPose_clip);
@@ -287,13 +293,14 @@ class Robot {
     }
 
     createAnimationShootPoseReverse(){
+        let velocity = 0.6;
         // this.arm_dx_1
         let arm_dx_1_a2 = this.arm_dx_1.quaternion;
         let arm_dx_1_a1 = this.incrementQuaternionFromEuler(arm_dx_1_a2, 0,Math.PI/8,Math.PI/3);
 
         const arm_dx_1_rotation = new THREE.QuaternionKeyframeTrack(
             this.arm_dx_1_path+'.quaternion',
-            [0, 0.3],
+            [0, velocity],
             [...arm_dx_1_a1.toArray(),
              ...arm_dx_1_a2.toArray()],
         );
@@ -304,7 +311,7 @@ class Robot {
 
         const arm_dx_2_rotation = new THREE.QuaternionKeyframeTrack(
             this.arm_dx_2_path+'.quaternion',
-            [0, 0.3],
+            [0, velocity],
             [...arm_dx_2_a1.toArray(),
              ...arm_dx_2_a2.toArray()],
         );
@@ -315,7 +322,7 @@ class Robot {
 
         const hand_dx_rotation = new THREE.QuaternionKeyframeTrack(
             this.hand_dx_path+'.quaternion',
-            [0, 0.3],
+            [0, velocity],
             [...hand_dx_a1.toArray(),
              ...hand_dx_a2.toArray()],
         );
@@ -330,14 +337,14 @@ class Robot {
         animation_shootPoseRev.loop = THREE.LoopOnce;
         animation_shootPoseRev.enabled = false;
         animation_shootPoseRev.clampWhenFinished = false;
-        // animation_shootPoseRev.finalCoords = {
-        //     positions: [],
-        //     rotations: [
-        //         {obj:this.arm_dx_1,value:arm_dx_1_a2},
-        //         {obj:this.arm_dx_2,value:arm_dx_2_a2},
-        //         {obj:this.hand_dx,value:hand_dx_a2},
-        //     ],
-        // };
+        animation_shootPoseRev.finalCoords = {
+            positions: [],
+            rotations: [
+                {obj:this.arm_dx_1,value:arm_dx_1_a2},
+                {obj:this.arm_dx_2,value:arm_dx_2_a2},
+                {obj:this.hand_dx,value:hand_dx_a2},
+            ],
+        };
 
         return animation_shootPoseRev;
     }
@@ -417,6 +424,7 @@ class Robot {
         let animation_alert = this.mixer.clipAction(alert_clip);
         animation_alert.loop = THREE.LoopOnce;
         animation_alert.enabled = false;
+        animation_alert.clampWhenFinished = false;
 
         return animation_alert;
     }
