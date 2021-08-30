@@ -145,15 +145,14 @@ class LevelCreator {
     }
 
     addParticleEffect(x,y,z, duration,radius,particleSize,generalLife,generalVelocity){
-        const ps = new ParticleSystem(camera,duration,(()=>{
-            this.objectsToUpdate = this.objectsToUpdate.filter(item => item !== ps);
+        const ps = new ParticleSystem(scene,camera,duration,(()=>{
+            // this.objectsToUpdate = this.objectsToUpdate.filter(item => item !== ps);
         }).bind(this));
         ps.setGeneralPosition(x,y,z);
         ps.setGeneralRadius(...radius);
         ps.setParticleSize(particleSize);
         ps.setGeneralLife(generalLife);
         ps.setGeneralVelocity(...generalVelocity);
-        scene.add(ps);
         this.objectsToUpdate.push(ps);
     }
 

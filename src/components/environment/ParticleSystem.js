@@ -73,7 +73,7 @@ class ParticleSystem extends THREE.Points {
      * @param {Number} duration If null, the duration is infinite, else is in seconds
      * @param {Function} onFinish The callback function when the effect finishes
      */
-    constructor(camera,duration = null, onFinish = ()=>{}) {
+    constructor(scene,camera,duration = null, onFinish = ()=>{}) {
         // Adding uniforms values to Vertex/Fragment shaders
         const uniforms = {
             diffuseTexture: {
@@ -103,6 +103,8 @@ class ParticleSystem extends THREE.Points {
         geometry.setAttribute('angle', new THREE.Float32BufferAttribute([], 1));
 
         super(geometry, material);
+        this._scene = scene;
+        this._scene.add(this);
         this._camera = camera;
 
         this.frustumCulled = false;
@@ -296,11 +298,13 @@ class ParticleSystem extends THREE.Points {
     }
 
     reset(){
+        if(this.parent == null) this._scene.add(this);
         this._duration = this._durationStart;
         this._isStopped = true;
     }
 
     start(){
+        if(this.parent == null) this._scene.add(this);
         this._isStopped = false;
     }
 
