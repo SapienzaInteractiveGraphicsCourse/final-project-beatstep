@@ -114,7 +114,7 @@ class ParticleSystem extends THREE.Points {
         this._durationStart = duration;
         this._onFinish = onFinish;
 
-        this._isStopped = false;
+        this._isStopped = true;
 
         this._alphaSpline = new LinearSpline((t, a, b) => {
             return a + t * (b - a);
@@ -258,6 +258,7 @@ class ParticleSystem extends THREE.Points {
             }
             else{
                 if(this._particles.length === 0){
+                    this._isStopped = true;
                     this.removeFromParent();
                     this._onFinish();
                 }
@@ -298,7 +299,8 @@ class ParticleSystem extends THREE.Points {
     }
 
     reset(){
-        if(this.parent == null) this._scene.add(this);
+        this.removeFromParent();
+        this._particles = [];
         this._duration = this._durationStart;
         this._isStopped = true;
     }
@@ -311,6 +313,11 @@ class ParticleSystem extends THREE.Points {
     restart(){
         this.reset();
         this.start();
+    }
+
+    stop(){
+        this.removeFromParent();
+        this._isStopped = true;
     }
 
 }

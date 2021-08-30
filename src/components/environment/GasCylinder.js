@@ -98,6 +98,7 @@ class GasCylinder extends THREE.Mesh{
             this._explosionParticles = null;
         });
         this._explosionParticles.setGeneralPosition(this.position.x,this.position.y,this.position.z);
+        this._explosionParticles.start();
     }
 
     onCollision(collisionResult,obj,delta){

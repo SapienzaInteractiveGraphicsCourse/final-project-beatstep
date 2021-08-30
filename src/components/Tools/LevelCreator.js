@@ -159,7 +159,10 @@ class LevelCreator {
         ps.setParticleSize(particleSize);
         ps.setGeneralLife(generalLife);
         ps.setGeneralVelocity(...generalVelocity);
+        ps.restart();
         this.objectsToUpdate.push(ps);
+
+        // setTimeout(()=>ps.restart(),(duration+2)*1000)
     }
 
     /** Update game */
