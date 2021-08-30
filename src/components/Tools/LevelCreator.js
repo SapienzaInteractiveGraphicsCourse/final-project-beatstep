@@ -150,7 +150,7 @@ class LevelCreator {
         scene.add(pointLight);
     }
 
-    addParticleEffect(x,y,z, duration,radius,particleSize,generalLife,generalVelocity,particleImage){
+    addParticleEffect(x,y,z, duration,radius,particleSize,generalLife,generalVelocity,numberOfParticles,particleImage){
         const ps = new ParticleSystem(scene,camera,duration,particleImage,(()=>{
             // this.objectsToUpdate = this.objectsToUpdate.filter(item => item !== ps);
         }).bind(this));
@@ -159,6 +159,7 @@ class LevelCreator {
         ps.setParticleSize(particleSize);
         ps.setGeneralLife(generalLife);
         ps.setGeneralVelocity(...generalVelocity);
+        ps.setNumberOfParticles(numberOfParticles);
         ps.restart();
         this.objectsToUpdate.push(ps);
 
@@ -287,7 +288,7 @@ class LevelCreator {
 
         this.addGasCylinder(5,0,5, Math.PI*0.8);
 
-        this.addParticleEffect(0,2,0, 4, [8,8,8], 8, 0.5, [0,10,0], smokeImg);
+        this.addParticleEffect(0,2,0, 4, [8,8,8], 4, 0.5, [0,10,0], 75, null);
     }
 
 }

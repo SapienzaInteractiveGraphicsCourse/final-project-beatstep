@@ -141,6 +141,7 @@ class ParticleSystem extends THREE.Points {
         this._generalRadius = [3,3,3];
         this._generalLife = 0.6;
         this._particleSize = 4.0;
+        this._numberOfParticles = 75;
 
         this.updateGeometry();
     }
@@ -227,8 +228,8 @@ class ParticleSystem extends THREE.Points {
             this.gdfsghk = 0.0;
         }
         this.gdfsghk += timeElapsed;
-        const n = Math.floor(this.gdfsghk * 75.0);
-        this.gdfsghk -= n / 75.0;
+        const n = Math.floor(this.gdfsghk * this._numberOfParticles);
+        this.gdfsghk -= n / this._numberOfParticles;
 
         for (let i = 0; i < n; i++) {
             const life = (Math.random() * 0.75 + 0.25) * this._generalLife;
@@ -296,6 +297,10 @@ class ParticleSystem extends THREE.Points {
 
     setDuration(seconds = null){
         this._durationStart = seconds;
+    }
+
+    setNumberOfParticles(n){
+        this._numberOfParticles = n;
     }
 
     reset(){
