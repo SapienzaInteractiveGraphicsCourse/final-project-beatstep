@@ -58,8 +58,8 @@ class Staircase extends THREE.Mesh {
         
         this.onCollision = ((collisionResult,obj,delta)=>{
             // Move back the player if he penetrated into the wall
-            // let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
-            // obj.position.add(backVec);
+            let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
+            obj.position.add(backVec);
     
             // Don't allow the player to move inside the wall
             let dotDisplacement = collisionResult.normal.dot(obj.movementEngine.displacement);
