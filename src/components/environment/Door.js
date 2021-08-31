@@ -70,20 +70,34 @@ class Door {
         this.animation_openDoors = this.createOpenAnimation();
         this.animation_closeDoors = this.createCloseAnimation();
 
-        this.group.onCollision = function(collisionResult,obj,delta){
-            if(!this.isOpen){
-                // Move back the player if he penetrated into the wall
-                let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
-                obj.position.add(backVec);
+        // this.group.onCollision = function(collisionResult,obj,delta){
+        //     if(!this.isOpen){
+        //         // Move back the player if he penetrated into the wall
+        //         let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
+        //         obj.position.add(backVec);
 
-                // Don't allow the player to move inside the wall
-                let dot = collisionResult.normal.dot(obj.movementEngine.displacement);
-                if(dot < 0){
-                    backVec = collisionResult.normal.multiplyScalar(dot);
-                    obj.movementEngine.displacement.sub(backVec);
-                }
+        //         // Don't allow the player to move inside the wall
+        //         let dot = collisionResult.normal.dot(obj.movementEngine.displacement);
+        //         if(dot < 0){
+        //             backVec = collisionResult.normal.multiplyScalar(dot);
+        //             obj.movementEngine.displacement.sub(backVec);
+        //         }
+        //     }
+        // }.bind(this);
+
+        this.door_l.onCollision = function(collisionResult,obj,delta){
+            // Move back the player if he penetrated into the wall
+            let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
+            obj.position.add(backVec);
+
+            // Don't allow the player to move inside the wall
+            let dot = collisionResult.normal.dot(obj.movementEngine.displacement);
+            if(dot < 0){
+                backVec = collisionResult.normal.multiplyScalar(dot);
+                obj.movementEngine.displacement.sub(backVec);
             }
         }.bind(this);
+        this.door_r.onCollision = this.door_l.onCollision;
 
         // TODO: debug animation, to remove
         document.addEventListener("mousedown",((event)=>{
