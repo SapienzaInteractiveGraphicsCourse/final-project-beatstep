@@ -77,7 +77,7 @@ class Robot {
         this.velocity = 8; // Step
         this.rotationVelocity = this.velocity;
         this.minVicinityWithPlayer = 2;
-        this.maxVicinityWithPlayer = this.minVicinityWithPlayer + 2;
+        this.maxVicinityWithPlayer = this.minVicinityWithPlayer + 8;
         this.eyeRadiusDistanceMin = this.maxVicinityWithPlayer + 6;
         this.eyeRadiusDistanceMax = this.eyeRadiusDistanceMin + 4;
 
@@ -87,10 +87,10 @@ class Robot {
         this.mixer = new THREE.AnimationMixer(this.group);
         // Set final position when animation ends
         this.mixer.addEventListener('finished', (e) => {
+            e.action.reset();
+            e.action.stop();
             // checking if finalCoords exists
             if(e.action.finalCoords){
-                e.action.stop();
-
                 console.log(e.action)
                 if(e.action.finalCoords.positions){
                     for(let objPosition of e.action.finalCoords.positions){
@@ -240,7 +240,7 @@ class Robot {
     }
 
     createAnimationShootPose(){
-        let velocity = 0.6;
+        let velocity = 0.3;
         // this.arm_dx_1
         let arm_dx_1_a1 = this.arm_dx_1.quaternion;
         let arm_dx_1_a2 = this.incrementQuaternionFromEuler(arm_dx_1_a1, 0,Math.PI/8,Math.PI/3);
@@ -287,9 +287,9 @@ class Robot {
         animation_shootPose.finalCoords = {
             positions: [],
             rotations: [
-                {obj:this.arm_dx_1,value:arm_dx_1_a2},
-                {obj:this.arm_dx_2,value:arm_dx_2_a2},
-                {obj:this.hand_dx,value:hand_dx_a2},
+                {obj:this.arm_dx_1,value:arm_dx_1_a2.clone()},
+                {obj:this.arm_dx_2,value:arm_dx_2_a2.clone()},
+                {obj:this.hand_dx,value:hand_dx_a2.clone()},
             ],
         };
 
@@ -297,7 +297,7 @@ class Robot {
     }
 
     createAnimationShootPoseReverse(){
-        let velocity = 0.6;
+        let velocity = 0.3;
         // this.arm_dx_1
         let arm_dx_1_a2 = this.arm_dx_1.quaternion;
         let arm_dx_1_a1 = this.incrementQuaternionFromEuler(arm_dx_1_a2, 0,Math.PI/8,Math.PI/3);
@@ -344,9 +344,9 @@ class Robot {
         animation_shootPoseRev.finalCoords = {
             positions: [],
             rotations: [
-                {obj:this.arm_dx_1,value:arm_dx_1_a2},
-                {obj:this.arm_dx_2,value:arm_dx_2_a2},
-                {obj:this.hand_dx,value:hand_dx_a2},
+                {obj:this.arm_dx_1,value:arm_dx_1_a2.clone()},
+                {obj:this.arm_dx_2,value:arm_dx_2_a2.clone()},
+                {obj:this.hand_dx,value:hand_dx_a2.clone()},
             ],
         };
 
