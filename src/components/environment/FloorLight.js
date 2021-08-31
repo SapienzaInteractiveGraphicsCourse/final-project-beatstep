@@ -95,12 +95,12 @@ class FloorLight {
                 obj.movementEngine.displacement.sub(backVec);
             }
             
-            
+            if(obj.constructor.name != "Player") return
             hud.caption.text = "Press E to toggle the light";
             hud.caption.owner = this;
             hud.caption.show = true;
+            this._canBeInteracted = true;
             // this._tipLight.classList.remove("hidden");
-            if(obj.constructor.name === "Player") this._canBeInteracted = true;
 
         }).bind(this);
 

@@ -105,10 +105,11 @@ class Door {
         }).bind(this));
 
         this.group.onCollision = function(collisionResult,obj,delta){
+            if(obj.constructor.name != "Player") return
             hud.caption.text = `Press E to ${this.isOpen ? "close" : "open"} the door`;
             hud.caption.owner = this;
             hud.caption.show = true;
-            if(obj.constructor.name === "Player") this._canBeInteracted = true;
+            this._canBeInteracted = true;
         }.bind(this);
         
         this.door_l.onCollision = this.door_r.onCollision = function(collisionResult,obj,delta){
