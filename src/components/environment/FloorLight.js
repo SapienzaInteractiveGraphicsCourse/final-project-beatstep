@@ -1,5 +1,6 @@
 import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
+import { hud } from '../player/HUD';
 
 import light from '../../asset/models/floorLight/LUCE.glb';
 
@@ -68,11 +69,11 @@ class FloorLight {
         
         // Interaction text
         // TODO: put in HUD
-        this._tipLight = document.createElement("p");
-        this._tipLight.innerText = "Press E to toggle the light";
-        this._tipLight.classList.add("tip");
-        this._tipLight.classList.add("hidden");
-        document.body.appendChild(this._tipLight);
+        // this._tipLight = document.createElement("p");
+        // this._tipLight.innerText = "Press E to toggle the light";
+        // this._tipLight.classList.add("tip");
+        // this._tipLight.classList.add("hidden");
+        // document.body.appendChild(this._tipLight);
 
         // Interaction + Collision
         this._canBeInteracted = false;
@@ -94,7 +95,11 @@ class FloorLight {
                 obj.movementEngine.displacement.sub(backVec);
             }
             
-            this._tipLight.classList.remove("hidden");
+            
+            hud.caption.text = "Press E to toggle the light";
+            hud.caption.owner = this;
+            hud.caption.show = true;
+            // this._tipLight.classList.remove("hidden");
             if(obj.constructor.name === "Player") this._canBeInteracted = true;
 
         }).bind(this);
@@ -114,7 +119,10 @@ class FloorLight {
     }
 
     update(delta){
-        this._tipLight.classList.add("hidden");
+        // Reset the caption if this object is the owner
+        if(hud.caption.owner == this)
+            hud.caption.show = false;
+        // this._tipLight.classList.add("hidden");
         this._canBeInteracted = false;
     }
 

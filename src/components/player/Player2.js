@@ -4,7 +4,7 @@ import { THREE, scene } from "../setup/ThreeSetup";
 
 import { world } from "../physics/PhysicsWorld";
 import { MovementEngine } from "../physics/MovementEngine";
-import HUD from "./HUD";
+import { hud } from "./HUD";
 import ParticleSystem from "../environment/ParticleSystem";
 
 import { DefaultGeneralLoadingManager } from "../Tools/GeneralLoadingManager";
@@ -123,10 +123,27 @@ class Player extends Object3D{
         
 
         this.setUpControls(angularSensitivity);
-        this.hud = new HUD(this,camera);
+
+
+        // Setup of the HUD
+        this.hud = hud;
+
+        this.hud.createBar("healthBar","green","Health");
         this.hud.healthBar.setPercentage(_health/this.topHealth*100);
+
+        this.hud.createBar("shieldBar","blue", "Shield");
         this.hud.shieldBar.setPercentage(_shield/this.topShield*100);
+        
+        this.hud.createBar("ammoBar","red", "Ammo");
         this.hud.ammoBar.setPercentage(_ammo/this.topAmmo*100);
+
+        this.controls.addEventListener("lock", function (e) {
+            this.hud.crosshairs.visible = true;
+        }.bind(this));
+        this.controls.addEventListener("unlock", function (e) {
+            this.hud.crosshairs.visible = false;
+        }.bind(this));
+
 
         this.rifle = rifleModel.mesh;
         this.setUpRifle();
@@ -139,9 +156,7 @@ class Player extends Object3D{
         this.rifleExplosion.setParticleSize(0.1)
         this.rifleExplosion.setGeneralRadius(0.1,0.1,0.1);
         this.rifleExplosion.setGeneralVelocity(0.01,0.01,0.01);
-        this.rifleExplosion.setGeneralPosition(...this.rifle.tipPosition.toArray());
         this.rifleExplosion.setGeneralPosition(1.1,0.95,-0.65);
-        window.exp = this.rifleExplosion;
         
     }
 
@@ -303,26 +318,13 @@ class Player extends Object3D{
         this.shootAnimation.reset();
         this.shootAnimation.play();
         // Explosion
-        // if(!this._explosionParticles){
-        //     let worldTipPosition = this.rifle.localToWorld(this.rifle.tipPosition).toArray()
-        //     this._explosionParticles = new ParticleSystem(scene,this.camera, 0.05, ()=>{
-        //         this._explosionParticles = null;
-        //     });
-        //     this._explosionParticles.setPosition(...worldTipPosition);
-        //     this._explosionParticles.setRadious(10,10,10);
-        //     this._explosionParticles.setPosition(0,0,0);
-
-        // }
-        //this.rifleExplosion.setGeneralPosition(0,2,0);
         this.rifleExplosion.restart();
 
-
-        // let origin = this.rifle.localToWorld(this.rifle.tipPosition.clone());
-        let origin = new Vector3();
+        let origin = new Vector3(0,0,0);
         this.camera.getWorldPosition(origin);
         let direction = _zAxis.setFromMatrixColumn( this.camera.matrixWorld, 2).multiplyScalar(-1).normalize().clone();
         let distance = 100;
-        let hits = world.raycast(origin,direction,distance);
+        let hits = world.raycastPrecise(origin,direction,distance);
 
         if(hits.length > 0){
             // Sorting hits by distance, closer first
@@ -336,6 +338,10 @@ class Player extends Object3D{
             if(hit.objectIntersected.hit) hit.objectIntersected.hit(direction, hit.distance);
         }
         
+    }
+
+    hit(){
+        dealDamage(10);
     }
 
     update(deltaTime){

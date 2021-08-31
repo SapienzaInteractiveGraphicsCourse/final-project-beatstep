@@ -1,4 +1,4 @@
-.overlay {
+.top_overlay {
     position: fixed;
     top: 10px;
     left: 10px;
@@ -83,16 +83,14 @@
 }
 
 /* Tip text position */
-.tip{
-    position: absolute;
+.caption{
+    position: fixed;
     bottom: 2%;
     left: 50%;
     transform: translate(-50%,0);
-
-    font-size: 2vw;
-    -webkit-text-fill-color: white;
-	-webkit-text-stroke-width: 0.04vw;
-	-webkit-text-stroke-color: black;
+    font-size: xx-large;
+    color: white;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
 .hidden{
     display: none;

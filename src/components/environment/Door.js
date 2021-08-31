@@ -1,6 +1,7 @@
   
 import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
+import { hud } from '../player/HUD';
 
 import door from '../../asset/models/door/doorSquared.glb';
 
@@ -32,7 +33,7 @@ class Door {
 
         let _doorCollisionGeometry = new THREE.BoxGeometry( _doorSize.x,
                                                             _doorSize.y,
-                                                            _doorSize.z);
+                                                            _doorSize.z+12);
         _doorCollisionGeometry.translate(0,_doorSize.y/2,0);
 
         this.group.geometry = _doorCollisionGeometry;
@@ -94,40 +95,56 @@ class Door {
         //     }
         // }.bind(this);
 
-        
-        this.door_r.onCollision = function(collisionResult,obj,delta){
-            // Move back the player if he penetrated into the wall
-            let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
-            obj.position.add(backVec);
-
-            // Don't allow the player to move inside the wall
-            let dot = collisionResult.normal.dot(obj.movementEngine.displacement);
-            if(dot < 0){
-                backVec = collisionResult.normal.multiplyScalar(dot);
-                obj.movementEngine.displacement.sub(backVec);
-            }
-        }.bind(this);
-        this.door_l.onCollision = function(collisionResult,obj,delta){
-            // Move back the player if he penetrated into the wall
-            let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
-            obj.position.add(backVec);
-
-            // Don't allow the player to move inside the wall
-            let dot = collisionResult.normal.dot(obj.movementEngine.displacement);
-            if(dot < 0){
-                backVec = collisionResult.normal.multiplyScalar(dot);
-                obj.movementEngine.displacement.sub(backVec);
-            }
-        }.bind(this);
-
-        // TODO: debug animation, to remove
-        document.addEventListener("mousedown",((event)=>{
-            if(event.button == 1){ // wheel
-                // this.openDoor();
+        // Interaction
+        this._canBeInteracted = false;
+        document.addEventListener("keydown", ((event) => {
+            if(this._canBeInteracted && event.key.toLowerCase() === "e") { // press e
                 if(!this.isOpen) this.openDoor();
                 else this.closeDoor();
             }
         }).bind(this));
+
+        this.group.onCollision = function(collisionResult,obj,delta){
+            hud.caption.text = `Press E to ${this.isOpen ? "close" : "open"} the door`;
+            hud.caption.owner = this;
+            hud.caption.show = true;
+            if(obj.constructor.name === "Player") this._canBeInteracted = true;
+        }.bind(this);
+        
+        this.door_l.onCollision = this.door_r.onCollision = function(collisionResult,obj,delta){
+            // Move back the player if he penetrated into the wall
+            let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
+            obj.position.add(backVec);
+
+            // Don't allow the player to move inside the wall
+            let dot = collisionResult.normal.dot(obj.movementEngine.displacement);
+            if(dot < 0){
+                backVec = collisionResult.normal.multiplyScalar(dot);
+                obj.movementEngine.displacement.sub(backVec);
+            }
+        }.bind(this);
+        // this.door_l.onCollision = function(collisionResult,obj,delta){
+        //     // Move back the player if he penetrated into the wall
+        //     let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
+        //     obj.position.add(backVec);
+
+        //     // Don't allow the player to move inside the wall
+        //     let dot = collisionResult.normal.dot(obj.movementEngine.displacement);
+        //     if(dot < 0){
+        //         backVec = collisionResult.normal.multiplyScalar(dot);
+        //         obj.movementEngine.displacement.sub(backVec);
+        //     }
+        // }.bind(this);
+
+
+        // TODO: debug animation, to remove
+        // document.addEventListener("mousedown",((event)=>{
+        //     if(event.button == 1){ // wheel
+        //         // this.openDoor();
+        //         if(!this.isOpen) this.openDoor();
+        //         else this.closeDoor();
+        //     }
+        // }).bind(this));
         
     }
 
@@ -148,6 +165,9 @@ class Door {
     update(delta){
         // Update every animation
         this.mixer.update(delta);
+        // Reset the caption if this object is the owner
+        if(hud.caption.owner == this)
+            hud.caption.show = false;
     }
 
     startAnimation(anim) {
