@@ -71,8 +71,8 @@ class LevelCreator {
     addDoor(x,y,z, height, rotationRadians){
         let door = new Door(x,y,z, height, rotationRadians);
         scene.add(door.group);
-        world.addStaticObject(door.group.getObjectByName("door_l"));
-        world.addStaticObject(door.group.getObjectByName("door_r"));
+        world.addStaticObject(door.group.getObjectByName("door_l"),door.group.getObjectByName("door_l").collisionGeometry);
+        world.addStaticObject(door.group.getObjectByName("door_r"),door.group.getObjectByName("door_r").collisionGeometry);
 
         this.objectsToUpdate.push(door);
     }

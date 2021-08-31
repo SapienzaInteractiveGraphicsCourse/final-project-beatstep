@@ -40,6 +40,15 @@ class Door {
         this.door_r = this.group.getObjectByName("door_r");
         this.door_l = this.group.getObjectByName("door_l");
 
+        // Adding geometry of doors
+        let _door_l_CollisionGeometry = new THREE.BoxGeometry( _doorSize.x/4,
+            _doorSize.y/4,
+            _doorSize.z);
+        _door_l_CollisionGeometry.translate(0,0,0);
+
+        this.door_r.collisionGeometry = _door_l_CollisionGeometry;
+        this.door_l.collisionGeometry = _door_l_CollisionGeometry;
+
         // Size
         this.size = _doorSize;
 
@@ -85,6 +94,19 @@ class Door {
         //     }
         // }.bind(this);
 
+        
+        this.door_r.onCollision = function(collisionResult,obj,delta){
+            // Move back the player if he penetrated into the wall
+            let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
+            obj.position.add(backVec);
+
+            // Don't allow the player to move inside the wall
+            let dot = collisionResult.normal.dot(obj.movementEngine.displacement);
+            if(dot < 0){
+                backVec = collisionResult.normal.multiplyScalar(dot);
+                obj.movementEngine.displacement.sub(backVec);
+            }
+        }.bind(this);
         this.door_l.onCollision = function(collisionResult,obj,delta){
             // Move back the player if he penetrated into the wall
             let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
@@ -97,7 +119,6 @@ class Door {
                 obj.movementEngine.displacement.sub(backVec);
             }
         }.bind(this);
-        this.door_r.onCollision = this.door_l.onCollision;
 
         // TODO: debug animation, to remove
         document.addEventListener("mousedown",((event)=>{
