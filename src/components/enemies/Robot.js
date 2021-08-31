@@ -256,13 +256,14 @@ class Robot {
     }
 
     update(delta){
+        if(this._explosionParticles !== null){
+            this._explosionParticles.update(delta);
+        }
         if(this.group.parent == null) return;
         // Update every animation
         this.mixer.update(delta);
         this._shootExplosion.update(delta);
-        if(this._explosionParticles !== null){
-            this._explosionParticles.update(delta);
-        }
+        
         let player = this.playerToFollow;
 
         if(player == null) return;
