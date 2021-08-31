@@ -25,12 +25,12 @@ class PhysicsWorld {
     }
 
 
-    addObject(mesh,geometry = null,dynamic = false){
+    addObject(mesh,geometry = null,dynamic = false,raycastable = true){
         let geom = geometry || mesh.geometry;
         if(!geom) throw new Error("A geometry or an object with a .geometry property is needed");
         let shape = new PhysicsShape(geom);
         if(mesh.movementEngine == undefined) mesh.movementEngine = new MovementEngine(); 
-        let phObject = new PhysicsObject(mesh,shape);
+        let phObject = new PhysicsObject(mesh,shape,raycastable);
         mesh.movementEngine.phObject = phObject;
 
         if(dynamic) this.dynamicObjects.push(phObject);
@@ -55,12 +55,12 @@ class PhysicsWorld {
         }
     }
 
-    addDynamicObject(mesh,geometry = null){
-        this.addObject(mesh,geometry,true);
+    addDynamicObject(mesh,geometry = null,raycastable = true){
+        this.addObject(mesh,geometry,true,raycastable);
     }
 
-    addStaticObject(mesh,geometry = null){
-        this.addObject(mesh,geometry,false);
+    addStaticObject(mesh,geometry = null,raycastable = true){
+        this.addObject(mesh,geometry,false,raycastable);
     }
 
     removeObject(object){
@@ -157,6 +157,8 @@ class PhysicsWorld {
     raycastPrecise(origin, direction, distance){
         let intersections = [];
         for (let obj of this.dynamicObjects) {
+            // If the object is not raycastable, skip it
+            if(!obj.raycastable) continue;
             // If the object is further than the ray's length, ignore this object
             if(obj.boundingBox.distanceToPoint(origin) > distance) continue;
 
@@ -169,6 +171,8 @@ class PhysicsWorld {
         }
 
         for (let obj of this.staticObjects) {
+            // If the object is not raycastable, skip it
+            if(!obj.raycastable) continue;
             // If the object is further than the ray's length, ignore this object
             if(obj.boundingBox.distanceToPoint(origin) > distance) continue;
 
@@ -187,8 +191,9 @@ class PhysicsWorld {
 
 class PhysicsObject{
 
-    constructor(mesh,shape){
+    constructor(mesh,shape,raycastable){
         this.mesh = mesh;
+        this.raycastable = raycastable;
         this.shape = shape;
         this.boundingBox = this.shape.boundingBox.clone();
         this.boundingShape = new BoundingPhysicsShape(this.shape.geometry);
