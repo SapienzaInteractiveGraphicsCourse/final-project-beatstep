@@ -120,7 +120,6 @@ class GasCylinder extends THREE.Mesh{
         this._explosionParticles.start();
 
         // Pushing surrounding objects away
-        console.log(this.closeObjects);
         for (let obj of this.closeObjects) {
             let dir = new THREE.Vector3().subVectors(obj.position,this.position);
             dir.setY(Math.random()+1).normalize().multiplyScalar(this.explosionPower);

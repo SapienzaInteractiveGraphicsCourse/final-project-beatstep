@@ -163,6 +163,7 @@ class Robot {
         }.bind(this);
 
         this.group.hit = this.hit.bind(this);
+        this.group.dealDamage = this.dealDamage.bind(this);
 
     }
 
@@ -227,6 +228,7 @@ class Robot {
         }).bind(this));
         this.health -= n;
         if(this.health <= 0) this.explode();
+        console.log("Robot got damaged " + this.health);
     }
 
     setPosition(x,y,z){
