@@ -17,7 +17,7 @@ let _robotCollisionGeometry;
 loader.load(robot1, (gltf)=>{
     _robot1Model = gltf.scene;
     // Scale
-    let boundingBox = new THREE.Box3().setFromObject(_robot1Model).getSize();
+    let boundingBox = new THREE.Box3().setFromObject(_robot1Model).getSize(new THREE.Vector3());
     let scaleFactor = _robotHeight / boundingBox.y;
     _robot1Model.scale.set(scaleFactor, scaleFactor, scaleFactor);
     _robotSize = boundingBox.clone();
@@ -86,7 +86,7 @@ class Robot {
         this.head_path = "testa";
 
         // Size
-        this.size = new THREE.Box3().setFromObject(this.group).getSize();
+        this.size = new THREE.Box3().setFromObject(this.group).getSize(new THREE.Vector3());
 
         // Properties to interact
         this.isFollowing = false; // if needs to follow player or not
@@ -204,9 +204,10 @@ class Robot {
                 child.material.emissiveIntensity = this._emissiveIntensityDamage;
             }
         }).bind(this));
-        this.health -= 20;
+        this.dealDamage(20);
         this.angryDuration =  this.angryDurationMax;
-        if(this.health <= 0) this.explode();
+        // this.health -= 20;
+        // if(this.health <= 0) this.explode();
     }
 
     explode(){
@@ -220,6 +221,11 @@ class Robot {
         // Disappear
         this.group.removeFromPhysicsWorld();
         this.group.removeFromParent();
+    }
+
+    dealDamage(n){
+        this.health -= n;
+        if(this.health <= 0) this.explode();
     }
 
     setPosition(x,y,z){

@@ -26,14 +26,14 @@ class Door {
         this.group = _doorModel.clone(true);
 
         // Scale
-        let boundingBox = new THREE.Box3().setFromObject(this.group).getSize();
+        let boundingBox = new THREE.Box3().setFromObject(this.group).getSize(new THREE.Vector3());
         let scaleFactor = height / boundingBox.y;
         this.group.scale.set(scaleFactor, scaleFactor, scaleFactor);
-        let _doorSize = new THREE.Box3().setFromObject(_doorModel).getSize();
+        let _doorSize = new THREE.Box3().setFromObject(_doorModel).getSize(new THREE.Vector3());
 
         let _doorCollisionGeometry = new THREE.BoxGeometry( _doorSize.x,
                                                             _doorSize.y,
-                                                            _doorSize.z+12);
+                                                            _doorSize.z+24);
         _doorCollisionGeometry.translate(0,_doorSize.y/2,0);
 
         this.group.geometry = _doorCollisionGeometry;

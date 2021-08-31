@@ -26,10 +26,21 @@ const _gascylinderRadius = 0.5;
 const _gascylinderHeight = 2;
 const _gascylinderMass = 2;
 const _gascylinderRotation = Math.PI/2;
+const _gascylinderSurroundRadius = 8;
+
 
 const _gascylinderGeometry = new THREE.CylinderGeometry(_gascylinderRadius,
                                                         _gascylinderRadius,
                                                         _gascylinderHeight,32);
+
+// const _gascylinderSurroundGeometry = new THREE.CylinderGeometry(_gascylinderRadius+_gascylinderSurroundRadius,
+//                                                                 _gascylinderRadius+_gascylinderSurroundRadius,
+//                                                                 _gascylinderHeight, 8);
+ 
+const _gascylinderSurroundGeometry = new THREE.BoxGeometry(_gascylinderRadius+_gascylinderSurroundRadius,
+                                                           _gascylinderHeight,
+                                                           _gascylinderRadius+_gascylinderSurroundRadius);
+
 const  _gascylinderMaterials = [
     new THREE.MeshPhongMaterial({
         map: _gascylinderTextures[0],
@@ -59,8 +70,14 @@ class GasCylinder extends THREE.Mesh{
         this.receiveShadow = true;
         this.castShadow = true;
 
-        this.explosionPower = 20;
-        this.health = 100; // TODO: when 0, explode onCollision
+        this.explosionPower = 35;
+        this.closeObjects = [];
+        this.surroundObject = new THREE.Object3D();
+        this.surroundObject.geometry = _gascylinderSurroundGeometry;
+        this.surroundObject.onCollision = function(collisionResult,obj,delta){
+            this.closeObjects.push(obj);
+        }.bind(this);
+        this.add(this.surroundObject);
 
         this._explosionParticles = null;
 
@@ -74,6 +91,7 @@ class GasCylinder extends THREE.Mesh{
         if(this._explosionParticles !== null){
             this._explosionParticles.update(delta);
         }
+        this.closeObjects = [];
     }
 
     setPosition(x,y,z){
@@ -92,6 +110,7 @@ class GasCylinder extends THREE.Mesh{
         if(this._explosionParticles !== null) return;
         // Disappear
         this.removeFromPhysicsWorld();
+        this.surroundObject.removeFromPhysicsWorld();
         this.removeFromParent();
         // Adding Particles
         this._explosionParticles = new ParticleSystem(scene,camera, 0.6, null, ()=>{
@@ -99,19 +118,34 @@ class GasCylinder extends THREE.Mesh{
         });
         this._explosionParticles.setGeneralPosition(this.position.x,this.position.y,this.position.z);
         this._explosionParticles.start();
+
+        // Pushing surrounding objects away
+        console.log(this.closeObjects);
+        for (let obj of this.closeObjects) {
+            let dir = new THREE.Vector3().subVectors(obj.position,this.position);
+            dir.setY(Math.random()+1).normalize().multiplyScalar(this.explosionPower);
+            obj.movementEngine.velocity.copy(dir);
+            if(obj.dealDamage) obj.dealDamage(30);
+        }
     }
 
     onCollision(collisionResult,obj,delta){
 
         //collisionResult.normal.multiplyScalar(-1);
-        collisionResult.normal.y = 1;
-        collisionResult.normal.multiplyScalar(this.explosionPower);
-        obj.movementEngine.velocity.copy(collisionResult.normal);
+        // collisionResult.normal.y = 1;
+        // collisionResult.normal.multiplyScalar(this.explosionPower);
+        // obj.movementEngine.velocity.copy(collisionResult.normal);
 
+        // let dir = obj.movementEngine.velocity.clone().multiplyScalar(-1);
+        // dir.setY(Math.random()).normalize().multiplyScalar(this.explosionPower);
+        // obj.movementEngine.velocity.copy(dir);
+
+        // let dir = new THREE.Vector3().subVectors(obj.position,this.position);
+        // dir.setY(Math.random()+1).normalize().multiplyScalar(this.explosionPower);
+        // obj.movementEngine.velocity.copy(dir);
+
+        if(this.closeObjects.indexOf(obj) == -1) this.closeObjects.push(obj);
         this.explode();
-
-        if(obj.dealDamage) obj.dealDamage(30);
-
     }
 
     hit(){

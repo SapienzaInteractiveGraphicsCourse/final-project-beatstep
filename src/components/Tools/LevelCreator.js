@@ -124,6 +124,7 @@ class LevelCreator {
     addGasCylinder(x,y,z, rotationRadians){
         let cylinder = new GasCylinder(x,y,z, rotationRadians);
         scene.add(cylinder);
+        world.addStaticObject(cylinder.surroundObject,null,false);
         world.addStaticObject(cylinder);
 
         this.objectsToUpdate.push(cylinder);

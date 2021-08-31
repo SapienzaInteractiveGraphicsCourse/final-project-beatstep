@@ -45,7 +45,7 @@ class PhysicsWorld {
         // else if(mesh.addToScene) mesh.addToScene(scene);
 
         if(this.debugDraw){
-            let dbSize = shape.boundingBox.getSize().toArray();
+            let dbSize = shape.boundingBox.getSize(new Vector3()).toArray();
             let dbGeom = new THREE.BoxBufferGeometry(...dbSize);
             dbGeom.translate(...shape.center.toArray());
             let dbBox = new THREE.Mesh(dbGeom,_debugMaterial);
@@ -384,7 +384,7 @@ class BoundingPhysicsShape extends PhysicsShape {
         super();
 
         geometry.computeBoundingBox();
-        let size = geometry.boundingBox.getSize().fixZeroPrecision();
+        let size = geometry.boundingBox.getSize(new Vector3()).fixZeroPrecision();
 
         this.width = size.x;
         this.height = size.y;

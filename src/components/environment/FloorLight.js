@@ -20,10 +20,10 @@ loaderGLTF.load(light, (gltf)=>{
     _floorLightModel = gltf.scene;
     
     // Scale
-    let boundingBox = new THREE.Box3().setFromObject(_floorLightModel).getSize();
+    let boundingBox = new THREE.Box3().setFromObject(_floorLightModel).getSize(new THREE.Vector3());
     let scaleFactor = _floorLightHeight / boundingBox.y;
     _floorLightModel.scale.set(scaleFactor, scaleFactor, scaleFactor);
-    _floorLightSize = new THREE.Box3().setFromObject(_floorLightModel).getSize();
+    _floorLightSize = new THREE.Box3().setFromObject(_floorLightModel).getSize(new THREE.Vector3());
 
     _cylinderGeometry = new THREE.CylinderGeometry(
         (boundingBox.x/2),
@@ -63,7 +63,7 @@ class FloorLight {
                                 this.lightPosition.z + this.lightPosition.r);
                                 
         // Size
-        this.size = new THREE.Box3().setFromObject(this.group).getSize();
+        this.size = new THREE.Box3().setFromObject(this.group).getSize(new THREE.Vector3());
         this.setPosition(x,y,z);
         this.setRotation(rotation);
         

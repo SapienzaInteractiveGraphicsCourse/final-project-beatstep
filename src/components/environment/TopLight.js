@@ -21,7 +21,7 @@ objLoaderLight.load(topLightModel,
     (obj) => {
         _topLightObj = obj;
         // Scale
-        let boundingBox = new THREE.Box3().setFromObject(_topLightObj).getSize();
+        let boundingBox = new THREE.Box3().setFromObject(_topLightObj).getSize(new THREE.Vector3());
         let scaleFactor = 3 / boundingBox.x;
         _topLightObj.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
