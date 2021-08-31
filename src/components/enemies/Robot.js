@@ -178,6 +178,7 @@ class Robot {
         this.shootingCooldown = this.shootingCooldownMax;
         this._shootExplosion.restart();
         let fromPosition = this.group.position.clone(true);
+        fromPosition.y += _robotHeight*0.6;
         let direction = toPosition.clone(true).sub(fromPosition).normalize();
         let distance = 100;
         let hits = world.raycastPrecise(fromPosition,direction,distance);
@@ -190,7 +191,7 @@ class Robot {
             });
 
             let hit = hits[0];
-            if(hit.objectIntersected.constructor.name == "Robot" && hits.length > 1) hit = hits[1];
+            if(hit.objectIntersected.name == "Robot" && hits.length > 1) hit = hits[1];
             if(hit.objectIntersected.hit) hit.objectIntersected.hit(direction, hit.distance);
         }
     }

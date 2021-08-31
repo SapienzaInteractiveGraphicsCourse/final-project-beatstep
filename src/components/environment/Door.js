@@ -166,8 +166,10 @@ class Door {
         // Update every animation
         this.mixer.update(delta);
         // Reset the caption if this object is the owner
+        this._canBeInteracted = false;
         if(hud.caption.owner == this)
             hud.caption.show = false;
+        
     }
 
     startAnimation(anim) {

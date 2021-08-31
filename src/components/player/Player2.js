@@ -341,7 +341,7 @@ class Player extends Object3D{
     }
 
     hit(){
-        dealDamage(10);
+        this.dealDamage(10);
     }
 
     update(deltaTime){
