@@ -217,8 +217,9 @@ class Robot {
         
         let movement = this.computeDistance(px,pz);
         let dist = Math.sqrt( movement.x**2 + movement.z**2 );
-        if( this.isOnSameLevel(py) && ( (dist < this.eyeRadiusDistanceMin && !this.isFollowing) || 
-                                        (dist < this.eyeRadiusDistanceMax && this.isFollowing) || this.angryDuration > 0 ) ){
+        if( (this.isOnSameLevel(py) && ( (dist < this.eyeRadiusDistanceMin && !this.isFollowing) || 
+                                        (dist < this.eyeRadiusDistanceMax && this.isFollowing) )
+        ) || this.angryDuration > 0 ){
             if(!this.isFollowing){
                 this.isFollowing = true;
                 this.startAnimation(this.animation_alert);
