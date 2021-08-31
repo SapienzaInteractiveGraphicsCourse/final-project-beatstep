@@ -20,6 +20,7 @@ import ParticleSystem from '../environment/ParticleSystem';
 // Particle Test
 import smoke from '../../asset/textures/smoke.png';
 import { DefaultGeneralLoadingManager } from './GeneralLoadingManager';
+import ControlPanel from '../environment/ControlPanel';
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
 const smokeImg = loader.load(smoke);
 
@@ -76,6 +77,13 @@ class LevelCreator {
         world.addStaticObject(door.group.getObjectByName("door_r"),door.group.getObjectByName("door_r").collisionGeometry);
 
         this.objectsToUpdate.push(door);
+    }
+
+    addControlPanel(x,y,z, height, rotationRadians){
+        let cp = new ControlPanel(x,y,z, height, rotationRadians);
+        scene.add(cp.group);
+        world.addStaticObject(cp.group,cp.group.geometry);
+        this.objectsToUpdate.push(cp);
     }
 
     addTopLight(x,y,z){
@@ -186,7 +194,8 @@ class LevelCreator {
         this.addPointLight(0,40,0, 0xFFFFFF, 0.1);
         // this.addFogExp2();
 
-        this.addPlayer(0,0,25, 3);
+        // this.addPlayer(0,0,25, 3);
+        this.addPlayer(60,0,40, 3);
 
         this.addFloor(0,0,0, 200,200);
         this.addFloor(0,wallHeight,0, 200,200); // ceiling = floor on higher level
@@ -273,6 +282,9 @@ class LevelCreator {
         this.addRobot(50,0,10, -Math.PI*3/4);
 
         this.addGasCylinder(16,0,-38, -Math.PI*0.2);
+
+        /* Room 3 */
+        this.addControlPanel(90,0,35, 3, -Math.PI/2);
     }
 
     createTestLevel(){
