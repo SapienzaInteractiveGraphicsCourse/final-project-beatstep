@@ -315,6 +315,9 @@ class Player extends Object3D{
     }
 
     shoot(){
+        if(this.ammo <= 0) return;
+        this.ammo -= 1;
+        
         this.shootAnimation.reset();
         this.shootAnimation.play();
         // Explosion

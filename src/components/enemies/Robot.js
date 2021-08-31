@@ -228,7 +228,6 @@ class Robot {
         }).bind(this));
         this.health -= n;
         if(this.health <= 0) this.explode();
-        console.log("Robot got damaged " + this.health);
     }
 
     setPosition(x,y,z){
