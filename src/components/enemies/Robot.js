@@ -198,12 +198,7 @@ class Robot {
     }
 
     hit(){
-        this._emissiveIntensityDamage = this._emissiveIntensityDamageMax;
-        this.group.traverse((function(child){
-            if(child.isMesh){
-                child.material.emissiveIntensity = this._emissiveIntensityDamage;
-            }
-        }).bind(this));
+        
         this.dealDamage(20);
         this.angryDuration =  this.angryDurationMax;
         // this.health -= 20;
@@ -224,6 +219,12 @@ class Robot {
     }
 
     dealDamage(n){
+        this._emissiveIntensityDamage = this._emissiveIntensityDamageMax;
+        this.group.traverse((function(child){
+            if(child.isMesh){
+                child.material.emissiveIntensity = this._emissiveIntensityDamage;
+            }
+        }).bind(this));
         this.health -= n;
         if(this.health <= 0) this.explode();
     }
