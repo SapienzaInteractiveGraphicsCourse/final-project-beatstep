@@ -102,7 +102,6 @@ class Robot {
             e.action.stop();
             // checking if finalCoords exists
             if(e.action.finalCoords){
-                console.log(e.action)
                 if(e.action.finalCoords.positions){
                     for(let objPosition of e.action.finalCoords.positions){
                         objPosition.obj.position.set(...objPosition.value.toArray());

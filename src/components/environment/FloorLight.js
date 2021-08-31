@@ -14,6 +14,7 @@ let _floorLightModel;
 const _floorLightHeight = 4;
 const _floorLightEmissiveIntensity = 1.5;
 let _floorLightSize;
+let _cylinderGeometry;
 loaderGLTF.load(light, (gltf)=>{
     _floorLightModel = gltf.scene;
     
@@ -22,14 +23,14 @@ loaderGLTF.load(light, (gltf)=>{
     let scaleFactor = _floorLightHeight / boundingBox.y;
     _floorLightModel.scale.set(scaleFactor, scaleFactor, scaleFactor);
     _floorLightSize = new THREE.Box3().setFromObject(_floorLightModel).getSize();
+
+    _cylinderGeometry = new THREE.CylinderGeometry(
+        (boundingBox.x/2),
+        (boundingBox.x/2),
+        boundingBox.y,32);
+    
+    _cylinderGeometry.translate(0,boundingBox.y/2,0);
 });
-
-// Geometry collision
-const _floorLightRadius = 0.5;
-
-const _cylinderGeometry = new THREE.CylinderGeometry(_floorLightRadius,
-                                                    _floorLightRadius,
-                                                    _floorLightHeight,32);
 
 class FloorLight {
     constructor(x,y,z, rotation = 0, distance = 10, intensity = 0.6, color = 0xFFFFFF){

@@ -183,7 +183,7 @@ class LevelCreator {
         this.addPointLight(0,40,0, 0xFFFFFF, 0.1);
         // this.addFogExp2();
 
-        this.addPlayer(35,0,-34, 3);
+        this.addPlayer(0,0,25, 3);
 
         this.addFloor(0,0,0, 200,200);
         this.addFloor(0,wallHeight,0, 200,200); // ceiling = floor on higher level
