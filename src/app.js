@@ -11,7 +11,7 @@ import LevelCreator from './components/Tools/LevelCreator';
 let levels = new LevelCreator();
 
 function init(){
-    levels.createTestLevel();
+    levels.createLevel1();
     
 
     animate = function () {

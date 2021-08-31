@@ -12,9 +12,6 @@ const _robotHeight = 3;
 let _robotSize;
 let _robotCollisionGeometry;
 loader.load(robot1, (gltf)=>{
-    gltf.scene.traverse(function(node){
-        if(node.isMesh) node.castShadow = true;
-    });
     _robot1Model = gltf.scene;
     // Scale
     let boundingBox = new THREE.Box3().setFromObject(_robot1Model).getSize();
@@ -45,6 +42,17 @@ class Robot {
                     this.head = this.group.getObjectByName("testa");
                 this.wheels = this.group.getObjectByName("ruote");
 
+
+        this.group.traverse(function(child){
+            if(child.isMesh){
+                child.material = child.material.clone(true);
+                child.material.emissive = new THREE.Color( 0xff0000 );
+                child.material.emissiveIntensity = 0;
+
+                child.castShadow = true;
+            }
+        });
+
         this.group.geometry = _robotCollisionGeometry;
         this.group.name = "Robot";
 
@@ -72,7 +80,6 @@ class Robot {
         this.isInShooting = false;
         this.angryDurationMax = 10;
         this.angryDuration = 0;
-        this.isHit = false;
         this.health = 100; // TODO: when 0, explode onCollision
         this.velocity = 8; // Step
         this.rotationVelocity = this.velocity;
@@ -82,6 +89,10 @@ class Robot {
         this.eyeRadiusDistanceMax = this.eyeRadiusDistanceMin + 4;
 
         this._explosionParticles = null;
+
+        this._emissiveIntensityDamage = 0;
+        this._emissiveIntensityDamageMax = 0.4;
+        this._emissiveIntensityDrop = 0.4;
 
         // We need one mixer for each animated object in the scene
         this.mixer = new THREE.AnimationMixer(this.group);
@@ -134,6 +145,12 @@ class Robot {
     }
 
     hit(){
+        this._emissiveIntensityDamage = this._emissiveIntensityDamageMax;
+        this.group.traverse((function(child){
+            if(child.isMesh){
+                child.material.emissiveIntensity = this._emissiveIntensityDamage;
+            }
+        }).bind(this));
         this.health -= 20;
         this.angryDuration =  this.angryDurationMax;
         if(this.health <= 0) this.explode();
@@ -230,9 +247,14 @@ class Robot {
             }
         }
 
-        if(this.isHit){
-            this.isHit = false;
-            // TODO: hit here
+        if(this._emissiveIntensityDamage > 0){
+            this._emissiveIntensityDamage -= delta*this._emissiveIntensityDrop;
+            if(this._emissiveIntensityDamage < 0) this._emissiveIntensityDamage = 0;
+            this.group.traverse((function(child){
+                if(child.isMesh){
+                    child.material.emissiveIntensity = this._emissiveIntensityDamage;
+                }
+            }).bind(this));
         }
 
         this.group.position.add(this.group.movementEngine.displacement);
