@@ -3,8 +3,11 @@ import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 
 import robot1 from '../../asset/models/robot1/robot_1.glb';
 import { MovementEngine } from '../physics/MovementEngine';
-import ParticleSystem from '../environment/ParticleSystem';
-// import { setCollideable } from '../physics/CollisionDetector';
+import { world } from "../physics/PhysicsWorld";
+import ParticleSystem from "../environment/ParticleSystem";
+import smoke from '../../asset/textures/smoke.png';
+const loaderTexture = DefaultGeneralLoadingManager.getHandler("texture");
+const smokeImg = loaderTexture.load(smoke);
 
 const loader = DefaultGeneralLoadingManager.getHandler("gltf");
 let _robot1Model;
@@ -53,6 +56,16 @@ class Robot {
             }
         });
 
+        this._shootExplosion = new ParticleSystem(this.hand_dx,camera,0.03,smokeImg,(()=>{
+            
+        }).bind(this));
+        this._shootExplosion.setGeneralPosition(1,0.3,1);
+        this._shootExplosion.setGeneralRadius(0.3,0.3,0.3);
+        this._shootExplosion.setParticleSize(0.4);
+        this._shootExplosion.setGeneralVelocity(0.1,0.1,0.1);
+        // ps.setGeneralLife(generalLife);
+        // ps.setNumberOfParticles(100);
+
         this.group.geometry = _robotCollisionGeometry;
         this.group.name = "Robot";
 
@@ -78,6 +91,11 @@ class Robot {
         // Properties to interact
         this.isFollowing = false; // if needs to follow player or not
         this.isInShooting = false;
+
+        this.isShootingProjectiles = false;
+        this.shootingCooldown = 0;
+        this.shootingCooldownMax = 1;
+
         this.angryDurationMax = 10;
         this.angryDuration = 0;
         this.health = 100; // TODO: when 0, explode onCollision
@@ -114,6 +132,11 @@ class Robot {
                 }
             }
 
+            // shooting controls:
+            if(e.action._clip.name == "shootPose_clip"){
+                this.isShootingProjectiles = true;
+            } else this.isShootingProjectiles = false;
+
         });
         // Animations
         this.animation_alert = this.createAnimationAlert();
@@ -141,6 +164,35 @@ class Robot {
 
         this.group.hit = this.hit.bind(this);
 
+    }
+
+    shoot(delta,toPosition){
+        if(!this.isShootingProjectiles){ 
+            this.shootingCooldown = 0;
+            return;
+        }
+        if(this.shootingCooldown > 0){
+            this.shootingCooldown -= delta;
+            return;
+        }
+        this.shootingCooldown = this.shootingCooldownMax;
+        this._shootExplosion.restart();
+        let fromPosition = this.group.position.clone(true);
+        let direction = toPosition.clone(true).sub(fromPosition).normalize();
+        let distance = 100;
+        let hits = world.raycastPrecise(fromPosition,direction,distance);
+
+        if(hits.length > 0){
+            // Sorting hits by distance, closer first
+            hits.sort((a, b) => { 
+                let dif = a.distance - b.distance;
+                return dif;
+            });
+
+            let hit = hits[0];
+            if(hit.objectIntersected.constructor.name == "Robot" && hits.length > 1) hit = hits[1];
+            if(hit.objectIntersected.hit) hit.objectIntersected.hit(direction, hit.distance);
+        }
     }
 
     hit(){
@@ -204,6 +256,7 @@ class Robot {
     update(delta){
         // Update every animation
         this.mixer.update(delta);
+        this._shootExplosion.update(delta);
         if(this._explosionParticles !== null){
             this._explosionParticles.update(delta);
         }
@@ -224,7 +277,9 @@ class Robot {
                 this.isFollowing = true;
                 this.startAnimation(this.animation_alert);
             }
+
             if(this.angryDuration > 0) this.angryDuration -= delta;
+
             let v = { x: movement.x/dist, z: movement.z/dist };
             if(dist > this.maxVicinityWithPlayer){
                 
@@ -233,9 +288,12 @@ class Robot {
                 this.group.movementEngine.velocity.setX(v.x*this.velocity);
                 this.group.movementEngine.velocity.setZ(v.z*this.velocity);
             }
-            else if(!this.isInShooting){
-                this.isInShooting = true;
-                this.startAnimation(this.animation_shootPose);
+            else {
+                if(!this.isInShooting){
+                    this.isInShooting = true;
+                    this.startAnimation(this.animation_shootPose);
+                }
+                this.shoot(delta,player.position);
             }
             let r = Math.atan2(v.z,v.x);
             this.setRotation(-r);
@@ -381,7 +439,7 @@ class Robot {
         let chest_a2 = this.incrementQuaternionFromEuler(chest_a1, 0,0,Math.PI/4);
         const chest_rotation = new THREE.QuaternionKeyframeTrack(
             this.chest_path+'.quaternion',
-            [0, 0.3, 0.8],
+            [0, 0.3, 0.6],
             [...chest_a1.toArray(),
              ...chest_a2.toArray(),
              ...chest_a1.toArray()],
@@ -406,14 +464,14 @@ class Robot {
         let arm_sx_1_a2 = arm_dx_1_a2;
         const arm_dx_1_rotation = new THREE.QuaternionKeyframeTrack(
             this.arm_dx_1_path+'.quaternion',
-            [0, 0.3, 0.8],
+            [0, 0.3, 0.6],
             [...arm_dx_1_a1.toArray(),
              ...arm_dx_1_a2.toArray(),
              ...arm_dx_1_a1.toArray()],
         );
         const arm_sx_1_rotation = new THREE.QuaternionKeyframeTrack(
             this.arm_sx_1_path+'.quaternion',
-            [0, 0.3, 0.8],
+            [0, 0.3, 0.6],
             [...arm_sx_1_a1.toArray(),
              ...arm_sx_1_a2.toArray(),
              ...arm_sx_1_a1.toArray()],
@@ -426,14 +484,14 @@ class Robot {
         let arm_sx_2_a2 = this.incrementQuaternionFromEuler(arm_dx_2_a1, +Math.PI/2,0,Math.PI/2);;
         const arm_dx_2_rotation = new THREE.QuaternionKeyframeTrack(
             this.arm_dx_2_path+'.quaternion',
-            [0, 0.3, 0.8],
+            [0, 0.3, 0.6],
             [...arm_dx_2_a1.toArray(),
              ...arm_dx_2_a2.toArray(),
              ...arm_dx_2_a1.toArray()],
         );
         const arm_sx_2_rotation = new THREE.QuaternionKeyframeTrack(
             this.arm_sx_2_path+'.quaternion',
-            [0, 0.3, 0.8],
+            [0, 0.3, 0.6],
             [...arm_sx_2_a1.toArray(),
              ...arm_sx_2_a2.toArray(),
              ...arm_sx_2_a1.toArray()],
@@ -456,6 +514,7 @@ class Robot {
     }
 
     startAnimation(anim) {
+        this.mixer.stopAllAction();
         if(anim){
             anim.reset();
             anim.play();
