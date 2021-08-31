@@ -192,6 +192,7 @@ class Robot {
 
             let hit = hits[0];
             if(hit.objectIntersected.name == "Robot" && hits.length > 1) hit = hits[1];
+            if(hit.objectIntersected.name == "Robot") return;
             if(hit.objectIntersected.hit) hit.objectIntersected.hit(direction, hit.distance);
         }
     }
@@ -255,12 +256,14 @@ class Robot {
     }
 
     update(delta){
-        // Update every animation
-        this.mixer.update(delta);
-        this._shootExplosion.update(delta);
         if(this._explosionParticles !== null){
             this._explosionParticles.update(delta);
         }
+        if(this.group.parent == null) return;
+        // Update every animation
+        this.mixer.update(delta);
+        this._shootExplosion.update(delta);
+        
         let player = this.playerToFollow;
 
         if(player == null) return;
