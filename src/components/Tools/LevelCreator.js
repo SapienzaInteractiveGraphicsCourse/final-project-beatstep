@@ -21,6 +21,7 @@ import ParticleSystem from '../environment/ParticleSystem';
 import smoke from '../../asset/textures/smoke.png';
 import { DefaultGeneralLoadingManager } from './GeneralLoadingManager';
 import ControlPanel from '../environment/ControlPanel';
+import RobotDebug from '../debug/RobotDebug';
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
 const smokeImg = loader.load(smoke);
 
@@ -60,6 +61,15 @@ class LevelCreator {
         robot.setRotation(rotationRadians);
         scene.add(robot.group);
         world.addDynamicObject(robot.group);
+
+        this.objectsToUpdate.push(robot);
+    }
+
+    addRobotDebug(x,y,z, rotationRadians = 0){
+        let robot = new RobotDebug();
+        robot.setPosition(x,y,z);
+        robot.setRotation(rotationRadians);
+        scene.add(robot.group);
 
         this.objectsToUpdate.push(robot);
     }
@@ -312,7 +322,7 @@ class LevelCreator {
         this.addFloor(0,0,0, 200,200);
         this.addWall(-10,0,0, 60,wallHeight, Math.PI/2);
 
-        this.addRobot(0,0,-20,0);
+        this.addRobotDebug(0,0,24, -Math.PI/2);
 
         this.addGasCylinder(5,0,5, Math.PI*0.8);
 

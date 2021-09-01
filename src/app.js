@@ -11,21 +11,21 @@ import LevelCreator from './components/Tools/LevelCreator';
 let levels = new LevelCreator();
 
 function init(){
-    levels.createLevel1();
+    levels.createTestLevel();
     
 
-    
+    animate = function () {
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+        
+        let delta = clock.getDelta();
+        // delta = 0.02;
+        levels.step(delta);
+    };
 
 }
 
-function animate () {
-    renderer.render(scene, camera);
-    requestAnimationFrame(animate);
-    
-    let delta = clock.getDelta();
-    // delta = 0.02;
-    levels.step(delta);
-};
+let animate;
 
 DefaultGeneralLoadingManager.addOnLoad(() => {
     console.log("Game loaded, starting rendering loop");
