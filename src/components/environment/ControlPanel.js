@@ -10,8 +10,8 @@ let _controlPanelModel;
 loader.load(controlPanel, (gltf)=>{
     gltf.scene.traverse(function(node){
         if(node.isMesh){ 
-            //node.castShadow = true;
-            node.receiveShadow = true;
+            node.castShadow = true;
+            // node.receiveShadow = true;
             //node.material.emissive = new THREE.Color( 0xffffff );
             //node.material.emissiveIntensity = 0.1;
         }

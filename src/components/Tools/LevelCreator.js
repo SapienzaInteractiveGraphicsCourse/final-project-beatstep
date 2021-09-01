@@ -290,7 +290,7 @@ class LevelCreator {
         this.addWall(80,0,30, 40,wallHeight, 0);
         this.addWall(100,0,50, 40,wallHeight-5, Math.PI/2);
 
-        this.addControlPanel(90,0,50, 3, -Math.PI/2);
+        this.addControlPanel(90,0,50, 4, 0);
         this.addTopLight(90,wallHeight,50, -Math.PI/2);
         this.addTopLight(40,wallHeight,50, -Math.PI/2);
 
