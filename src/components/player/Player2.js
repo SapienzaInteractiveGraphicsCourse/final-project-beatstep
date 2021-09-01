@@ -104,14 +104,13 @@ class Player extends Object3D{
 
         this.dealDamage = function(n){
             let s = this.shield - n;
-            let h = 0;
             if(s < 0){
-                h = this.health + s;
+                let h = this.health + s;
                 s = 0;
                 if(h < 0) h = 0;
+                this.health = h;
             }
             this.shield = s;
-            this.health = h;
         }
 
         this.speed = 15;
@@ -344,7 +343,10 @@ class Player extends Object3D{
     }
 
     hit(){
+        console.log("Being hit, previous health " + this.health);
         this.dealDamage(10);
+        console.log("current health " + this.health);
+        console.log("-------------------------");
     }
 
     update(deltaTime){
