@@ -12,8 +12,8 @@ loader.load(controlPanel, (gltf)=>{
         if(node.isMesh){ 
             //node.castShadow = true;
             node.receiveShadow = true;
-            node.material.emissive = new THREE.Color( 0xffffff );
-            node.material.emissiveIntensity = 0.1;
+            //node.material.emissive = new THREE.Color( 0xffffff );
+            //node.material.emissiveIntensity = 0.1;
         }
     });
     _controlPanelModel = gltf.scene;
@@ -54,12 +54,6 @@ class ControlPanel {
         }).bind(this));
 
         this.group.onCollision = function(collisionResult,obj,delta){
-            if(obj.constructor.name != "Player") return
-            hud.caption.text = `Press E to shutdown the simulation`;
-            hud.caption.owner = this;
-            hud.caption.show = true;
-            this._canBeInteracted = true;
-
             // Move back the player if he penetrated into the wall
             let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
             obj.position.add(backVec);
@@ -70,6 +64,14 @@ class ControlPanel {
                 backVec = collisionResult.normal.multiplyScalar(dot);
                 obj.movementEngine.displacement.sub(backVec);
             }
+
+            
+            if(obj.constructor.name != "Player") return
+            hud.caption.text = `Press E to shutdown the simulation`;
+            hud.caption.owner = this;
+            hud.caption.show = true;
+            this._canBeInteracted = true;
+            
         }.bind(this);
         
     }

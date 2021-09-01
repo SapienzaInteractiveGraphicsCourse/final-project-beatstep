@@ -636,5 +636,5 @@ class SatCollisionResult {
 }
 
 const world = new PhysicsWorld();
-world.debugDraw = true;
+// world.debugDraw = true;
 export { PhysicsWorld, world }

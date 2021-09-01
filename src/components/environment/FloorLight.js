@@ -34,7 +34,7 @@ loaderGLTF.load(light, (gltf)=>{
 });
 
 class FloorLight {
-    constructor(x,y,z, rotation = 0, distance = 10, intensity = 0.6, color = 0xFFFFFF){
+    constructor(x,y,z, rotation = 0, distance = 20, intensity = 0.8, color = 0xFFFFFF){
         this.group = _floorLightModel.clone(true);
 
         this.group.traverse(function (child) {
