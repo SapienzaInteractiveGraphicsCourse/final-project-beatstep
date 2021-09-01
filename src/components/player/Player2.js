@@ -343,10 +343,7 @@ class Player extends Object3D{
     }
 
     hit(){
-        console.log("Being hit, previous health " + this.health);
         this.dealDamage(10);
-        console.log("current health " + this.health);
-        console.log("-------------------------");
     }
 
     update(deltaTime){
@@ -368,7 +365,6 @@ class Player extends Object3D{
         if(this.controls.shouldJump && this.canJump){
             this.movementEngine.velocity.setY(this.jumpSpeed);
             this.canJump = false;
-            console.log("JUMP");
         }
 
         this.position.add(this.movementEngine.displacement);
