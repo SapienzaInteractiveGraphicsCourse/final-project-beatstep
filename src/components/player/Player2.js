@@ -317,7 +317,7 @@ class Player extends Object3D{
     shoot(){
         if(this.ammo <= 0) return;
         this.ammo -= 1;
-        
+
         this.shootAnimation.reset();
         this.shootAnimation.play();
         // Explosion
@@ -326,7 +326,7 @@ class Player extends Object3D{
         let origin = new Vector3(0,0,0);
         this.camera.getWorldPosition(origin);
         let direction = _zAxis.setFromMatrixColumn( this.camera.matrixWorld, 2).multiplyScalar(-1).normalize().clone();
-        let distance = 100;
+        let distance = 500;
         let hits = world.raycastPrecise(origin,direction,distance);
 
         if(hits.length > 0){
@@ -337,7 +337,7 @@ class Player extends Object3D{
             });
 
             let hit = hits[0];
-            if(hit.objectIntersected.constructor.name == "Player" && hits.length > 1) hit = hits[1];
+            if(hit.objectIntersected.constructor.name == "Player") if(hits.length > 1) hit = hits[1];
             if(hit.objectIntersected.hit) hit.objectIntersected.hit(direction, hit.distance);
         }
         
