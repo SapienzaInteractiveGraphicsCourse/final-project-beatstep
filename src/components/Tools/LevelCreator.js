@@ -51,6 +51,7 @@ class LevelCreator {
 
         this.objectsToUpdate.push(player);
         this.player = player;
+        window.getPlayerPos = ()=> this.player.position;
     }
 
     addRobot(x,y,z, rotationRadians = 0){
@@ -86,8 +87,8 @@ class LevelCreator {
         this.objectsToUpdate.push(cp);
     }
 
-    addTopLight(x,y,z){
-        let topLight = new TopLight(x,y,z);
+    addTopLight(x,y,z, rotationRadians){
+        let topLight = new TopLight(x,y,z, rotationRadians);
         topLight.addToScene(scene);
     }
 
@@ -195,7 +196,7 @@ class LevelCreator {
         // this.addFogExp2();
 
         // this.addPlayer(0,0,25, 3);
-        this.addPlayer(60,0,40, 3);
+        this.addPlayer(32,0,54, 3);
 
         this.addFloor(0,0,0, 200,200);
         this.addFloor(0,wallHeight,0, 200,200); // ceiling = floor on higher level
@@ -284,7 +285,19 @@ class LevelCreator {
         this.addGasCylinder(16,0,-38, -Math.PI*0.2);
 
         /* Room 3 */
-        this.addControlPanel(90,0,35, 3, -Math.PI/2);
+        this.addWall(25,0,50, 40,wallHeight, Math.PI/2);
+        this.addWall(62.5,0,70, 75,wallHeight, 0);
+        this.addWall(80,0,30, 40,wallHeight, 0);
+        this.addWall(100,0,50, 40,wallHeight-5, Math.PI/2);
+
+        this.addControlPanel(90,0,50, 3, -Math.PI/2);
+        this.addTopLight(90,wallHeight,50, -Math.PI/2);
+        this.addTopLight(40,wallHeight,50, -Math.PI/2);
+
+        this.addGasCylinder(50,0,60, -Math.PI*0.6);
+        this.addGasCylinder(60,0,40, -Math.PI*0.6);
+
+        this.addFloorLight(29,0,65, Math.PI*3/4);
     }
 
     createTestLevel(){
