@@ -19,7 +19,7 @@ function init(){
         requestAnimationFrame(animate);
         
         let delta = clock.getDelta();
-        // delta = 0.02;
+        delta = 0.02;
         levels.step(delta);
     };
 

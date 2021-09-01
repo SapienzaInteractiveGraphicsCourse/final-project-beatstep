@@ -26,7 +26,7 @@ const _gascylinderRadius = 0.5;
 const _gascylinderHeight = 2;
 const _gascylinderMass = 2;
 const _gascylinderRotation = Math.PI/2;
-const _gascylinderSurroundRadius = 8;
+const _gascylinderSurroundRadius = 10;
 
 
 const _gascylinderGeometry = new THREE.CylinderGeometry(_gascylinderRadius,
