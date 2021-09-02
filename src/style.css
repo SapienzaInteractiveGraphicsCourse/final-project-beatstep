@@ -109,11 +109,13 @@
     justify-content: center;
     align-items: center;
 }
-
 .menu_backdrop.main {
     background: linear-gradient(-45deg, #1cb2e9, #f15893);
     background-size: 200% 200%;
     animation: gradient 3s ease infinite;
+}
+.menu_backdrop.pause {
+    background: rgba(0, 0, 0, 0.25);
 }
 
 .menu_board{

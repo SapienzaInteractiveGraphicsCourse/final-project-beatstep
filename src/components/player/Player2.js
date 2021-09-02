@@ -2,6 +2,8 @@ import { Object3D } from "three";
 import { Euler,EventDispatcher,Vector3 } from 'three';
 import { THREE, scene } from "../setup/ThreeSetup";
 
+var TWEEN = require('@tweenjs/tween.js');
+
 import { world } from "../physics/PhysicsWorld";
 import { MovementEngine } from "../physics/MovementEngine";
 import { hud } from "./HUD";
@@ -102,16 +104,6 @@ class Player extends Object3D{
             }
         });
 
-        this.dealDamage = function(n){
-            let s = this.shield - n;
-            if(s < 0){
-                let h = this.health + s;
-                s = 0;
-                if(h < 0) h = 0;
-                this.health = h;
-            }
-            this.shield = s;
-        }
 
         this.speed = 15;
         this.jumpSpeed = 15;
@@ -156,6 +148,24 @@ class Player extends Object3D{
         this.rifleExplosion.setGeneralRadius(0.1,0.1,0.1);
         this.rifleExplosion.setGeneralVelocity(0.01,0.01,0.01);
         this.rifleExplosion.setGeneralPosition(1.1,0.95,-0.65);
+
+        // Setup death animation
+        this.internalTimer = 0;
+        let animDuration = 1000*0.3;
+        this.animationGroup = new TWEEN.Group(); 
+        this.deathAnim = new TWEEN.Tween(this.camera.position,this.animationGroup)
+        .to({x: 0, y: -height/2, z: -0.2}, animDuration).easing(TWEEN.Easing.Quadratic.In)
+        .onComplete(()=>{
+            this.deathAnim.alreadyPlayed = true;
+            new TWEEN.Tween(this.camera.rotation,this.animationGroup)
+            .to({x: `+${Math.PI/4}`, y: `+${0}`, z: `+${Math.PI/2}`}, animDuration).easing(TWEEN.Easing.Bounce.InOut)
+            .onComplete(()=>{
+                this.death()
+            })
+            .start(this.internalTimer);
+        })
+        this.deathAnim.alreadyPlayed = false;
+        
         
     }
 
@@ -260,12 +270,25 @@ class Player extends Object3D{
 			}
 		}
 
-        window.addEventListener('keydown', onKeyDown, false );
-        window.addEventListener('keyup', onKeyUp, false );
-        this.canvas.ownerDocument.addEventListener('mousedown', onMouseDown );
-        this.canvas.ownerDocument.addEventListener('mousemove', onMouseMove);
-        this.canvas.ownerDocument.addEventListener('pointerlockchange', onPointerlockChange);
-        this.canvas.ownerDocument.addEventListener('pointerlockerror', onPointerlockError);
+        this.controls.attach = function(){
+            window.addEventListener('keydown', onKeyDown, false );
+            window.addEventListener('keyup', onKeyUp, false );
+            this.canvas.ownerDocument.addEventListener('mousedown', onMouseDown );
+            this.canvas.ownerDocument.addEventListener('mousemove', onMouseMove);
+            this.canvas.ownerDocument.addEventListener('pointerlockchange', onPointerlockChange);
+            this.canvas.ownerDocument.addEventListener('pointerlockerror', onPointerlockError);
+        }.bind(this)
+
+        this.controls.detach = function(){
+            window.removeEventListener('keydown', onKeyDown, false );
+            window.removeEventListener('keyup', onKeyUp, false );
+            this.canvas.ownerDocument.removeEventListener('mousedown', onMouseDown );
+            this.canvas.ownerDocument.removeEventListener('mousemove', onMouseMove);
+            this.canvas.ownerDocument.removeEventListener('pointerlockchange', onPointerlockChange);
+            this.canvas.ownerDocument.removeEventListener('pointerlockerror', onPointerlockError);
+        }.bind(this);
+
+        this.controls.attach();
 
     }
 
@@ -296,16 +319,6 @@ class Player extends Object3D{
         this.shootAnimation.loop = THREE.LoopOnce;
         this.shootAnimation.enabled = false;
         this.repetitions = 1;
-
-        // TODO: DEBUG (toremove)
-        // let vel = new THREE.Vector3(0,0,0);
-        // document.addEventListener("mousedown",((event)=>{
-        //     if(event.button == 2){ // shoot
-        //         this.startShootAnimation();
-        //         this.getWorldDirection(vel).multiplyScalar(-60);
-        //         this.bulletEmitter.shoot(vel);
-        //     }
-        // }).bind(this));
         
         rifle.geometry.computeBoundingBox();
         let box = rifle.geometry.boundingBox;
@@ -345,8 +358,28 @@ class Player extends Object3D{
         
     }
 
+    dealDamage(n){
+        let s = this.shield - n;
+        if(s < 0){
+            let h = this.health + s;
+            s = 0;
+            if(h < 0) h = 0;
+            this.health = h;
+        }
+        this.shield = s;
+
+        if(this.health == 0) this.die();
+    }
+
     hit(){
         this.dealDamage(10);
+    }
+
+    die(){
+        console.log("YOU DIED!")
+        
+        this.controls.detach();
+        if(!this.deathAnim.alreadyPlayed) this.deathAnim.start(this.internalTimer);
     }
 
     update(deltaTime){
@@ -377,6 +410,8 @@ class Player extends Object3D{
             this.mixer.update(deltaTime);
         }
         this.rifleExplosion.update(deltaTime);
+        this.internalTimer += deltaTime*1000;
+        this.animationGroup.update(this.internalTimer);
     }
 
 }

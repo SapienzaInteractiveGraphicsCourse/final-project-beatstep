@@ -46,7 +46,7 @@ class LevelCreator {
 
     addPlayer(x,y,z, height){
         let player = new Player(camera, [x, y, z], height, renderer.domElement);
-        player.controls.shouldLock = true;
+        player.controls.shouldLock = false;
         scene.add(player);
         world.addDynamicObject(player);
 
