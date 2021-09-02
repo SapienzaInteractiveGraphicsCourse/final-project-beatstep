@@ -73,6 +73,9 @@ class Robot {
         this.animation_shootPoseRev = this.createAnimationShootPoseReverse();
         this.animation_death = this.createAnimationDeath();
 
+        /** Internal timer for Tween's animations */
+        this.internalTimer = 0;
+
         /** Shoot Particle System */
         this._shootExplosion = new ParticleSystem(this.hand_dx,camera,0.03,smokeImg,(()=>{}).bind(this));
         this._shootExplosion.setGeneralPosition(1,0.3,1);
@@ -86,6 +89,15 @@ class Robot {
         this._explosionParticles = new ParticleSystem(scene,camera, 0.6, null, ()=>{
             this._explosionParticles = null;
         });
+
+        /** Movement idle informations */
+        this._idleMovement = {
+            duration: 1000*4,
+            isIdleAnimated: false, // if there is and idle animation right now
+            radialDistance: 3,
+            generateAnimation: ()=> this._createIdleAnimation(),
+        };
+
 
         /** Properties to interact */
         this.isFollowing = false;
@@ -212,7 +224,8 @@ class Robot {
 
     update(delta){
         // Update animations
-        this._tweenAnimations.update();
+        this.internalTimer += delta*1000;
+        this._tweenAnimations.update(this.internalTimer);
 
         // Update robot explosion particle system
         if(this._explosionParticles != null) this._explosionParticles.update(delta);
@@ -273,11 +286,19 @@ class Robot {
             }
             let r = Math.atan2(v.z,v.x);
             this.setRotation(-r);
+
+            this._idleMovement.isIdleAnimated = false;
+
         } else {
             this.isFollowing = false;
             if(this.isInShooting){
                 this.isInShooting = false;
                 this.startAnimation(this.animation_shootPoseRev);
+            }
+            else if(!this._idleMovement.isIdleAnimated){
+                this._idleMovement.isIdleAnimated = true;
+                let anim = this._idleMovement.generateAnimation();
+                this.startAnimation(anim);
             }
         }
 
@@ -351,7 +372,7 @@ class Robot {
         }, velocity)
         .onComplete(()=>{
             let head = new TWEEN.Tween(this.head.rotation, this._tweenAnimations)
-            .to({x:0,y:0,z:0}, 0).start();
+            .to({x:0,y:0,z:0}, 0).start(this.internalTimer);
         });
 
         chest.chain(chest2);
@@ -408,7 +429,7 @@ class Robot {
     startAnimation(anim) {
         if (!anim) return;
         this._tweenAnimations.removeAll();
-        anim.start();
+        anim.start(this.internalTimer);
     }
 
     createGeneralAnimation(rotationParams, generalVelocityMilliseconds = 1000, generalEasing = TWEEN.Easing.Quadratic.In){
@@ -420,36 +441,73 @@ class Robot {
 
             if(rotationParams.group){
                 let group = new TWEEN.Tween(this.group.rotation, this._tweenAnimations)
-                .to(rotationParams.group, velocity).easing(generalEasing).start();
+                .to(rotationParams.group, velocity).easing(generalEasing).start(this.internalTimer);
             }
 
             let head = new TWEEN.Tween(this.head.rotation, this._tweenAnimations)
-            .to(rotationParams.head || this.head.defaultRotation, velocity).start();
+            .to(rotationParams.head || this.head.defaultRotation, velocity).start(this.internalTimer);
 
             let arm_dx_1 = new TWEEN.Tween(this.arm_dx_1.rotation, this._tweenAnimations)
-            .to(rotationParams.arm_dx_1 || this.arm_dx_1.defaultRotation, velocity).easing(generalEasing).start();
+            .to(rotationParams.arm_dx_1 || this.arm_dx_1.defaultRotation, velocity).easing(generalEasing).start(this.internalTimer);
 
             let arm_dx_2 = new TWEEN.Tween(this.arm_dx_2.rotation, this._tweenAnimations)
-            .to(rotationParams.arm_dx_2 || this.arm_dx_2.defaultRotation, velocity).easing(generalEasing).start();
+            .to(rotationParams.arm_dx_2 || this.arm_dx_2.defaultRotation, velocity).easing(generalEasing).start(this.internalTimer);
 
             let hand_dx = new TWEEN.Tween(this.hand_dx.rotation, this._tweenAnimations)
-            .to(rotationParams.hand_dx || this.hand_dx.defaultRotation, velocity).easing(generalEasing).start();
+            .to(rotationParams.hand_dx || this.hand_dx.defaultRotation, velocity).easing(generalEasing).start(this.internalTimer);
 
             let arm_sx_1 = new TWEEN.Tween(this.arm_sx_1.rotation, this._tweenAnimations)
-            .to(rotationParams.arm_sx_1 || this.arm_sx_1.defaultRotation, velocity).easing(generalEasing).start();
+            .to(rotationParams.arm_sx_1 || this.arm_sx_1.defaultRotation, velocity).easing(generalEasing).start(this.internalTimer);
 
             let arm_sx_2 = new TWEEN.Tween(this.arm_sx_2.rotation, this._tweenAnimations)
-            .to(rotationParams.arm_sx_2 || this.arm_sx_2.defaultRotation, velocity).easing(generalEasing).start();
+            .to(rotationParams.arm_sx_2 || this.arm_sx_2.defaultRotation, velocity).easing(generalEasing).start(this.internalTimer);
 
             let hand_sx = new TWEEN.Tween(this.hand_sx.rotation, this._tweenAnimations)
-            .to(rotationParams.hand_sx || this.hand_sx.defaultRotation, velocity).easing(generalEasing).start();
+            .to(rotationParams.hand_sx || this.hand_sx.defaultRotation, velocity).easing(generalEasing).start(this.internalTimer);
 
             let wheels_base = new TWEEN.Tween(this.wheels_base.rotation, this._tweenAnimations)
-            .to(rotationParams.wheels_base || this.wheels_base.defaultRotation, velocity).easing(generalEasing).start();
+            .to(rotationParams.wheels_base || this.wheels_base.defaultRotation, velocity).easing(generalEasing).start(this.internalTimer);
 
         });
 
         return chest;
+    }
+
+    _createIdleAnimation(){
+        let generalEasing = TWEEN.Easing.Quadratic.InOut;
+
+        let angleRadius = ( Math.random()*0.5 + 0.5 ) * (Math.PI/2);
+        let sign;
+        if(Math.random() > 0.5){
+            sign = "-";
+        } else {
+            sign = "+";
+        }
+        
+        let chest = new TWEEN.Tween(this.group.rotation, this._tweenAnimations)
+        .to({x:`+${0}`,y:`${sign}${angleRadius}`,z:`+${0}`}, this._idleMovement.duration*0.2).easing(generalEasing)
+        .onStart(()=>{
+            this._idleMovement.isIdleAnimated = true;
+
+        })
+        .onComplete(()=>{
+            let _zAxis = new THREE.Vector3();
+		    _zAxis.setFromMatrixColumn( this.group.matrixWorld, 2).normalize();
+            _zAxis.cross(this.group.up); //.multiplyScalar(-this._idleMovement.radialDistance);
+            // let finalPosition = new THREE.Vector3().addVectors(this.group.position,_zAxis);
+
+            this.group.movementEngine.velocity.setX(-_zAxis.x*this.velocity*0.3);
+            this.group.movementEngine.velocity.setZ(-_zAxis.z*this.velocity*0.3);
+
+            let group = new TWEEN.Tween(this.group.movementEngine.velocity, this._tweenAnimations)
+            .to({x: 0, y: `+${0}`, z: 0}, this._idleMovement.duration*0.8)
+            .onComplete(()=>{
+                this._idleMovement.isIdleAnimated = false;
+            }).start(this.internalTimer);
+        });
+
+        return chest;
+
     }
 
 }
