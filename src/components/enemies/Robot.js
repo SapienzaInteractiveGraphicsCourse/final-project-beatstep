@@ -95,7 +95,6 @@ class Robot {
             duration: 1000*4,
             isIdleAnimated: false, // if there is and idle animation right now
             radialDistance: 3,
-            generateAnimation: ()=> this._createIdleAnimation(),
         };
 
 
@@ -126,11 +125,16 @@ class Robot {
         this.group.feetPosition = this.group.position;
         this.group.movementEngine = new MovementEngine(-25);
         this.group.isDynamic = true;
+        this._collided = false;
         this.group.onCollision = function(collisionResult,obj,delta){
             if(obj.isDynamic){
                 // Move back the robot if he touched something
                 let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
                 obj.position.sub(backVec);
+            }
+            
+            if(obj.constructor.name != "Floor"){
+                this._collided = true;
             }
 
         }.bind(this);
@@ -297,13 +301,15 @@ class Robot {
             }
             else if(!this._idleMovement.isIdleAnimated){
                 this._idleMovement.isIdleAnimated = true;
-                let anim = this._idleMovement.generateAnimation();
+                let angleRadius = ( Math.random()*0.5 + 0.5 ) * (Math.PI/2);
+                if(this._collided) angleRadius += Math.PI*3/4;
+                let anim = this._createIdleAnimation(angleRadius);
                 this.startAnimation(anim);
             }
         }
 
         this.group.position.add(this.group.movementEngine.displacement);
-
+        this._collided = false;
     }
 
     /** Animations */
@@ -473,10 +479,9 @@ class Robot {
         return chest;
     }
 
-    _createIdleAnimation(){
+    _createIdleAnimation(angleRadius){
         let generalEasing = TWEEN.Easing.Quadratic.InOut;
 
-        let angleRadius = ( Math.random()*0.5 + 0.5 ) * (Math.PI/2);
         let sign;
         if(Math.random() > 0.5){
             sign = "-";
@@ -500,7 +505,7 @@ class Robot {
             this.group.movementEngine.velocity.setZ(-_zAxis.z*this.velocity*0.3);
 
             let group = new TWEEN.Tween(this.group.movementEngine.velocity, this._tweenAnimations)
-            .to({x: 0, y: `+${0}`, z: 0}, this._idleMovement.duration*0.8)
+            .to({x: 0, y: `+${0}`, z: 0}, this._idleMovement.duration*(0.8 + Math.random()*0.2 ) )
             .onComplete(()=>{
                 this._idleMovement.isIdleAnimated = false;
             }).start(this.internalTimer);
