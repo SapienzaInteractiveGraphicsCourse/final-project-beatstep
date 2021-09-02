@@ -382,6 +382,10 @@ class Player extends Object3D{
         if(!this.deathAnim.alreadyPlayed) this.deathAnim.start(this.internalTimer);
     }
 
+    death(){
+        
+    }
+
     update(deltaTime){
         let xDir = - Number(this.controls.shouldMoveRight) + Number(this.controls.shouldMoveLeft);
         let zDir = - Number(this.controls.shouldMoveForward) + Number(this.controls.shouldMoveBackward);
