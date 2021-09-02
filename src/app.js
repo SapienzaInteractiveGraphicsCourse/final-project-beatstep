@@ -15,8 +15,10 @@ let levels = new LevelCreator();
 
 function startGame(){
     levels.createTestLevel();
+
     mainMenu.removeFromPage();
     document.body.appendChild(renderer.domElement);
+    
     renderer.domElement.requestPointerLock();
     levels.player.hud.show();
     animate();

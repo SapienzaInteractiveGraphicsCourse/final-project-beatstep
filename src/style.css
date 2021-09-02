@@ -117,7 +117,7 @@
 }
 
 .menu_board{
-    position: relative;
+    position: absolute;
     background-color: #fffff5;
     border: 5px solid #1cb2e9;
     border-radius: 8px;
@@ -132,6 +132,17 @@
     align-items: center;
 
     animation: fadein 2s;
+
+    backface-visibility: hidden;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+}
+
+.rotation{
+    transform: rotateY(180deg);
+}
+.backrotation{
+    transform: rotateY(-180deg);
 }
 
 @keyframes fadein {
@@ -209,4 +220,17 @@
 .menu_button:active {
 	position:relative;
 	top:1px;
+}
+
+.menu_text{
+    color: #1cb2e9;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+    box-sizing: border-box;
+    padding: 35px 35px;
+    width: 90%;
+    height: 50%;
 }
