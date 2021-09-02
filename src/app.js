@@ -14,7 +14,7 @@ import LevelCreator from './components/Tools/LevelCreator';
 let levels = new LevelCreator();
 
 function startGame(){
-    levels.createTestLevel();
+    levels.createLevel1();
 
     mainMenu.removeFromPage();
     document.body.appendChild(renderer.domElement);

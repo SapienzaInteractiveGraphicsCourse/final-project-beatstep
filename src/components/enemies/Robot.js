@@ -6,6 +6,9 @@ import { MovementEngine } from '../physics/MovementEngine';
 import { world } from "../physics/PhysicsWorld";
 import ParticleSystem from "../environment/ParticleSystem";
 import smoke from '../../asset/textures/smoke.png';
+
+var TWEEN = require('@tweenjs/tween.js');
+
 const loaderTexture = DefaultGeneralLoadingManager.getHandler("texture");
 const smokeImg = loaderTexture.load(smoke);
 
@@ -32,7 +35,7 @@ loader.load(robot1, (gltf)=>{
 class Robot {
     constructor(playerToFollow){
         this.playerToFollow = playerToFollow || null;
-        // Groups part (ordered by hierarchy)
+        /** Groups part (ordered by hierarchy) */
         this.group = _robot1Model.clone(true);
             this.wheels_base = this.group.getObjectByName("base_ruote");
                 this.chest = this.group.getObjectByName("petto");
@@ -45,7 +48,7 @@ class Robot {
                     this.head = this.group.getObjectByName("testa");
                 this.wheels = this.group.getObjectByName("ruote");
 
-
+        let eulerToJSON = (e) => ({x:e.x,y:e.y,z:e.z});
         this.group.traverse(function(child){
             if(child.isMesh){
                 child.material = child.material.clone(true);
@@ -54,11 +57,24 @@ class Robot {
 
                 child.castShadow = true;
             }
+            // for Tween.js animations createGeneralAnimation()
+            child.defaultPosition = eulerToJSON(child.position.clone());
+            child.defaultRotation = eulerToJSON(child.rotation.clone());
         });
 
-        this._shootExplosion = new ParticleSystem(this.hand_dx,camera,0.03,smokeImg,(()=>{
-            
-        }).bind(this));
+        /** Size */
+        this.size = new THREE.Box3().setFromObject(this.group).getSize(new THREE.Vector3());
+
+        /** Animations */
+        this._tweenAnimations = new TWEEN.Group();
+        this.animation_alert = this.createAnimationAlert();
+        this.animation_shootPose = this.createAnimationShootPose();
+        this.animation_shooting = this.createAnimationShooting();
+        this.animation_shootPoseRev = this.createAnimationShootPoseReverse();
+        this.animation_death = this.createAnimationDeath();
+
+        /** Shoot Particle System */
+        this._shootExplosion = new ParticleSystem(this.hand_dx,camera,0.03,smokeImg,(()=>{}).bind(this));
         this._shootExplosion.setGeneralPosition(1,0.3,1);
         this._shootExplosion.setGeneralRadius(0.3,0.3,0.3);
         this._shootExplosion.setParticleSize(0.4);
@@ -66,105 +82,64 @@ class Robot {
         // ps.setGeneralLife(generalLife);
         // ps.setNumberOfParticles(100);
 
-        this.group.geometry = _robotCollisionGeometry;
-        this.group.name = "Robot";
+        /** Explosion Particle System */
+        this._explosionParticles = new ParticleSystem(scene,camera, 0.6, null, ()=>{
+            this._explosionParticles = null;
+        });
 
-        this.group.feetPosition = this.group.position;
-
-        this.group.movementEngine = new MovementEngine(-25);
-        
-        // Useful for animation
-        this.wheels_base_path = "base_ruote";
-        this.chest_path = "petto";
-        this.wheels_path = "ruote";
-        this.arm_dx_1_path = "braccio_dx";
-        this.arm_dx_2_path = "avambraccio_dx";
-        this.hand_dx_path = "mano_dx";
-        this.arm_sx_1_path = "braccio_sx";
-        this.arm_sx_2_path = "avanbraccio_sx";
-        this.hand_sx_path = "mano_sx";
-        this.head_path = "testa";
-
-        // Size
-        this.size = new THREE.Box3().setFromObject(this.group).getSize(new THREE.Vector3());
-
-        // Properties to interact
-        this.isFollowing = false; // if needs to follow player or not
+        /** Properties to interact */
+        this.isFollowing = false;
         this.isInShooting = false;
-
         this.isShootingProjectiles = false;
+        this.isDead = false;
         this.shootingCooldown = 0;
-        this.shootingCooldownMax = 1;
+        this.shootingCooldownMax = 1; // x = x second(s), how much time from one shoot and another
 
-        this.angryDurationMax = 10;
-        this.angryDuration = 0;
-        this.health = 100; // TODO: when 0, explode onCollision
-        this.velocity = 8; // Step
-        this.rotationVelocity = this.velocity;
-        this.minVicinityWithPlayer = 2;
-        this.maxVicinityWithPlayer = this.minVicinityWithPlayer + 8;
-        this.eyeRadiusDistanceMin = this.maxVicinityWithPlayer + 6;
+        this.angryDuration = 0; 
+        this.angryDurationMax = 10; // how much time the robot will follow the player independently of radius distance
+        
+        this.health = 100; // when 0, death animation and explode
+        this.velocity = 8; // in update, how fast the robot goes
+        this.rotationVelocity = this.velocity; // rotation velocity of the robot
+        // how much distance is tollerated to shoot to player
+        this.shootingDistanceMin = 2;
+        this.shootingDistanceMax = this.shootingDistanceMin + 8;
+        // how much range the robot will follow the player
+        this.eyeRadiusDistanceMin = this.shootingDistanceMax + 6;
         this.eyeRadiusDistanceMax = this.eyeRadiusDistanceMin + 4;
 
-        this._explosionParticles = null;
-
-        this._emissiveIntensityDamage = 0;
-        this._emissiveIntensityDamageMax = 0.4;
-        this._emissiveIntensityDrop = 0.4;
-
-        // We need one mixer for each animated object in the scene
-        this.mixer = new THREE.AnimationMixer(this.group);
-        // Set final position when animation ends
-        this.mixer.addEventListener('finished', (e) => {
-            e.action.reset();
-            e.action.stop();
-            // checking if finalCoords exists
-            if(e.action.finalCoords){
-                if(e.action.finalCoords.positions){
-                    for(let objPosition of e.action.finalCoords.positions){
-                        objPosition.obj.position.set(...objPosition.value.toArray());
-                    }
-                }
-                if(e.action.finalCoords.rotations){
-                    for(let objRotation of e.action.finalCoords.rotations){
-                        objRotation.obj.setRotationFromQuaternion(objRotation.value.normalize());
-                    }
-                }
-            }
-
-            // shooting controls:
-            if(e.action._clip.name == "shootPose_clip"){
-                this.isShootingProjectiles = true;
-            } else this.isShootingProjectiles = false;
-
-        });
-        // Animations
-        this.animation_alert = this.createAnimationAlert();
-        this.animation_shootPose = this.createAnimationShootPose();
-        this.animation_shootPoseRev = this.createAnimationShootPoseReverse();
-
-        // Adding collision detection
+        /** Adding collision detection */
+        this.group.geometry = _robotCollisionGeometry;
+        this.group.name = "Robot";
+        this.group.feetPosition = this.group.position;
+        this.group.movementEngine = new MovementEngine(-25);
         this.group.isDynamic = true;
         this.group.onCollision = function(collisionResult,obj,delta){
-        
             if(obj.isDynamic){
-                // Move back the robot if he penetrated into the wall
+                // Move back the robot if he touched something
                 let backVec = collisionResult.normal.clone().multiplyScalar(collisionResult.penetration);
                 obj.position.sub(backVec);
-
-                // Don't allow the robot to move inside the other robot!
-                // let dot = collisionResult.normal.dot(obj.movementEngine.displacement);
-                // if(dot < 0){
-                //     backVec = collisionResult.normal.multiplyScalar(dot);
-                //     obj.movementEngine.displacement.sub(backVec);
-                // }
             }
 
         }.bind(this);
 
+        /** Events for collision detection */
         this.group.hit = this.hit.bind(this);
         this.group.dealDamage = this.dealDamage.bind(this);
+        // dealDamage() properties intenisty color
+        this._emissiveIntensityDamage = 0;
+        this._emissiveIntensityDamageMax = 0.4;
+        this._emissiveIntensityDrop = 0.4;
 
+    }
+
+    setPosition(x,y,z){
+        // Apply position
+        this.group.position.set(x,y,z);
+    }
+
+    setRotation(alpha){
+        this.group.rotation.y = alpha;
     }
 
     shoot(delta,toPosition){
@@ -178,19 +153,19 @@ class Robot {
         }
         this.shootingCooldown = this.shootingCooldownMax;
         this._shootExplosion.restart();
+        this.startAnimation(this.animation_shooting);
+
         let fromPosition = this.group.position.clone(true);
         fromPosition.y += _robotHeight*0.6;
         let direction = toPosition.clone(true).sub(fromPosition).normalize();
         let distance = 100;
         let hits = world.raycastPrecise(fromPosition,direction,distance);
-
         if(hits.length > 0){
             // Sorting hits by distance, closer first
             hits.sort((a, b) => { 
                 let dif = a.distance - b.distance;
                 return dif;
             });
-
             let hit = hits[0];
             if(hit.objectIntersected.name == "Robot" && hits.length > 1) hit = hits[1];
             if(hit.objectIntersected.name == "Robot") return;
@@ -199,24 +174,18 @@ class Robot {
     }
 
     hit(){
-        
         this.dealDamage(20);
-        this.angryDuration =  this.angryDurationMax;
-        // this.health -= 20;
-        // if(this.health <= 0) this.explode();
+        this.angryDuration =  this.angryDurationMax; // Robot is angry, will follow you
     }
 
     explode(){
-        if(this._explosionParticles !== null) return;
-        // Adding Particles
-        this._explosionParticles = new ParticleSystem(scene,camera, 0.6, null, ()=>{
-            this._explosionParticles = null;
-        });
-        this._explosionParticles.setGeneralPosition(this.group.position.x,this.group.position.y,this.group.position.z);
-        this._explosionParticles.restart();
-        // Disappear
-        this.group.removeFromPhysicsWorld();
-        this.group.removeFromParent();
+        // Starting Death sequence
+        if(!this.isDead){
+            this.isDead = true;
+            this.isShootingProjectiles = false;
+            this.startAnimation(this.animation_death);
+        }
+        
     }
 
     dealDamage(n){
@@ -228,28 +197,6 @@ class Robot {
         }).bind(this));
         this.health -= n;
         if(this.health <= 0) this.explode();
-    }
-
-    setPosition(x,y,z){
-        // Apply position
-        this.group.position.set(x,y,z);
-    }
-
-    addPosition(dx,dy,dz){
-        let p = this.group.position;
-        this.group.position.set(p.x+dx,p.y+dy,p.z+dz);
-    }
-
-    setRotation(alpha){
-        this.group.rotation.y = alpha;
-    }
-
-    addRotation(dalpha){
-        this.group.rotation.y += dalpha;
-    }
-
-    toRotation(alpha){
-        // TODO
     }
 
     computeDistance(px,pz){
@@ -264,16 +211,29 @@ class Robot {
     }
 
     update(delta){
-        if(this._explosionParticles !== null){
-            this._explosionParticles.update(delta);
+        // Update animations
+        this._tweenAnimations.update();
+
+        // Update robot explosion particle system
+        if(this._explosionParticles != null) this._explosionParticles.update(delta);
+
+        // Emissive intensity update
+        if(this._emissiveIntensityDamage > 0){
+            this._emissiveIntensityDamage -= delta*this._emissiveIntensityDrop;
+            if(this._emissiveIntensityDamage < 0) this._emissiveIntensityDamage = 0;
+            this.group.traverse((function(child){
+                if(child.isMesh){
+                    child.material.emissiveIntensity = this._emissiveIntensityDamage;
+                }
+            }).bind(this));
         }
-        if(this.group.parent == null) return;
-        // Update every animation
-        this.mixer.update(delta);
+
+        // Update shooting explosion particle system
         this._shootExplosion.update(delta);
+
+        if(this.group.parent == null || this.isDead) return;
         
         let player = this.playerToFollow;
-
         if(player == null) return;
 
         let px = player.position.x;
@@ -285,15 +245,19 @@ class Robot {
         if( (this.isOnSameLevel(py) && ( (dist < this.eyeRadiusDistanceMin && !this.isFollowing) || 
                                         (dist < this.eyeRadiusDistanceMax && this.isFollowing) )
         ) || this.angryDuration > 0 ){
-            if(!this.isFollowing){
-                this.isFollowing = true;
-                this.startAnimation(this.animation_alert);
-            }
 
             if(this.angryDuration > 0) this.angryDuration -= delta;
 
+            // has seen now the player?
+            if(!this.isFollowing){
+                this.isFollowing = true;
+                this.isShootingProjectiles = false;
+                this.startAnimation(this.animation_alert);
+            }
+
             let v = { x: movement.x/dist, z: movement.z/dist };
-            if(dist > this.maxVicinityWithPlayer){
+            // is far from player to shoot?
+            if(dist > this.shootingDistanceMax){
                 
                 if(this.isInShooting) this.startAnimation(this.animation_shootPoseRev);
                 this.isInShooting = false;
@@ -317,233 +281,175 @@ class Robot {
             }
         }
 
-        if(this._emissiveIntensityDamage > 0){
-            this._emissiveIntensityDamage -= delta*this._emissiveIntensityDrop;
-            if(this._emissiveIntensityDamage < 0) this._emissiveIntensityDamage = 0;
-            this.group.traverse((function(child){
-                if(child.isMesh){
-                    child.material.emissiveIntensity = this._emissiveIntensityDamage;
-                }
-            }).bind(this));
-        }
-
         this.group.position.add(this.group.movementEngine.displacement);
 
     }
 
-    createAnimationShootPose(){
-        let velocity = 0.3;
-        // this.arm_dx_1
-        let arm_dx_1_a1 = this.arm_dx_1.quaternion;
-        let arm_dx_1_a2 = this.incrementQuaternionFromEuler(arm_dx_1_a1, 0,Math.PI/8,Math.PI/3);
+    /** Animations */
+    createAnimationShootPose() {
+        let velocity = 1000*0.3;
 
-        const arm_dx_1_rotation = new THREE.QuaternionKeyframeTrack(
-            this.arm_dx_1_path+'.quaternion',
-            [0, velocity],
-            [...arm_dx_1_a1.toArray(),
-             ...arm_dx_1_a2.toArray()],
-        );
+        let chest = this.createGeneralAnimation({
+            arm_dx_1: {x:0,y:Math.PI/8,z:Math.PI/3},
+            arm_dx_2: {x:Math.PI/8,y:0,z:0},
+            hand_dx: {x:-Math.PI/4,y:0,z:0},
 
-        // this.arm_dx_2
-        let arm_dx_2_a1 = this.arm_dx_2.quaternion;
-        let arm_dx_2_a2 = this.incrementQuaternionFromEuler(arm_dx_2_a1, +Math.PI/8,0,0);
-
-        const arm_dx_2_rotation = new THREE.QuaternionKeyframeTrack(
-            this.arm_dx_2_path+'.quaternion',
-            [0, velocity],
-            [...arm_dx_2_a1.toArray(),
-             ...arm_dx_2_a2.toArray()],
-        );
-
-        // this.hand_dx
-        let hand_dx_a1 = this.hand_dx.quaternion;
-        let hand_dx_a2 = this.incrementQuaternionFromEuler(hand_dx_a1, -Math.PI/4,0,0);
-
-        const hand_dx_rotation = new THREE.QuaternionKeyframeTrack(
-            this.hand_dx_path+'.quaternion',
-            [0, velocity],
-            [...hand_dx_a1.toArray(),
-             ...hand_dx_a2.toArray()],
-        );
-
-        // Putting everything toghether
-        const shootPose_clip = new THREE.AnimationClip('shootPose_clip', -1, [
-            arm_dx_1_rotation, arm_dx_2_rotation,
-            hand_dx_rotation
-        ]);
-
-        let animation_shootPose = this.mixer.clipAction(shootPose_clip);
-        animation_shootPose.loop = THREE.LoopOnce;
-        animation_shootPose.enabled = false;
-        animation_shootPose.clampWhenFinished = false;
-        animation_shootPose.finalCoords = {
-            positions: [],
-            rotations: [
-                {obj:this.arm_dx_1,value:arm_dx_1_a2.clone()},
-                {obj:this.arm_dx_2,value:arm_dx_2_a2.clone()},
-                {obj:this.hand_dx,value:hand_dx_a2.clone()},
-            ],
-        };
-
-        return animation_shootPose;
+            arm_sx_1: {x:-Math.PI/4,y:-Math.PI*0.13,z:Math.PI/6},
+            arm_sx_2: {x:-Math.PI/4,y:0,z:0},
+        }, velocity)
+        .onComplete(()=>{
+            this.isShootingProjectiles = true;
+        });
+        
+        return chest;
     }
 
     createAnimationShootPoseReverse(){
-        let velocity = 0.3;
-        // this.arm_dx_1
-        let arm_dx_1_a2 = this.arm_dx_1.quaternion;
-        let arm_dx_1_a1 = this.incrementQuaternionFromEuler(arm_dx_1_a2, 0,Math.PI/8,Math.PI/3);
+        let velocity = 1000*0.3;
+        
+        let chest = this.createGeneralAnimation({}, velocity);
 
-        const arm_dx_1_rotation = new THREE.QuaternionKeyframeTrack(
-            this.arm_dx_1_path+'.quaternion',
-            [0, velocity],
-            [...arm_dx_1_a1.toArray(),
-             ...arm_dx_1_a2.toArray()],
-        );
-
-        // this.arm_dx_2
-        let arm_dx_2_a2 = this.arm_dx_2.quaternion;
-        let arm_dx_2_a1 = this.incrementQuaternionFromEuler(arm_dx_2_a2, +Math.PI/8,0,0);
-
-        const arm_dx_2_rotation = new THREE.QuaternionKeyframeTrack(
-            this.arm_dx_2_path+'.quaternion',
-            [0, velocity],
-            [...arm_dx_2_a1.toArray(),
-             ...arm_dx_2_a2.toArray()],
-        );
-
-        // this.hand_dx
-        let hand_dx_a2 = this.hand_dx.quaternion;
-        let hand_dx_a1 = this.incrementQuaternionFromEuler(hand_dx_a2, -Math.PI/4,0,0);
-
-        const hand_dx_rotation = new THREE.QuaternionKeyframeTrack(
-            this.hand_dx_path+'.quaternion',
-            [0, velocity],
-            [...hand_dx_a1.toArray(),
-             ...hand_dx_a2.toArray()],
-        );
-
-        // Putting everything toghether
-        const shootPoseRev_clip = new THREE.AnimationClip('shootPose_clip_rev', -1, [
-            arm_dx_1_rotation, arm_dx_2_rotation,
-            hand_dx_rotation
-        ]);
-
-        let animation_shootPoseRev = this.mixer.clipAction(shootPoseRev_clip);
-        animation_shootPoseRev.loop = THREE.LoopOnce;
-        animation_shootPoseRev.enabled = false;
-        animation_shootPoseRev.clampWhenFinished = false;
-        animation_shootPoseRev.finalCoords = {
-            positions: [],
-            rotations: [
-                {obj:this.arm_dx_1,value:arm_dx_1_a2.clone()},
-                {obj:this.arm_dx_2,value:arm_dx_2_a2.clone()},
-                {obj:this.hand_dx,value:hand_dx_a2.clone()},
-            ],
-        };
-
-        return animation_shootPoseRev;
+        return chest;
     }
 
-    createAnimationAlert(){
-        // this.chest
-        let chest_a1 = this.chest.quaternion;
-        let chest_a2 = this.incrementQuaternionFromEuler(chest_a1, 0,0,Math.PI/4);
-        const chest_rotation = new THREE.QuaternionKeyframeTrack(
-            this.chest_path+'.quaternion',
-            [0, 0.3, 0.6],
-            [...chest_a1.toArray(),
-             ...chest_a2.toArray(),
-             ...chest_a1.toArray()],
-        );
+    createAnimationShooting() {
+        let velocity = 1000*0.2;
 
-        // this.head
-        let head_a1 = this.head.quaternion;
-        let head_a2 = this.incrementQuaternionFromEuler(head_a1, 0,Math.PI,0);
-        let head_a3 = this.incrementQuaternionFromEuler(head_a1, 0,Math.PI*2,0);
-        const head_rotation = new THREE.QuaternionKeyframeTrack(
-            this.head_path+'.quaternion',
-            [0, 0.1, 0.3],
-            [...head_a1.toArray(),
-             ...head_a2.toArray(),
-             ...head_a3.toArray()],
-        );
+        let chest = this.createGeneralAnimation({
+            chest: {x:0,y:0,z:Math.PI/6},
+            head: {x:0,y:0,z:-Math.PI/6},
+            arm_dx_1: {x:0,y:Math.PI/8,z:Math.PI/3},
+            arm_dx_2: {x:Math.PI/8,y:0,z:0},
+            hand_dx: {x:-Math.PI/4,y:0,z:0},
 
-        // this.arm_dx_1 & this.arm_sx_1
-        let arm_dx_1_a1 = this.arm_dx_1.quaternion;
-        let arm_dx_1_a2 = this.incrementQuaternionFromEuler(arm_dx_1_a1, 0,0,Math.PI*3/4);
-        let arm_sx_1_a1 = arm_dx_1_a1;
-        let arm_sx_1_a2 = arm_dx_1_a2;
-        const arm_dx_1_rotation = new THREE.QuaternionKeyframeTrack(
-            this.arm_dx_1_path+'.quaternion',
-            [0, 0.3, 0.6],
-            [...arm_dx_1_a1.toArray(),
-             ...arm_dx_1_a2.toArray(),
-             ...arm_dx_1_a1.toArray()],
-        );
-        const arm_sx_1_rotation = new THREE.QuaternionKeyframeTrack(
-            this.arm_sx_1_path+'.quaternion',
-            [0, 0.3, 0.6],
-            [...arm_sx_1_a1.toArray(),
-             ...arm_sx_1_a2.toArray(),
-             ...arm_sx_1_a1.toArray()],
-        );
+            arm_sx_1: {x:-Math.PI/4,y:-Math.PI*0.13,z:Math.PI/6},
+            arm_sx_2: {x:-Math.PI/4,y:0,z:0},
+        }, velocity);
 
-        // this.arm_dx_2 & this.arm_sx_2
-        let arm_dx_2_a1 = this.arm_dx_2.quaternion;
-        let arm_dx_2_a2 = this.incrementQuaternionFromEuler(arm_dx_2_a1, -Math.PI/2,0,Math.PI/2);
-        let arm_sx_2_a1 = arm_dx_2_a1;
-        let arm_sx_2_a2 = this.incrementQuaternionFromEuler(arm_dx_2_a1, +Math.PI/2,0,Math.PI/2);;
-        const arm_dx_2_rotation = new THREE.QuaternionKeyframeTrack(
-            this.arm_dx_2_path+'.quaternion',
-            [0, 0.3, 0.6],
-            [...arm_dx_2_a1.toArray(),
-             ...arm_dx_2_a2.toArray(),
-             ...arm_dx_2_a1.toArray()],
-        );
-        const arm_sx_2_rotation = new THREE.QuaternionKeyframeTrack(
-            this.arm_sx_2_path+'.quaternion',
-            [0, 0.3, 0.6],
-            [...arm_sx_2_a1.toArray(),
-             ...arm_sx_2_a2.toArray(),
-             ...arm_sx_2_a1.toArray()],
-        );
+        let chest2 = this.createAnimationShootPose();
 
-        // Putting everything toghether
-        const alert_clip = new THREE.AnimationClip('alert_clip', -1, [
-            head_rotation,
-            chest_rotation,
-            arm_dx_1_rotation, arm_sx_1_rotation,
-            arm_dx_2_rotation, arm_sx_2_rotation,
-        ]);
+        chest.chain(chest2);
+        
+        return chest;
+    }
 
-        let animation_alert = this.mixer.clipAction(alert_clip);
-        animation_alert.loop = THREE.LoopOnce;
-        animation_alert.enabled = false;
-        animation_alert.clampWhenFinished = false;
+    createAnimationAlert() {
+        let totalVelocity = 1000*0.6;
+        let velocity = totalVelocity/2;
 
-        return animation_alert;
+        let chest = this.createGeneralAnimation({
+            chest: {x:0,y:0,z:Math.PI/4},
+            head: {x:0,y:Math.PI*2,z:0},
+            arm_dx_1: {x:0,y:0,z:Math.PI*3/4},
+            arm_dx_2: {x:0,y:0,z:Math.PI*3/4},
+            arm_sx_1: {x:0,y:0,z:Math.PI*3/4},
+            arm_sx_2: {x:0,y:0,z:Math.PI*3/4},
+        }, velocity);
+
+        let chest2 = this.createGeneralAnimation({
+            head: {x:0,y:Math.PI*4,z:0},
+        }, velocity)
+        .onComplete(()=>{
+            let head = new TWEEN.Tween(this.head.rotation, this._tweenAnimations)
+            .to({x:0,y:0,z:0}, 0).start();
+        });
+
+        chest.chain(chest2);
+
+        return chest;
+    }
+
+    createAnimationDeath(){
+        let velocity1 = 1000*0.9;
+
+        let rot1 = {x:0,y:Math.PI*4,z:0};
+        let rot2 = {x:0,y:0,z:0.95*Math.PI/2};
+
+        let chest = this.createGeneralAnimation({
+            wheels_base: {x:Math.PI/8,y:0,z:0},
+            chest: {x:-Math.PI/8,y:0,z:0},
+            group: {x:`+${rot1.x}`,y:`+${rot1.y}`,z:`+${rot1.z}`},
+
+            arm_dx_1: {x:0,y:-Math.PI/4,z:Math.PI*3/4},
+            arm_dx_2: {x:0,y:0,z:Math.PI/4},
+            arm_sx_1: {x:0,y:Math.PI/4,z:Math.PI*3/4},
+            arm_sx_2: {x:0,y:0,z:Math.PI/4},
+        }, velocity1, TWEEN.Easing.Quadratic.InOut);
+
+        let chest2 = this.createGeneralAnimation({
+            wheels_base: {x:Math.PI/8,y:0,z:0},
+            chest: {x:-Math.PI/8,y:0,z:0},
+            group: {x:`+${rot2.x}`,y:`+${rot2.y}`,z:`-${rot2.z}`},
+            head: {x:0,y:Math.PI/4,z:0},
+
+            arm_dx_1: {x:0,y:-Math.PI/4,z:Math.PI*0.55},
+            arm_dx_2: {x:0,y:0,z:Math.PI/4},
+            arm_sx_1: {x:0,y:Math.PI/4,z:Math.PI*0.55},
+            arm_sx_2: {x:0,y:0,z:Math.PI/4},
+        }, velocity1, TWEEN.Easing.Bounce.InOut);
+
+        chest.chain(chest2);
+        // chest.onStart(()=>{
+        //     this.isDead = true;
+        //     this.isShootingProjectiles = false;
+        // })
+        chest2.onComplete(()=>{
+            // Disappear robot
+            this.group.removeFromPhysicsWorld();
+            this.group.removeFromParent();
+            // Start explosion particles
+            this._explosionParticles.setGeneralPosition(this.group.position.x,this.group.position.y,this.group.position.z);
+            this._explosionParticles.restart();
+        });
+
+        return chest;
     }
 
     startAnimation(anim) {
-        this.mixer.stopAllAction();
-        if(anim){
-            anim.reset();
-            anim.play();
-        }
+        if (!anim) return;
+        this._tweenAnimations.removeAll();
+        anim.start();
     }
 
-    createQuaternionFromEuler(x,y,z){
-        return new THREE.Quaternion().setFromEuler(new THREE.Euler(x,y,z, "XYZ"));
-    }
+    createGeneralAnimation(rotationParams, generalVelocityMilliseconds = 1000, generalEasing = TWEEN.Easing.Quadratic.In){
+        let velocity = generalVelocityMilliseconds;
+        
+        let chest = new TWEEN.Tween(this.chest.rotation, this._tweenAnimations)
+        .to(rotationParams.chest || this.chest.defaultRotation, velocity).easing(generalEasing)
+        .onStart(()=>{
 
-    createEulerFromQuaternion(x,y,z,w){
-        return new THREE.Euler().setFromQuaternion(new THREE.Quaternion(x,y,z,w));
-    }
+            if(rotationParams.group){
+                let group = new TWEEN.Tween(this.group.rotation, this._tweenAnimations)
+                .to(rotationParams.group, velocity).easing(generalEasing).start();
+            }
 
-    incrementQuaternionFromEuler(quaternion, dx,dy,dz){
-        let e = this.createEulerFromQuaternion(quaternion.x,quaternion.y,quaternion.z,quaternion.w);
-        return this.createQuaternionFromEuler(e.x+dx,e.y+dy,e.z+dz);
+            let head = new TWEEN.Tween(this.head.rotation, this._tweenAnimations)
+            .to(rotationParams.head || this.head.defaultRotation, velocity).start();
+
+            let arm_dx_1 = new TWEEN.Tween(this.arm_dx_1.rotation, this._tweenAnimations)
+            .to(rotationParams.arm_dx_1 || this.arm_dx_1.defaultRotation, velocity).easing(generalEasing).start();
+
+            let arm_dx_2 = new TWEEN.Tween(this.arm_dx_2.rotation, this._tweenAnimations)
+            .to(rotationParams.arm_dx_2 || this.arm_dx_2.defaultRotation, velocity).easing(generalEasing).start();
+
+            let hand_dx = new TWEEN.Tween(this.hand_dx.rotation, this._tweenAnimations)
+            .to(rotationParams.hand_dx || this.hand_dx.defaultRotation, velocity).easing(generalEasing).start();
+
+            let arm_sx_1 = new TWEEN.Tween(this.arm_sx_1.rotation, this._tweenAnimations)
+            .to(rotationParams.arm_sx_1 || this.arm_sx_1.defaultRotation, velocity).easing(generalEasing).start();
+
+            let arm_sx_2 = new TWEEN.Tween(this.arm_sx_2.rotation, this._tweenAnimations)
+            .to(rotationParams.arm_sx_2 || this.arm_sx_2.defaultRotation, velocity).easing(generalEasing).start();
+
+            let hand_sx = new TWEEN.Tween(this.hand_sx.rotation, this._tweenAnimations)
+            .to(rotationParams.hand_sx || this.hand_sx.defaultRotation, velocity).easing(generalEasing).start();
+
+            let wheels_base = new TWEEN.Tween(this.wheels_base.rotation, this._tweenAnimations)
+            .to(rotationParams.wheels_base || this.wheels_base.defaultRotation, velocity).easing(generalEasing).start();
+
+        });
+
+        return chest;
     }
 
 }

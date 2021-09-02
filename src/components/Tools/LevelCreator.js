@@ -205,8 +205,8 @@ class LevelCreator {
         this.addPointLight(0,40,0, 0xFFFFFF, 0.1);
         // this.addFogExp2();
 
-        // this.addPlayer(0,0,25, 3);
-        this.addPlayer(32,0,54, 3);
+        this.addPlayer(0,0,25, 3);
+        // this.addPlayer(32,0,54, 3);
 
         this.addFloor(0,0,0, 200,200);
         this.addFloor(0,wallHeight,0, 200,200); // ceiling = floor on higher level
@@ -323,6 +323,8 @@ class LevelCreator {
         this.addWall(-10,0,0, 60,wallHeight, Math.PI/2);
 
         this.addRobotDebug(0,0,24, -Math.PI/2);
+
+        this.addRobot(0,0,-20, -Math.PI/2);
 
         this.addGasCylinder(5,0,5, Math.PI*0.8);
 

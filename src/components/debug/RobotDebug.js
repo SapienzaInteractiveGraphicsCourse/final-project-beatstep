@@ -32,14 +32,6 @@ class RobotDebug {
 
                 child.castShadow = true;
             }
-            
-            // tween.js parameters for each part
-            // child.tweening = {
-            //     position: new TWEEN.Tween(child.position),
-            //     rotation: new TWEEN.Tween(child.rotation),
-            //     defaultPosition: child.position.clone(),
-            //     defaultRotation: child.rotation.clone(),
-            // };
 
             child.defaultPosition = eulerToJSON(child.position.clone());
             child.defaultRotation = eulerToJSON(child.rotation.clone());
