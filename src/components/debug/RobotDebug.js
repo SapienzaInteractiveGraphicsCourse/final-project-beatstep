@@ -44,6 +44,7 @@ class RobotDebug {
             child.defaultPosition = eulerToJSON(child.position.clone());
             child.defaultRotation = eulerToJSON(child.rotation.clone());
         });
+        this.group.defaultRotation = eulerToJSON(this.group.rotation.clone());
 
         // Groups part (ordered by hierarchy)
             this.wheels_base = this.group.getObjectByName("base_ruote");
@@ -67,12 +68,14 @@ class RobotDebug {
         this.animation_shootPose = this.createAnimationShootPose();
         this.animation_shooting = this.createAnimationShooting();
         this.animation_shootPoseRev = this.createAnimationShootPoseReverse();
+        this.animation_death = this.createAnimationDeath();
 
         this.animations = [
             this.animation_alert,
             this.animation_shootPose,
             this.animation_shooting,
             this.animation_shootPoseRev,
+            this.animation_death,
         ];
 
         document.addEventListener("keydown", ((event) => {
@@ -172,38 +175,85 @@ class RobotDebug {
         return chest;
     }
 
+    createAnimationDeath(){
+        let velocity1 = 1000*0.9;
+
+        let rot1 = {x:0,y:Math.PI*4,z:0};
+        let rot2 = {x:0,y:0,z:0.95*Math.PI/2};
+
+        let chest = this.createGeneralAnimation({
+            wheels_base: {x:Math.PI/8,y:0,z:0},
+            chest: {x:-Math.PI/8,y:0,z:0},
+            group: {x:`+${rot1.x}`,y:`+${rot1.y}`,z:`+${rot1.z}`},
+
+            arm_dx_1: {x:0,y:-Math.PI/4,z:Math.PI*3/4},
+            arm_dx_2: {x:0,y:0,z:Math.PI/4},
+            arm_sx_1: {x:0,y:Math.PI/4,z:Math.PI*3/4},
+            arm_sx_2: {x:0,y:0,z:Math.PI/4},
+        }, velocity1, TWEEN.Easing.Quadratic.InOut);
+
+        let chest2 = this.createGeneralAnimation({
+            wheels_base: {x:Math.PI/8,y:0,z:0},
+            chest: {x:-Math.PI/8,y:0,z:0},
+            group: {x:`+${rot2.x}`,y:`+${rot2.y}`,z:`-${rot2.z}`},
+            head: {x:0,y:Math.PI/4,z:0},
+
+            arm_dx_1: {x:0,y:-Math.PI/4,z:Math.PI*0.55},
+            arm_dx_2: {x:0,y:0,z:Math.PI/4},
+            arm_sx_1: {x:0,y:Math.PI/4,z:Math.PI*0.55},
+            arm_sx_2: {x:0,y:0,z:Math.PI/4},
+        }, velocity1, TWEEN.Easing.Bounce.InOut)
+        .onComplete(()=>{
+            // let group = new TWEEN.Tween(this.group.rotation, this._tweenAnimations)
+            // .to({x:`+${0}`,y:`-${rot1.y}`,z:`+${rot2.z}`}, 0).start();
+        });
+
+        chest.chain(chest2);
+
+        return chest;
+    }
+
     startAnimation(anim) {
         if (!anim) return;
         this._tweenAnimations.removeAll();
         anim.start();
     }
 
-    createGeneralAnimation(rotationParams, generalVelocityMilliseconds = 1000){
+    createGeneralAnimation(rotationParams, generalVelocityMilliseconds = 1000, generalEasing = TWEEN.Easing.Quadratic.In){
         let velocity = generalVelocityMilliseconds;
         
         let chest = new TWEEN.Tween(this.chest.rotation, this._tweenAnimations)
-        .to(rotationParams.chest || this.chest.defaultRotation, velocity).easing(TWEEN.Easing.Quadratic.In)
+        .to(rotationParams.chest || this.chest.defaultRotation, velocity).easing(generalEasing)
         .onStart(()=>{
+
+            if(rotationParams.group){
+                let group = new TWEEN.Tween(this.group.rotation, this._tweenAnimations)
+                .to(rotationParams.group, velocity).easing(generalEasing).start();
+            }
+
             let head = new TWEEN.Tween(this.head.rotation, this._tweenAnimations)
             .to(rotationParams.head || this.head.defaultRotation, velocity).start();
 
             let arm_dx_1 = new TWEEN.Tween(this.arm_dx_1.rotation, this._tweenAnimations)
-            .to(rotationParams.arm_dx_1 || this.arm_dx_1.defaultRotation, velocity).easing(TWEEN.Easing.Quadratic.In).start();
+            .to(rotationParams.arm_dx_1 || this.arm_dx_1.defaultRotation, velocity).easing(generalEasing).start();
 
             let arm_dx_2 = new TWEEN.Tween(this.arm_dx_2.rotation, this._tweenAnimations)
-            .to(rotationParams.arm_dx_2 || this.arm_dx_2.defaultRotation, velocity).easing(TWEEN.Easing.Quadratic.In).start();
+            .to(rotationParams.arm_dx_2 || this.arm_dx_2.defaultRotation, velocity).easing(generalEasing).start();
 
             let hand_dx = new TWEEN.Tween(this.hand_dx.rotation, this._tweenAnimations)
-            .to(rotationParams.hand_dx || this.hand_dx.defaultRotation, velocity).easing(TWEEN.Easing.Quadratic.In).start();
+            .to(rotationParams.hand_dx || this.hand_dx.defaultRotation, velocity).easing(generalEasing).start();
 
             let arm_sx_1 = new TWEEN.Tween(this.arm_sx_1.rotation, this._tweenAnimations)
-            .to(rotationParams.arm_sx_1 || this.arm_sx_1.defaultRotation, velocity).easing(TWEEN.Easing.Quadratic.In).start();
+            .to(rotationParams.arm_sx_1 || this.arm_sx_1.defaultRotation, velocity).easing(generalEasing).start();
 
             let arm_sx_2 = new TWEEN.Tween(this.arm_sx_2.rotation, this._tweenAnimations)
-            .to(rotationParams.arm_sx_2 || this.arm_sx_2.defaultRotation, velocity).easing(TWEEN.Easing.Quadratic.In).start();
+            .to(rotationParams.arm_sx_2 || this.arm_sx_2.defaultRotation, velocity).easing(generalEasing).start();
 
             let hand_sx = new TWEEN.Tween(this.hand_sx.rotation, this._tweenAnimations)
-            .to(rotationParams.hand_sx || this.hand_sx.defaultRotation, velocity).easing(TWEEN.Easing.Quadratic.In).start();
+            .to(rotationParams.hand_sx || this.hand_sx.defaultRotation, velocity).easing(generalEasing).start();
+
+            let wheels_base = new TWEEN.Tween(this.wheels_base.rotation, this._tweenAnimations)
+            .to(rotationParams.wheels_base || this.wheels_base.defaultRotation, velocity).easing(generalEasing).start();
 
         });
 
