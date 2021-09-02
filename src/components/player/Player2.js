@@ -336,8 +336,11 @@ class Player extends Object3D{
             });
 
             let hit = hits[0];
-            if(hit.objectIntersected.constructor.name == "Player") if(hits.length > 1) hit = hits[1];
-            if(hit.objectIntersected.hit) hit.objectIntersected.hit(direction, hit.distance);
+            if(hit.objectIntersected.constructor.name == "Player"){
+                if(hits.length > 1) hit = hits[1];
+                else hit = null;
+            }
+            if(hit && hit.objectIntersected.hit) hit.objectIntersected.hit(direction, hit.distance);
         }
         
     }

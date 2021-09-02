@@ -1,3 +1,4 @@
+/* HUD style */
 .top_overlay {
     position: fixed;
     top: 10px;
@@ -94,4 +95,118 @@
 }
 .hidden{
     display: none;
+}
+
+
+/* Menu style */
+.menu_backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.menu_backdrop.main {
+    background: linear-gradient(-45deg, #1cb2e9, #f15893);
+    background-size: 200% 200%;
+    animation: gradient 3s ease infinite;
+}
+
+.menu_board{
+    position: relative;
+    background-color: #fffff5;
+    border: 5px solid #1cb2e9;
+    border-radius: 8px;
+    width: 50%;
+    height: 50%;
+    max-width: 650px;
+    box-shadow: 0px 10px 13px 4px rgb(102 102 102 / 77%);
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    animation: fadein 2s;
+}
+
+@keyframes fadein {
+    from {
+        opacity:0;
+    }
+    to {
+        opacity:1;
+    }
+}
+
+.menu_title {
+    position: absolute;
+    top: 0;
+    transform: translate(0,-50%);
+    color: #1cb2e9;
+    font-size: xxx-large;
+    font-family: fantasy;
+    background-color: #fffff5;
+    border: 5px solid #1cb2e9;
+    border-bottom: #fffff5;
+    border-radius: 20px 20px 0px 0px;
+    padding: 15px 15px 15px 15px;
+    /* display: flex; */
+    /* flex-direction: column; */
+    /* justify-content: flex-end; */
+    /* align-items: center; */
+}
+.menu_title::before {
+    padding: 0;
+    margin: 0;
+    display: block;
+    content: "";
+    height: 54%;
+    width: 10px;
+    background-color: #fffff5;
+    position: absolute;
+    left: -5px;
+    bottom: -1px;
+}
+.menu_title:after {
+    padding: 0;
+    margin: 0;
+    display: block;
+    content: "";
+    height: 54%;
+    width: 10px;
+    background-color: #fffff5;
+    position: absolute;
+    right: -5px;
+    bottom: -1px;
+}
+
+.menu_button {
+	box-shadow: 0px 10px 14px -7px #747474;
+	background-color:#1cb2e9;
+	border-radius:8px;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Trebuchet MS;
+	font-size:20px;
+	font-weight:bold;
+	padding:15px 35px;
+    margin: 40px 0px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #747474;
+    box-sizing: border-box;
+    min-width: 50%;
+    text-align: center;
+}
+.menu_button:hover {
+	background-color:#378ead;
+}
+.menu_button:active {
+	position:relative;
+	top:1px;
 }
