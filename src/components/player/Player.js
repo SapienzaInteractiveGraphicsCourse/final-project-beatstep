@@ -83,11 +83,11 @@ class Player extends Object3D{
 
         let _health = 100;
         let _shield = 0;
-        let _ammo = 1000;
+        let _ammo = 50;
         
         this.topHealth = 100;
         this.topShield = 50;
-        this.topAmmo = 1000;
+        this.topAmmo = 200;
         
         Object.defineProperties(this,{
             health: {
