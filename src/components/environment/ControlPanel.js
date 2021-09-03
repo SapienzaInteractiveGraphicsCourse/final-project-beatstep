@@ -33,7 +33,7 @@ class ControlPanel {
 
         let _controlPanelCollisionGeometry = new THREE.BoxGeometry( _controlPanelSize.x,
                                                                     _controlPanelSize.y,
-                                                                    _controlPanelSize.z);
+                                                                    _controlPanelSize.z+6);
         _controlPanelCollisionGeometry.translate(0,_controlPanelSize.y/2,0);
 
         this.group.geometry = _controlPanelCollisionGeometry;

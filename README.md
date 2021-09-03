@@ -1,7 +1,10 @@
 ## Interactive Graphics Project
 
 Project for the Interactive Graphics class of AI & Robotics at Sapienza University of Rome, by Pasquale Silvestri and Marco Lo Pinto.\
-The game is an endless first person shooter, where you have to stay alive as long as possible by killing hordes of robots, room after room. How long will you be able to survive?
+The game is a first person shooter, You are an agent training in a very realistic disaster simulator! Get to the end of the simulation without getting killed by rogue robots or exploding on some weirdly misplaced exploding barrels (Why are there gas barrels again?)
+
+# GitHub Pages 
+[Link to the game](https://sapienzainteractivegraphicscourse.github.io/final-project-beatstep/dist/)
 
 # Develop
 * run `npm start` to star the development server, live recompilation and reloading are active
@@ -15,4 +18,4 @@ To run the project, serve the __/dist__ folder
 # Library used
 
 - Three.js
-- ?
+- Tween.js

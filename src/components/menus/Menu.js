@@ -56,7 +56,8 @@ class Menu {
                                 &bull; Use WASD to move around and the mouse to change your direction <br />
                                 &bull; Press E near doors and lamp lights to interact with them <br />
                                 &bull; Use the left mouse button to shoot at robots or barrels <br />
-                                &bull; Press Esc to pause the game`;
+                                &bull; Press Esc to pause the game <br />
+                                &bull; Reach the computer and press E to end the simulation`;
         this.htpBoard.append(this.htpText);
 
         this.htpBackBtn = document.createElement("div");
