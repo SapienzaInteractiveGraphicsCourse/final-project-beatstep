@@ -84,6 +84,7 @@ class RobotDebug {
 
     setRotation(alpha) {
         this.group.rotation.y = alpha;
+        this.group.defaultRotation.y = alpha;
     }
 
     update(delta) {
@@ -168,6 +169,7 @@ class RobotDebug {
     }
 
     createAnimationDeath(){
+
         let velocity1 = 1000*0.9;
 
         let rot1 = {x:0,y:Math.PI*4,z:0};
@@ -195,10 +197,15 @@ class RobotDebug {
             arm_sx_1: {x:0,y:Math.PI/4,z:Math.PI*0.55},
             arm_sx_2: {x:0,y:0,z:Math.PI/4},
         }, velocity1, TWEEN.Easing.Bounce.InOut)
-        .onComplete(()=>{
-            // let group = new TWEEN.Tween(this.group.rotation, this._tweenAnimations)
-            // .to({x:`+${0}`,y:`-${rot1.y}`,z:`+${rot2.z}`}, 0).start();
-        });
+        // .onComplete(()=>{
+        //     this.createGeneralAnimation({
+        //         group:{
+        //             x:this.group.defaultRotation.x,
+        //             y:this.group.defaultRotation.y,
+        //             z:this.group.defaultRotation.z
+        //         }
+        //     },0).start();
+        // });
 
         chest.chain(chest2);
 
@@ -208,7 +215,17 @@ class RobotDebug {
     startAnimation(anim) {
         if (!anim) return;
         this._tweenAnimations.removeAll();
-        anim.start();
+
+        new TWEEN.Tween(this.group.rotation, this._tweenAnimations)
+        .to({
+            x:this.group.defaultRotation.x,
+            y:this.group.defaultRotation.y,
+            z:this.group.defaultRotation.z
+        }, 0)
+        .onComplete(()=>{
+            anim.start();
+        }).start();
+        
     }
 
     createGeneralAnimation(rotationParams, generalVelocityMilliseconds = 1000, generalEasing = TWEEN.Easing.Quadratic.In){

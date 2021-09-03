@@ -226,6 +226,23 @@ class Robot {
         return Math.abs(this.group.position.y - py) < (this.size.y*2);
     }
 
+    update_debug(delta){
+        // Update animations
+        this.internalTimer += delta*1000;
+        this._tweenAnimations.update(this.internalTimer);
+
+        if(!this._idleMovement.isIdleAnimated){
+            this._idleMovement.isIdleAnimated = true;
+            let angleRadius = ( Math.random()*0.5 + 0.5 ) * (Math.PI/2);
+            if(this._collided) angleRadius += Math.PI*3/4;
+            let anim = this._createIdleAnimation(angleRadius);
+            this.startAnimation(anim);
+        }
+
+        this.group.position.add(this.group.movementEngine.displacement);
+        this._collided = false;
+    }
+
     update(delta){
         // Update animations
         this.internalTimer += delta*1000;
@@ -490,7 +507,7 @@ class Robot {
         }
         
         let chest = new TWEEN.Tween(this.group.rotation, this._tweenAnimations)
-        .to({x:`+${0}`,y:`${sign}${angleRadius}`,z:`+${0}`}, this._idleMovement.duration*0.2).easing(generalEasing)
+        .to({x:`+${0}`,y:`${sign}${angleRadius}`,z:`+${0}`}, this._idleMovement.duration*0.35).easing(generalEasing)
         .onStart(()=>{
             this._idleMovement.isIdleAnimated = true;
 

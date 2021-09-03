@@ -109,8 +109,8 @@ class LevelCreator {
         this.objectsToUpdate.push(floorLight);
     }
 
-    addWall(x,y,z, width,height, rotationRadians){
-        let wall = new Wall(x,y,z, width,height, rotationRadians);
+    addWall(x,y,z, width,height, rotationRadians, type=0){
+        let wall = new Wall(x,y,z, width,height, rotationRadians, type);
         scene.add(wall.obj);
         world.addStaticObject(wall.obj);
     }
@@ -309,6 +309,37 @@ class LevelCreator {
         this.addFloorLight(29,0,65, Math.PI*3/4);
     }
 
+    createDojo(){
+        let wallHeight = 12;
+        let doorHeight = 5;
+
+        this.addAmbientLight();
+        this.addPointLight(0,40,0, 0xFFFFFF, 0.1);
+
+        this.addRobotDebug(0,0,0, -Math.PI/2);
+        this.addPlayer(0,0,10, 3);
+
+        let dojoRadius = 16;
+        let dojoParts = 8;
+        let incrementAngle = 2*Math.PI/dojoParts;
+        let wallSize = 16.58 * dojoRadius/20;
+        for(let angle = 0; angle < 2*Math.PI; angle+=incrementAngle){
+            let x = Math.sin(angle)*dojoRadius;
+            let z = Math.cos(angle)*dojoRadius;
+            this.addWall(x,0,z, wallSize,wallHeight, angle, 2);
+
+            if(angle == incrementAngle || angle == incrementAngle*(dojoParts-1)){
+                this.addFloorLight(x-2*Math.sign(x),0,z-2*Math.sign(z), angle + Math.PI);
+            }
+        }
+
+        this.addPickupAmmo(4,0,-10);
+        this.addPickupHealth(0,0,-10);
+        this.addPickupShield(-4,0,-10);
+
+        this.addFloor(0,0,0, 80,80);
+    }
+
     createTestLevel(){
         let wallHeight = 16;
         let doorHeight = 5;
@@ -321,9 +352,9 @@ class LevelCreator {
         this.addFloor(0,0,0, 200,200);
         this.addWall(-10,0,0, 60,wallHeight, Math.PI/2);
 
-        this.addRobotDebug(0,0,24, -Math.PI/2);
+        this.addRobotDebug(0,0,-20, -Math.PI/2);
 
-        this.addRobot(0,0,-20, -Math.PI/2);
+        this.addRobot(0,0,24, -Math.PI/2);
 
         this.addGasCylinder(5,0,5, Math.PI*0.8);
 
