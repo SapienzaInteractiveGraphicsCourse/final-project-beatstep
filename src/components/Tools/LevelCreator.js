@@ -34,8 +34,7 @@ class LevelCreator {
 
     clearLevel(){
         scene.remove.apply(scene, scene.children);
-        world.staticObjects = [];
-        world.dynamicObjects = [];
+        world.clearWorld();
         this.objectsToUpdate = [];
         this.player = null;
     }

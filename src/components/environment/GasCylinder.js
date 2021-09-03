@@ -70,7 +70,7 @@ class GasCylinder extends THREE.Mesh{
         this.receiveShadow = true;
         this.castShadow = true;
 
-        this.explosionPower = 35;
+        this.explosionPower = 25;
         this.closeObjects = [];
         this.surroundObject = new THREE.Object3D();
         this.surroundObject.geometry = _gascylinderSurroundGeometry;

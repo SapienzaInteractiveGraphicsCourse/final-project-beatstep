@@ -1,11 +1,11 @@
 import Menu from "./Menu";
 
-class MainMenu extends Menu{
+class DeathMenu extends Menu{
 
-    constructor(playCallback = ()=>{}){
+    constructor(restartCallback = ()=>{}){
         
         super();
-        this.backdrop.classList.add("main");
+        this.backdrop.classList.add("death");
 
         // Main screen
         this.board = document.createElement("div");
@@ -14,14 +14,14 @@ class MainMenu extends Menu{
 
         this.boardTitle = document.createElement("div");
         this.boardTitle.classList.add("menu_title");
-        this.boardTitle.innerText = "IG Final Project";
+        this.boardTitle.innerText = "You Died";
         this.board.append(this.boardTitle);
 
         this.playBtn = document.createElement("div");
         this.playBtn.classList.add("menu_button");
-        this.playBtn.innerText = "Play";
+        this.playBtn.innerText = "Main Menu";
         this.playBtn.addEventListener("click",()=>{
-            playCallback();
+            restartCallback(this);
         })
         this.board.append(this.playBtn);
 
@@ -57,9 +57,9 @@ class MainMenu extends Menu{
 
         this.htpText = document.createElement("div");
         this.htpText.classList.add("menu_text");
-        this.htpText.innerHTML = `You are an agent training in a very realistic disaster simulator! <br />
+        this.htpText.innerHTML = `You are an agent training in a very realistic disaster simulator ! <br />
                                 Get to the end of the simulation without getting killed by rogue robots
-                                or exploding on some weirdly misplaced exploding barrels (Why are there gas barrels again?). <br /><br />
+                                or exploding on some weirdly misplaced exploding barrels (Why are there gas barrels again ?). <br /><br />
                                 &bull; Use WASD to move around and the mouse to change your direction <br />
                                 &bull; Press E near objects to interact with them <br />
                                 &bull; Use the left mouse button to shoot at robots or barrels <br />
@@ -103,11 +103,8 @@ class MainMenu extends Menu{
         })
         this.credBoard.append(this.credBackBtn);
 
-
-
-        
     }
 
 }
 
-export default MainMenu;
+export default DeathMenu;

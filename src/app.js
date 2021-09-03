@@ -1,20 +1,35 @@
 import { THREE, scene, clock, renderer, camera } from './components/setup/ThreeSetup';
 import './style.css';
 
-// Physics
-// import { PhysicsBody, PhysicsMaterial, PhysicsShapeThree, world } from './components/physics/PhysicsEngine';
-import { world } from './components/physics/PhysicsWorld';
-
 import MainMenu from './components/menus/MainMenu';
 let mainMenu = new MainMenu(startGame);
 import PauseMenu from './components/menus/PauseMenu';
 let pauseMenu = new PauseMenu(resumeGame);
-let inPause = false;
+import DeathMenu from './components/menus/DeathMenu';
+let deathMenu = new DeathMenu(restartGame);
 
 // Tools
 import { DefaultGeneralLoadingManager } from './components/Tools/GeneralLoadingManager';
 import LevelCreator from './components/Tools/LevelCreator';
 let levels = new LevelCreator();
+
+let exitAnimate = false;
+let inPause = false;
+
+DefaultGeneralLoadingManager.addOnLoad(() => {
+    
+    levels.createLevel1();
+    
+    console.log("Game loaded, starting rendering loop");
+    document.body.removeChild(document.querySelector(".splash"));
+    mainMenu.addToPage();
+
+    // init();
+    // document.body.removeChild(document.querySelector(".splash"));
+    // document.body.appendChild(renderer.domElement);
+    // levels.player.hud.show();
+    // animate();
+});
 
 function startGame(){
 
@@ -22,9 +37,10 @@ function startGame(){
     document.body.appendChild(renderer.domElement);
 
     // Setup pause
-    levels.player.controls.addEventListener("unlock", function (e) {
-        pauseGame()
-    }.bind(this));
+    levels.player.controls.addEventListener("unlock", pauseGame);
+
+    // Setup death
+    levels.player.controls.addEventListener("death", deathGame);
 
     renderer.domElement.requestPointerLock();
     levels.player.hud.show();
@@ -47,13 +63,33 @@ function resumeGame(){
     levels.player.hud.show();
 }
 
-function endGame(){
+function deathGame(){
+    levels.player.controls.removeEventListener("unlock", pauseGame);
+    levels.player.controls.removeEventListener("death", deathGame);
+    levels.player.controls.shouldLock = false;
+    levels.player.hud.hide();
+    document.exitPointerLock();
+    deathMenu.addToPage();
+    setTimeout(()=>{
+        exitAnimate = true;
+    },4000);
+    
+}
 
+function restartGame(currentMenu){
+    currentMenu.removeFromPage();
+    mainMenu.addToPage();
+    levels.clearLevel();
+    levels.createLevel1();
 }
 
 function animate () {
+    if(exitAnimate == true){
+        exitAnimate = false;
+        return;
+    }
+
     requestAnimationFrame(animate);
-    
     let delta = clock.getDelta();
     // delta = 0.02;
 
@@ -61,19 +97,4 @@ function animate () {
         renderer.render(scene, camera);
         levels.step(delta);
     }
-};;
-
-DefaultGeneralLoadingManager.addOnLoad(() => {
-    
-    levels.createLevel1();
-    
-    console.log("Game loaded, starting rendering loop");
-    document.body.removeChild(document.querySelector(".splash"));
-    mainMenu.addToPage();
-
-    // init();
-    // document.body.removeChild(document.querySelector(".splash"));
-    // document.body.appendChild(renderer.domElement);
-    // levels.player.hud.show();
-    // animate();
-});
+};

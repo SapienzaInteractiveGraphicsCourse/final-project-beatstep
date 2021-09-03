@@ -1,11 +1,10 @@
+import Menu from "./Menu";
 
-
-class PauseMenu {
+class PauseMenu extends Menu{
 
     constructor(resumeCallback = ()=>{}){
         
-        this.backdrop = document.createElement("div");
-        this.backdrop.classList.add("menu_backdrop");
+        super();
         this.backdrop.classList.add("pause");
 
         // Main screen
@@ -63,7 +62,7 @@ class PauseMenu {
                                 or exploding on some weirdly misplaced exploding barrels (Why are there gas barrels again ?). <br /><br />
                                 &bull; Use WASD to move around and the mouse to change your direction <br />
                                 &bull; Press E near objects to interact with them <br />
-                                &bull; Use the right mouse button to shoot at robots or barrels <br />
+                                &bull; Use the left mouse button to shoot at robots or barrels <br />
                                 &bull; Press Esc to pause the game`;
         this.htpBoard.append(this.htpText);
 
@@ -104,14 +103,6 @@ class PauseMenu {
         })
         this.credBoard.append(this.credBackBtn);
 
-    }
-
-    addToPage(){
-        document.body.append(this.backdrop);
-    }
-
-    removeFromPage(){
-        document.body.removeChild(this.backdrop);
     }
 
 }

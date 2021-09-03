@@ -113,54 +113,52 @@ class Player extends Object3D{
         this.geometry = new THREE.CylinderGeometry(1,1,height,16);
         
 
+        // Setup of the input and movement controls
         this.setUpControls(angularSensitivity);
 
 
         // Setup of the HUD
         this.hud = hud;
 
-        this.hud.createBar("healthBar","green","Health");
-        this.hud.healthBar.setPercentage(_health/this.topHealth*100);
+        hud.createBar("healthBar","green","Health");
+        hud.healthBar.setPercentage(_health/this.topHealth*100);
 
-        this.hud.createBar("shieldBar","blue", "Shield");
-        this.hud.shieldBar.setPercentage(_shield/this.topShield*100);
+        hud.createBar("shieldBar","blue", "Shield");
+        hud.shieldBar.setPercentage(_shield/this.topShield*100);
         
-        this.hud.createBar("ammoBar","red", "Ammo");
-        this.hud.ammoBar.setPercentage(_ammo/this.topAmmo*100);
+        hud.createBar("ammoBar","red", "Ammo");
+        hud.ammoBar.setPercentage(_ammo/this.topAmmo*100);
 
         this.controls.addEventListener("lock", function (e) {
-            this.hud.crosshairs.visible = true;
+            hud.crosshairs.visible = true;
         }.bind(this));
         this.controls.addEventListener("unlock", function (e) {
-            this.hud.crosshairs.visible = false;
+            hud.crosshairs.visible = false;
         }.bind(this));
 
 
+        // Setup of the rifle
         this.rifle = rifleModel.mesh;
         this.setUpRifle();
-        document.addEventListener("mousedown",((event)=>{
-            if(event.button == 2){ // shoot
-                this.shoot()
-            }
-        }).bind(this));
         this.rifleExplosion = new ParticleSystem(camera, camera, 0.03, smokeImg);
         this.rifleExplosion.setParticleSize(0.1)
         this.rifleExplosion.setGeneralRadius(0.1,0.1,0.1);
         this.rifleExplosion.setGeneralVelocity(0.01,0.01,0.01);
         this.rifleExplosion.setGeneralPosition(1.1,0.95,-0.65);
 
+
         // Setup death animation
         this.internalTimer = 0;
         let animDuration = 1000*0.3;
         this.animationGroup = new TWEEN.Group(); 
         this.deathAnim = new TWEEN.Tween(this.camera.position,this.animationGroup)
-        .to({x: 0, y: -height/2, z: -0.2}, animDuration).easing(TWEEN.Easing.Quadratic.In)
+        .to({y: 0}, animDuration).easing(TWEEN.Easing.Quadratic.In)
         .onComplete(()=>{
             this.deathAnim.alreadyPlayed = true;
             new TWEEN.Tween(this.camera.rotation,this.animationGroup)
-            .to({x: `+${Math.PI/4}`, y: `+${0}`, z: `+${Math.PI/2}`}, animDuration).easing(TWEEN.Easing.Bounce.InOut)
+            .to({x: Math.PI/4, z: Math.PI/2}, animDuration).easing(TWEEN.Easing.Bounce.InOut)
             .onComplete(()=>{
-                this.death()
+                setTimeout(this.death.bind(this),1000);
             })
             .start(this.internalTimer);
         })
@@ -173,6 +171,7 @@ class Player extends Object3D{
 
         this.controls = new EventDispatcher();
         this.controls.changeEvent = { type: 'change' };
+        this.controls.deathEvent = { type: 'death' };
         this.controls.lockEvent = { type: 'lock' };
         this.controls.unlockEvent = { type: 'unlock' };
         this.controls.shouldMoveForward = false;
@@ -190,9 +189,20 @@ class Player extends Object3D{
 
         let scope = this;
 
+        
+        // document.addEventListener("mousedown",((event)=>{
+        //     if(event.button == 2){ // shoot
+        //         this.shoot()
+        //     }
+        // }).bind(this));
+
         function onMouseDown(event) {
-            if (scope.controls.shouldLock && event.button == 0)
+            if (event.button == 0 && !scope.controls.isLocked && scope.controls.shouldLock){
                 scope.canvas.requestPointerLock(); // pointer lock requested on the HTML element
+            }
+            else if((event.button == 0 || event.button == 2) && scope.controls.isLocked){
+                scope.shoot();
+            }
         }
 
         function onMouseMove(event) {
@@ -383,7 +393,7 @@ class Player extends Object3D{
     }
 
     death(){
-        
+        this.controls.dispatchEvent(this.controls.deathEvent);
     }
 
     update(deltaTime){

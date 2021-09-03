@@ -64,6 +64,7 @@ class HUD {
         })(this);
 
         this.createBar = (function(name, color, text = ""){
+            if(this[name]) return; 
             let bar = document.createElement("div");
             bar.classList.add("stat_bar");
             bar.classList.add(color);            

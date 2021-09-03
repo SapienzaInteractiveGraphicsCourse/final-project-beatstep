@@ -24,6 +24,11 @@ class PhysicsWorld {
         this.debugBoxes = [];
     }
 
+    clearWorld(){
+        this.staticObjects = [];
+        this.dynamicObjects = [];
+        this.debugBoxes = [];
+    }
 
     addObject(mesh,geometry = null,dynamic = false,raycastable = true){
         let geom = geometry || mesh.geometry;

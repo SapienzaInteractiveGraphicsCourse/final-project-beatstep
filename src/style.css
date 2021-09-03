@@ -62,8 +62,6 @@
 }
 
 
-
-
 .stat_bar.blue .bar{
     background-color: rgb(37, 157, 255);
 }
@@ -73,8 +71,6 @@
 }
 
 
-
-
 .stat_bar.red .bar{
     background-color: red;
 }
@@ -82,6 +78,7 @@
 .stat_bar.red .sub_bar{
     background-color: rgb(250, 134, 134);
 }
+
 
 /* Tip text position */
 .caption{
@@ -96,6 +93,7 @@
 .hidden{
     display: none;
 }
+
 
 
 /* Menu style */
@@ -117,6 +115,11 @@
 .menu_backdrop.pause {
     background: rgba(0, 0, 0, 0.25);
 }
+.menu_backdrop.death {
+    background: black;
+    animation: fadein 4s forwards;
+    opacity: 0;
+}
 
 .menu_board{
     position: absolute;
@@ -133,11 +136,15 @@
     justify-content: center;
     align-items: center;
 
-    animation: fadein 2s;
+    animation: fadein 2s forwards;
+    opacity: 0;
 
     backface-visibility: hidden;
     transition: transform 0.8s;
     transform-style: preserve-3d;
+}
+.menu_backdrop.death .menu_board{
+    animation-delay: 2s;
 }
 
 .rotation{
