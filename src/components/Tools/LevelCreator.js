@@ -2,7 +2,7 @@ import { THREE, scene, clock, renderer, camera } from '../setup/ThreeSetup';
 // Physics
 import { world } from '../physics/PhysicsWorld';
 // Player
-import Player from '../player/Player2';
+import Player from '../player/Player';
 // Enemies
 import Robot from '../enemies/Robot';
 
