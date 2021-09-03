@@ -6,7 +6,7 @@ import pickup_shield from '../../asset/textures/pickup_shield.png';
 import pickup_ammo from '../../asset/textures/pickup_ammo.png';
 
 import { ObjectPool } from '../Tools/ObjectPool';
-import { setCollideable } from '../physics/CollisionDetector';
+// import { setCollideable } from '../physics/CollisionDetector';
 
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
 const _pickupTextureHealth = loader.load(pickup_health);
@@ -36,7 +36,7 @@ const _pickupMaterialAmmo = new THREE.MeshPhongMaterial({
 });
 
 class Pickup extends THREE.Mesh {
-    constructor(type = "health", onTouch = (player, distance, intersection, pickup)=>{}){
+    constructor(x,y,z, type = "health", onTouch = (player, pickup)=>{}){
         
         switch(type){
             default:
@@ -58,14 +58,8 @@ class Pickup extends THREE.Mesh {
 
         // Apply event touching
         this.onTouch = onTouch;
-        setCollideable(this,_pickupGeometry,
-            ()=>{},
-            (object, distance, intersection)=> {
-                if(object.constructor && object.constructor.name == "Player"){
-                    this.onTouch(object, distance, intersection,this);
-                }
-            }
-        );
+
+        this.setPosition(x,y,z);
 
         this.rotation.y = 0;
     }
@@ -79,19 +73,53 @@ class Pickup extends THREE.Mesh {
         this.position.set(x,y+dimension,z);
     }
 
+    onCollision(collisionResult,obj,delta){
+
+        if(obj.constructor.name != "Player") return;
+
+        this.onTouch(obj,this);
+
+    }
+
 }
 
-const pickupHealthPool = new ObjectPool(Pickup,5,["health",(player, distance, intersection, pickup)=>{
-    console.log("Health pickup!");
-    pickup.removeFromParent();
-}]);
-const pickupAmmoPool = new ObjectPool(Pickup,5,["ammo",(player, distance, intersection, pickup)=>{
-    console.log("Ammo pickup!");
-    pickup.removeFromParent();
-}]);
-const pickupShieldPool = new ObjectPool(Pickup,5,["shield",(player, distance, intersection, pickup)=>{
-    console.log("Shield pickup!");
-    pickup.removeFromParent();
-}]);
+class PickupHealth extends Pickup {
+    constructor(x,y,z){
+        super(x,y,z,"health",(player, pickup)=>{
+            let hInc = 10;
+            if(player.health < player.topHealth){
+                player.health += hInc;
+                pickup.removeFromPhysicsWorld();
+                pickup.removeFromParent();
+            }
+        });
+    }
+}
 
-export { pickupHealthPool, pickupAmmoPool, pickupShieldPool };
+class PickupAmmo extends Pickup {
+    constructor(x,y,z){
+        super(x,y,z,"ammo",(player, pickup)=>{
+            let aInc = 10;
+            if(player.ammo < player.topAmmo){
+                player.ammo += aInc;
+                pickup.removeFromPhysicsWorld();
+                pickup.removeFromParent();
+            }
+        });
+    }
+}
+
+class PickupShield extends Pickup {
+    constructor(x,y,z){
+        super(x,y,z,"shield",(player, pickup)=>{
+            let sInc = 10;
+            if(player.shield < player.topShield){
+                player.shield += sInc;
+                pickup.removeFromPhysicsWorld();
+                pickup.removeFromParent();
+            }
+        });
+    }
+}
+
+export { PickupHealth, PickupAmmo, PickupShield };

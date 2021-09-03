@@ -21,7 +21,7 @@ objLoaderLight.load(topLightModel,
     (obj) => {
         _topLightObj = obj;
         // Scale
-        let boundingBox = new THREE.Box3().setFromObject(_topLightObj).getSize();
+        let boundingBox = new THREE.Box3().setFromObject(_topLightObj).getSize(new THREE.Vector3());
         let scaleFactor = 3 / boundingBox.x;
         _topLightObj.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
@@ -40,18 +40,23 @@ objLoaderLight.load(topLightModel,
 );
 
 class TopLight {
-    constructor(x,y,z, distance = 24, intensity = 1, color = 0xFFFFFF){
+    constructor(x,y,z, rotationRadians = 0, distance = 24, intensity = 1, color = 0xFFFFFF){
         this.obj = _topLightObj.clone(true);
         this.light = new THREE.PointLight(color, intensity, distance);
         this.light.position.set(x,y-2,z);
 
         // Apply position
         this.setPosition(x,y,z);
+        this.setRotation(rotationRadians);
     }
 
     setPosition(x,y,z){
         // Apply position
         this.obj.position.set(x,y,z);
+    }
+
+    setRotation(alpha){
+        this.obj.rotation.y = alpha;
     }
 
     addToScene(scene){

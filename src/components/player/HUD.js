@@ -1,57 +1,82 @@
-import { THREE } from "../setup/ThreeSetup";
+import { THREE, camera } from "../setup/ThreeSetup";
 
 class HUD {
 
-    constructor(parent, camera){
-        this.parent = parent;
+    constructor(camera){
         this.camera = camera;
         this.objects = [];
 
-        //creating rifle scope
-        let lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
-        let size = 0.001;
-        let lineShape = new THREE.Shape()
-            .moveTo(0, -size)
-            .lineTo(0, size)
-            .moveTo(-size, 0)
-            .lineTo(size, 0);
-        let lineGeom = new THREE.BufferGeometry().setFromPoints(lineShape.getPoints());
-        this.line = new THREE.LineSegments(lineGeom, lineMaterial);
-        this.line.position.set(0, 0, -0.11);
+        (function(scope){
+            //creating rifle scope
+            let lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+            let size = 0.001;
+            let lineShape = new THREE.Shape()
+                .moveTo(0, -size)
+                .lineTo(0, size)
+                .moveTo(-size, 0)
+                .lineTo(size, 0);
+            let lineGeom = new THREE.BufferGeometry().setFromPoints(lineShape.getPoints());
+            scope.crosshairs = new THREE.LineSegments(lineGeom, lineMaterial);
+            scope.crosshairs.position.set(0, 0, -0.11);
+            scope.camera.add(scope.crosshairs);
 
-        this.line.visible = false;
-        this.parent.controls.addEventListener("lock", function (e) {
-            this.line.visible = true;
-        }.bind(this));
-        this.parent.controls.addEventListener("unlock", function (e) {
-            this.line.visible = false;
-        }.bind(this));
-        
-        this.camera.add(this.line);
+            Object.defineProperty(scope.crosshairs,"show",{
+                get: (function(){return this.visible}).bind(scope.crosshairs),
+                set: (function(v){this.visible = Boolean(v)}).bind(scope.crosshairs)
+            })
 
+            scope.crosshairs.visible = false;
+            scope.objects.push(scope.crosshairs);
+
+        })(this);
 
 
 
         (function(scope){
             let body = document.body;
 
-            let overlay = document.createElement("div")
-            overlay.classList.add("overlay");
-            body.appendChild(overlay);
+            let topOverlay = document.createElement("div")
+            topOverlay.classList.add("top_overlay");
+            body.appendChild(topOverlay);
 
-            scope.overlay = overlay;
+            scope.topOverlay = topOverlay;
+
+            scope.caption = document.createElement("div");
+            scope.caption.innerText = "";
+            scope.caption.classList.add("caption");
+            document.body.appendChild(scope.caption);
+
+            Object.defineProperties(scope.caption,{
+                show: {
+                    get: (function(){return this.style.display == "none" ? false : true}).bind(scope.caption),
+                    set: (function(v){v == true ? (this.style.display = null) : (this.style.display = "none")}).bind(scope.caption)
+                },
+                text: {
+                    get: (function(){return this.innerText}).bind(scope.caption),
+                    set: (function(v){this.innerText = v}).bind(scope.caption)
+                }
+            })
+            scope.caption.owner = null;
+
+            scope.caption.show = false;
+            scope.objects.push(scope.caption);
 
         })(this);
 
-        this.createBar = (function(name, color){
+        this.createBar = (function(name, color, text = ""){
+            if(this[name]) return; 
             let bar = document.createElement("div");
             bar.classList.add("stat_bar");
-            bar.classList.add(color);
+            bar.classList.add(color);            
+
+            bar.label = document.createElement("div");
+            bar.label.classList.add("bar_text");
+            bar.label.innerText = text;
+            bar.appendChild(bar.label);
 
             bar.indicator = document.createElement("div");
             bar.indicator.classList.add("bar");
             bar.appendChild(bar.indicator);
-
 
             bar.subIndicator = document.createElement("div");
             bar.subIndicator.classList.add("bar");
@@ -69,19 +94,12 @@ class HUD {
             })
 
             bar.show = false;
-            this.overlay.appendChild(bar);
+            this.topOverlay.appendChild(bar);
             this[name] = bar;
+            this.objects.push(bar);
         }).bind(this)
 
-        this.createBar("healthBar","green");
-        this.healthBar.setPercentage(100);
-        this.objects.push(this.healthBar);
-        this.createBar("shieldBar","blue");
-        this.shieldBar.setPercentage(100);
-        this.objects.push(this.shieldBar);
-        this.createBar("ammoBar","red");
-        this.ammoBar.setPercentage(100);
-        this.objects.push(this.ammoBar);
+        
     }
 
     show(){
@@ -99,4 +117,5 @@ class HUD {
 
 }
 
-export default HUD;
+const hud = new HUD(camera);
+export {HUD as default, hud };
