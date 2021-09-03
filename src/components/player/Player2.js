@@ -172,6 +172,7 @@ class Player extends Object3D{
         this.controls = new EventDispatcher();
         this.controls.changeEvent = { type: 'change' };
         this.controls.deathEvent = { type: 'death' };
+        this.controls.winEvent = { type: 'win' };
         this.controls.lockEvent = { type: 'lock' };
         this.controls.unlockEvent = { type: 'unlock' };
         this.controls.shouldMoveForward = false;
@@ -386,14 +387,17 @@ class Player extends Object3D{
     }
 
     die(){
-        console.log("YOU DIED!")
-        
         this.controls.detach();
         if(!this.deathAnim.alreadyPlayed) this.deathAnim.start(this.internalTimer);
     }
 
     death(){
         this.controls.dispatchEvent(this.controls.deathEvent);
+    }
+
+    win(){        
+        this.controls.detach();
+        this.controls.dispatchEvent(this.controls.winEvent);
     }
 
     update(deltaTime){

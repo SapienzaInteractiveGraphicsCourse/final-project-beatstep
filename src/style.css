@@ -120,6 +120,12 @@
     animation: fadein 4s forwards;
     opacity: 0;
 }
+.menu_backdrop.win {
+    background: linear-gradient(-45deg, rgb(253 242 176), gold);
+    background-size: 200% 200%;
+    animation: fadein 4s forwards, gradient 3s ease infinite;
+    opacity: 0;
+}
 
 .menu_board{
     position: absolute;

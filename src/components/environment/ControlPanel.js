@@ -47,9 +47,10 @@ class ControlPanel {
 
         // Interaction
         this._canBeInteracted = false;
+        this._endgameCallback = null;
         document.addEventListener("keydown", ((event) => {
-            if(this._canBeInteracted && event.key.toLowerCase() === "e") { // press e
-                // TODO: interaction
+            if(this._canBeInteracted && this._endgameCallback && event.key.toLowerCase() === "e") { // press e
+                this._endgameCallback();
             }
         }).bind(this));
 
@@ -71,7 +72,7 @@ class ControlPanel {
             hud.caption.owner = this;
             hud.caption.show = true;
             this._canBeInteracted = true;
-            
+            this._endgameCallback = obj.win.bind(obj);
         }.bind(this);
         
     }

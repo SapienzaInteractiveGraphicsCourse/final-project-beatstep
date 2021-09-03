@@ -7,6 +7,8 @@ import PauseMenu from './components/menus/PauseMenu';
 let pauseMenu = new PauseMenu(resumeGame);
 import DeathMenu from './components/menus/DeathMenu';
 let deathMenu = new DeathMenu(restartGame);
+import WinMenu from './components/menus/WinMenu';
+let winMenu = new WinMenu(restartGame);
 
 // Tools
 import { DefaultGeneralLoadingManager } from './components/Tools/GeneralLoadingManager';
@@ -42,6 +44,9 @@ function startGame(){
     // Setup death
     levels.player.controls.addEventListener("death", deathGame);
 
+    // Setup win
+    levels.player.controls.addEventListener("win", winGame);
+
     renderer.domElement.requestPointerLock();
     levels.player.hud.show();
     animate();
@@ -66,6 +71,7 @@ function resumeGame(){
 function deathGame(){
     levels.player.controls.removeEventListener("unlock", pauseGame);
     levels.player.controls.removeEventListener("death", deathGame);
+    levels.player.controls.removeEventListener("win", winGame);
     levels.player.controls.shouldLock = false;
     levels.player.hud.hide();
     document.exitPointerLock();
@@ -73,7 +79,16 @@ function deathGame(){
     setTimeout(()=>{
         exitAnimate = true;
     },4000);
-    
+}
+
+function winGame(){
+    levels.player.controls.removeEventListener("unlock", pauseGame);
+    levels.player.controls.removeEventListener("death", deathGame);
+    levels.player.controls.removeEventListener("win", winGame);
+    levels.player.controls.shouldLock = false;
+    levels.player.hud.hide();
+    document.exitPointerLock();
+    winMenu.addToPage()
 }
 
 function restartGame(currentMenu){
