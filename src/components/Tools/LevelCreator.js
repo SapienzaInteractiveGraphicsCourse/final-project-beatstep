@@ -36,6 +36,7 @@ class LevelCreator {
         scene.remove.apply(scene, scene.children);
         world.clearWorld();
         this.objectsToUpdate = [];
+        this.player.controls.detach();
         this.player = null;
     }
 
@@ -45,13 +46,14 @@ class LevelCreator {
 
     addPlayer(x,y,z, height){
         let player = new Player(camera, [x, y, z], height, renderer.domElement);
-        player.controls.shouldLock = false;
+        //player.controls.shouldLock = false;
         scene.add(player);
         world.addDynamicObject(player);
 
         this.objectsToUpdate.push(player);
         this.player = player;
         window.getPlayerPos = ()=> this.player.position;
+        window.player = this.player;
     }
 
     addRobot(x,y,z, rotationRadians = 0){

@@ -4,7 +4,7 @@ import './style.css';
 import MainMenu from './components/menus/MainMenu';
 let mainMenu = new MainMenu(startGame);
 import PauseMenu from './components/menus/PauseMenu';
-let pauseMenu = new PauseMenu(resumeGame);
+let pauseMenu = new PauseMenu(resumeGame,restartGame);
 import DeathMenu from './components/menus/DeathMenu';
 let deathMenu = new DeathMenu(restartGame);
 import WinMenu from './components/menus/WinMenu';
@@ -18,22 +18,17 @@ let levels = new LevelCreator();
 let exitAnimate = false;
 let inPause = false;
 
-DefaultGeneralLoadingManager.addOnLoad(() => {
-    
-    levels.createLevel1();
-    
-    console.log("Game loaded, starting rendering loop");
+DefaultGeneralLoadingManager.addOnLoad(() => {    
     document.body.removeChild(document.querySelector(".splash"));
     mainMenu.addToPage();
-
-    // init();
-    // document.body.removeChild(document.querySelector(".splash"));
-    // document.body.appendChild(renderer.domElement);
-    // levels.player.hud.show();
-    // animate();
 });
 
-function startGame(){
+function startGame(n){
+
+    if(n==1)
+        levels.createDojo();
+    else
+        levels.createLevel1();
 
     mainMenu.removeFromPage();
     document.body.appendChild(renderer.domElement);
@@ -46,9 +41,12 @@ function startGame(){
 
     // Setup win
     levels.player.controls.addEventListener("win", winGame);
-
+    
+    inPause = false;
     renderer.domElement.requestPointerLock();
+    levels.player.controls.shouldLock = true;
     levels.player.hud.show();
+    levels.player.hud.caption.show = false;
     animate();
 }
 
@@ -95,7 +93,6 @@ function restartGame(currentMenu){
     currentMenu.removeFromPage();
     mainMenu.addToPage();
     levels.clearLevel();
-    levels.createLevel1();
 }
 
 function animate () {

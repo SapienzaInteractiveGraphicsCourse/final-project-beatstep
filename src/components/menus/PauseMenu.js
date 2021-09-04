@@ -2,11 +2,13 @@ import Menu from "./Menu";
 
 class PauseMenu extends Menu{
 
-    constructor(resumeCallback = ()=>{}){
+    constructor(resumeCallback = ()=>{}, restartCallback = ()=>{}){
 
-        super("Pause","Resume",resumeCallback);  
+        super("Pause");
+        this.createBtn("Resume",resumeCallback)
         this.createHtpBtn();
         this.createCreditsBtn();
+        this.createMainMenuBtn(restartCallback);
         this.backdrop.classList.add("pause");      
 
         // HowToPlay screen

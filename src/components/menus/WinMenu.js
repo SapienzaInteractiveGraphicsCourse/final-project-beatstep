@@ -4,7 +4,8 @@ class WinMenu extends Menu{
 
     constructor(restartCallback = ()=>{}){
         
-        super("You Won","Main Menu",restartCallback);
+        super("You Won");
+        this.createMainMenuBtn(restartCallback);
         this.createCreditsBtn();
         this.backdrop.classList.add("win");
 

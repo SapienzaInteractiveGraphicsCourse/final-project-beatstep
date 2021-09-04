@@ -2,9 +2,10 @@
 
 class Menu {
 
-    constructor(title,btnText,callback){
+    constructor(title){
         
         this.isShowing = false;
+        this.btns = [];
 
         this.backdrop = document.createElement("div");
         this.backdrop.classList.add("menu_backdrop");
@@ -17,14 +18,6 @@ class Menu {
         this.boardTitle.classList.add("menu_title");
         this.boardTitle.innerText = title;
         this.board.append(this.boardTitle);
-
-        this.playBtn = document.createElement("div");
-        this.playBtn.classList.add("menu_button");
-        this.playBtn.innerText = btnText;
-        this.playBtn.addEventListener("click",()=>{
-            callback(this);
-        })
-        this.board.append(this.playBtn);
     }
 
     addToPage(){
@@ -35,6 +28,16 @@ class Menu {
     removeFromPage(){
         document.body.removeChild(this.backdrop);
         this.isShowing = false;
+    }
+
+    createBtn(btnText,callback){
+        let playBtn = document.createElement("div");
+        playBtn.classList.add("menu_button");
+        playBtn.innerText = btnText;
+        playBtn.addEventListener("click",()=>{
+            callback(this);
+        })
+        this.board.append(playBtn);
     }
 
     createHtpPanel(){
@@ -118,6 +121,16 @@ class Menu {
             this.credBoard.classList.remove("backrotation");
         })
         this.board.append(this.creditBtn);
+    }
+
+    createMainMenuBtn(restartCallback){
+        this.menuBtn = document.createElement("div");
+        this.menuBtn.classList.add("menu_button");
+        this.menuBtn.innerText = "Main Menu";
+        this.menuBtn.addEventListener("click",()=>{
+            restartCallback(this);
+        })
+        this.board.append(this.menuBtn);
     }
 
 }
