@@ -133,14 +133,15 @@
     border: 5px solid #1cb2e9;
     border-radius: 8px;
     width: 50%;
-    height: 50%;
+    min-height: 50%;
     max-width: 650px;
     box-shadow: 0px 10px 13px 4px rgb(102 102 102 / 77%);
     
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-evenly;
     align-items: center;
+    padding-top: 50px;
 
     animation: fadein 2s forwards;
     opacity: 0;
@@ -222,7 +223,7 @@
 	font-size:20px;
 	font-weight:bold;
 	padding:15px 35px;
-    margin: 40px 0px;
+    /* margin: 40px 0px; */
 	text-decoration:none;
 	text-shadow:0px 1px 0px #747474;
     box-sizing: border-box;
