@@ -207,7 +207,7 @@ class LevelCreator {
         // this.addFogExp2();
 
         this.addPlayer(0,0,25, 3);
-        // this.addPlayer(32,0,54, 3);
+        // this.addPlayer(31,0,46, 3);
 
         this.addFloor(0,0,0, 200,200);
         this.addFloor(0,wallHeight,0, 200,200); // ceiling = floor on higher level
@@ -235,14 +235,9 @@ class LevelCreator {
                      _wallAndDoorPos_1[2], doorHeight,wallHeight-doorHeight, 0);
 
         this.addFloorLight(7,0,-6,-Math.PI/4);
-        this.addFloorLight(-7,0,-6,Math.PI/4);
+
         this.addTopLight(0,wallHeight,20);
-        this.addTopLight(0,wallHeight,0);
-        this.addTopLight(0,wallHeight,-20);
 
-        this.addRobot(0,0,-20, -Math.PI/4);
-
-        this.addGasCylinder(5,0,12, Math.PI*0.8);
         this.addGasCylinder(-5,0,12, -Math.PI*0.8);
 
         /* Room 2 */
@@ -254,7 +249,7 @@ class LevelCreator {
         this.addFloor(_upFloorPos_1[0]+6,_upFloorPos_1[1]+6,_upFloorPos_1[2]-6-6, 12,12);
         this.addStaircase(_upFloorPos_1[0]+6+12,_upFloorPos_1[1],_upFloorPos_1[2]-6-6, 12,6,12, 10, 3);
 
-        this.addPickupHealth(_upFloorPos_1[0]+6+2,_upFloorPos_1[1]+6,_upFloorPos_1[2]-6-6+2);
+        this.addPickupAmmo(_upFloorPos_1[0]+6+2,_upFloorPos_1[1]+6,_upFloorPos_1[2]-6-6+2);
         this.addPickupShield(_upFloorPos_1[0]+6-2,_upFloorPos_1[1]+6,_upFloorPos_1[2]-6-6-2);
 
         this.addWall(-10+35,0,-90, 70,wallHeight, 0);
@@ -284,16 +279,28 @@ class LevelCreator {
         this.addTopLight(_wallAndDoorPos_2[0],wallHeight,-40);
         this.addTopLight(_wallAndDoorPos_2[0],wallHeight,0);
 
-        this.addFloorLight(_wallAndDoorPos_2[0]+22,0,-30, -Math.PI/4);
-
-        this.addRobot(14,0,-60, -Math.PI/4);
-        this.addRobot(50,0,-55, -Math.PI*3/4);
+        this.addFloorLight(40,0,-86, 0);
             
-        this.addRobot(20,0,10, -Math.PI/4);
+        this.addStaircase(60-6,0,-25, 12,6,12, 10, 2);
+        this.addFloor(60-6,6,-25-12, 12,12);
+        this.addWall(60-6-6,0,-25-12, 12,6, Math.PI/2);
+        this.addWall(60-6,0,-25-12-6, 12,6, 0);
+
+        this.addPickupHealth(60-4,6,-25-10);
+
+        this.addRobot(60-6,6,-25-12, 0);
+
+        this.addRobot(0,0,-55, -Math.PI/2);
+
+        this.addRobot(50,0,-70, 0);
+            
+        // in front of the door
         this.addRobot(35,0,10, -Math.PI/2);
         this.addRobot(50,0,10, -Math.PI*3/4);
 
-        this.addGasCylinder(16,0,-38, -Math.PI*0.2);
+        this.addGasCylinder(16,0,-38, Math.PI*0.8);
+        this.addGasCylinder(32,0,-65, Math.PI*0.3);
+        this.addGasCylinder(32,0,-10, Math.PI*0.3);
 
         /* Room 3 */
         this.addWall(25,0,50, 40,wallHeight, Math.PI/2);
@@ -309,6 +316,10 @@ class LevelCreator {
         this.addGasCylinder(60,0,40, -Math.PI*0.6);
 
         this.addFloorLight(29,0,65, Math.PI*3/4);
+
+        this.addRobot(82,0,50, 0);
+        this.addRobot(40,0,56, 0);
+        this.addRobot(55,0,50, 0);
     }
 
     createDojo(){

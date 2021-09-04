@@ -105,6 +105,7 @@ class Robot {
         this.isDead = false;
         this.shootingCooldown = 0;
         this.shootingCooldownMax = 1; // x = x second(s), how much time from one shoot and another
+        this._shootingProbability = 0.7; // the higher, the more precise, values between [0,1]
 
         this.angryDuration = 0; 
         this.angryDurationMax = 10; // how much time the robot will follow the player independently of radius distance
@@ -114,10 +115,10 @@ class Robot {
         this.rotationVelocity = this.velocity; // rotation velocity of the robot
         // how much distance is tollerated to shoot to player
         this.shootingDistanceMin = 2;
-        this.shootingDistanceMax = this.shootingDistanceMin + 8;
+        this.shootingDistanceMax = this.shootingDistanceMin + 9;
         // how much range the robot will follow the player
-        this.eyeRadiusDistanceMin = this.shootingDistanceMax + 6;
-        this.eyeRadiusDistanceMax = this.eyeRadiusDistanceMin + 4;
+        this.eyeRadiusDistanceMin = this.shootingDistanceMax + 8;
+        this.eyeRadiusDistanceMax = this.eyeRadiusDistanceMin + 6;
 
         /** Adding collision detection */
         this.group.geometry = _robotCollisionGeometry;
@@ -170,6 +171,11 @@ class Robot {
         this.shootingCooldown = this.shootingCooldownMax;
         this._shootExplosion.restart();
         this.startAnimation(this.animation_shooting);
+
+        let probabilityOfHit = Math.random();
+        if(probabilityOfHit > this._shootingProbability){
+            return;
+        }
 
         let fromPosition = this.group.position.clone(true);
         fromPosition.y += _robotHeight*0.6;
