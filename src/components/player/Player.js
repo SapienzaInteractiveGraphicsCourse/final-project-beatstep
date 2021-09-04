@@ -337,9 +337,9 @@ class Player extends Object3D{
         this.shootAnimation.enabled = false;
         this.repetitions = 1;
         
-        rifle.geometry.computeBoundingBox();
-        let box = rifle.geometry.boundingBox;
-        rifle.tipPosition = new Vector3(0,box.max.y,box.min.z);
+        // rifle.geometry.computeBoundingBox();
+        // let box = rifle.geometry.boundingBox;
+        // rifle.tipPosition = new Vector3(0,box.max.y,box.min.z);
         this.camera.add(rifle);
     }
 
@@ -436,6 +436,12 @@ class Player extends Object3D{
         this.rifleExplosion.update(deltaTime);
         this.internalTimer += deltaTime*1000;
         this.animationGroup.update(this.internalTimer);
+    }
+
+    destroyObject(){
+        this.controls.detach();
+        this.rifle.removeFromParent();
+        this.rifleExplosion.removeFromParent();
     }
 
 }
