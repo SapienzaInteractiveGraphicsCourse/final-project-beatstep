@@ -1,19 +1,19 @@
-import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 import texture from '../../asset/textures/floor1.jpg';
 // import { setCollideable } from '../physics/CollisionDetector';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { HalfCubeGeometry, HalfCubeGeometryHollowed, InclinedSurfaceGeometry } from '../Tools/CustomGeometries';
+import { BoxGeometry, Mesh, MeshPhongMaterial, NearestFilter, RepeatWrapping } from 'three';
 
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
 const _staircaseTexture = loader.load(texture);
 // Apply repetition
-_staircaseTexture.wrapS = THREE.RepeatWrapping;
-_staircaseTexture.wrapT = THREE.RepeatWrapping;
-_staircaseTexture.magFilter = THREE.NearestFilter;
+_staircaseTexture.wrapS = RepeatWrapping;
+_staircaseTexture.wrapT = RepeatWrapping;
+_staircaseTexture.magFilter = NearestFilter;
 _staircaseTexture.repeat.set(3,3);
 
-class Staircase extends THREE.Mesh {
+class Staircase extends Mesh {
     constructor(x,y,z,width,height,depth,steps=10,direction=0){
 
         let discreteHeight = height/steps;
@@ -21,13 +21,13 @@ class Staircase extends THREE.Mesh {
 
         let geometries = [];
 
-        let material = new THREE.MeshPhongMaterial({
+        let material = new MeshPhongMaterial({
             map: _staircaseTexture
         });
 
         for(let i=1;i<=steps;i++){
             let h = discreteHeight*i;
-            let geometry = new THREE.BoxGeometry( width, h, discreteDepth );
+            let geometry = new BoxGeometry( width, h, discreteDepth );
 
             geometry.translate( 0,
                                 0 -height/2 + h/2,

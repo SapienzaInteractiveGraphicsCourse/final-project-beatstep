@@ -1,5 +1,4 @@
-import { THREE } from '../setup/ThreeSetup';
-import { DefaultGeneralLoadingManager } from './GeneralLoadingManager';
+
 
 //    6--------7
 //   /|       /|
@@ -9,19 +8,22 @@ import { DefaultGeneralLoadingManager } from './GeneralLoadingManager';
 // |  4-----|--5
 // | /      | /
 // |/       |/ 
+
+import { BufferGeometry, Vector3 } from "three";
+
 // 0--------1
 const _cube = [
-    new THREE.Vector3(-1, -1,  1),  // 0
-    new THREE.Vector3( 1, -1,  1),  // 1
-    new THREE.Vector3(-1,  1,  1),  // 2
-    new THREE.Vector3( 1,  1,  1),  // 3
-    new THREE.Vector3(-1, -1, -1),  // 4
-    new THREE.Vector3( 1, -1, -1),  // 5
-    new THREE.Vector3(-1,  1, -1),  // 6
-    new THREE.Vector3( 1,  1, -1),  // 7
+    new Vector3(-1, -1,  1),  // 0
+    new Vector3( 1, -1,  1),  // 1
+    new Vector3(-1,  1,  1),  // 2
+    new Vector3( 1,  1,  1),  // 3
+    new Vector3(-1, -1, -1),  // 4
+    new Vector3( 1, -1, -1),  // 5
+    new Vector3(-1,  1, -1),  // 6
+    new Vector3( 1,  1, -1),  // 7
 ];
 
-class HalfCubeGeometry extends THREE.BufferGeometry {
+class HalfCubeGeometry extends BufferGeometry {
     constructor(scaleX = 1,scaleY = 1,scaleZ = 1){
         super();
         
@@ -48,7 +50,7 @@ class HalfCubeGeometry extends THREE.BufferGeometry {
     }
 }
 
-class HalfCubeGeometryHollowed extends THREE.BufferGeometry {
+class HalfCubeGeometryHollowed extends BufferGeometry {
     constructor(scaleX = 1,scaleY = 1,scaleZ = 1){
         super();
         
@@ -75,17 +77,17 @@ class HalfCubeGeometryHollowed extends THREE.BufferGeometry {
 // |/       |/ 
 // 0--------1
 const _cube_zero = [
-    new THREE.Vector3(-0.5,  0,  0),  // 0
-    new THREE.Vector3( 0.5,  0,  0),  // 1
-    new THREE.Vector3(-0.5,  1,  0),  // 2
-    new THREE.Vector3( 0.5,  1,  0),  // 3
-    new THREE.Vector3(-0.5,  0, -1),  // 4
-    new THREE.Vector3( 0.5,  0, -1),  // 5
-    new THREE.Vector3(-0.5,  1, -1),  // 6
-    new THREE.Vector3( 0.5,  1, -1),  // 7
+    new Vector3(-0.5,  0,  0),  // 0
+    new Vector3( 0.5,  0,  0),  // 1
+    new Vector3(-0.5,  1,  0),  // 2
+    new Vector3( 0.5,  1,  0),  // 3
+    new Vector3(-0.5,  0, -1),  // 4
+    new Vector3( 0.5,  0, -1),  // 5
+    new Vector3(-0.5,  1, -1),  // 6
+    new Vector3( 0.5,  1, -1),  // 7
 ];
 
-class InclinedSurfaceGeometry extends THREE.BufferGeometry {
+class InclinedSurfaceGeometry extends BufferGeometry {
     constructor(width = 1,height = 1,depth = 1){
         super();
         

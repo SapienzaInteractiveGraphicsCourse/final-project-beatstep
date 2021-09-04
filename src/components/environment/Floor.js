@@ -1,25 +1,25 @@
-import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 import floor1 from '../../asset/textures/floor1.jpg';
+import { DoubleSide, Mesh, MeshPhongMaterial, NearestFilter, PlaneGeometry, RepeatWrapping } from 'three';
 
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
 const _floorTexture = loader.load(floor1);
 // Apply repetition
-_floorTexture.wrapS = THREE.RepeatWrapping;
-_floorTexture.wrapT = THREE.RepeatWrapping;
-_floorTexture.magFilter = THREE.NearestFilter;
+_floorTexture.wrapS = RepeatWrapping;
+_floorTexture.wrapT = RepeatWrapping;
+_floorTexture.magFilter = NearestFilter;
 
-class Floor extends THREE.Mesh{
+class Floor extends Mesh{
     constructor(x,y,z,width,height){
-        let geometry = new THREE.PlaneGeometry(width,height);
+        let geometry = new PlaneGeometry(width,height);
         geometry.rotateX(-Math.PI/2); // Rotating the plane geometry
         let texture = _floorTexture.clone();
         texture.needsUpdate = true;
         texture.repeat.set(width/2,width/2);
 
-        const _floorMaterial = new THREE.MeshPhongMaterial({
+        const _floorMaterial = new MeshPhongMaterial({
             map: texture,
-            side: THREE.DoubleSide,
+            side: DoubleSide,
         });
 
         super(geometry, _floorMaterial);

@@ -1,4 +1,4 @@
-import { THREE, scene, clock, renderer, camera } from './components/setup/ThreeSetup';
+import { scene, clock, renderer, camera } from './components/setup/ThreeSetup';
 import './style.css';
 
 import MainMenu from './components/menus/MainMenu';

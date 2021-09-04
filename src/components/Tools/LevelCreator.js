@@ -1,4 +1,4 @@
-import { THREE, scene, clock, renderer, camera } from '../setup/ThreeSetup';
+import { scene, clock, renderer, camera } from '../setup/ThreeSetup';
 // Physics
 import { world } from '../physics/PhysicsWorld';
 // Player
@@ -22,6 +22,7 @@ import smoke from '../../asset/textures/smoke.png';
 import { DefaultGeneralLoadingManager } from './GeneralLoadingManager';
 import ControlPanel from '../environment/ControlPanel';
 import RobotDebug from '../debug/RobotDebug';
+import { AmbientLight, PointLight } from 'three';
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
 const smokeImg = loader.load(smoke);
 
@@ -40,9 +41,9 @@ class LevelCreator {
         this.player = null;
     }
 
-    addFogExp2(color = 0xFFFFFF, density = 0.02){
-        scene.fog = new THREE.FogExp2(color, density);
-    }
+    // addFogExp2(color = 0xFFFFFF, density = 0.02){
+    //     scene.fog = new THREE.FogExp2(color, density);
+    // }
 
     addPlayer(x,y,z, height){
         let player = new Player(camera, [x, y, z], height, renderer.domElement);
@@ -151,7 +152,7 @@ class LevelCreator {
     }
 
     addAmbientLight(color = 0xFFFFFF, intensity = 0.2){
-        const ambientLight = new THREE.AmbientLight(color, intensity);
+        const ambientLight = new AmbientLight(color, intensity);
         scene.add(ambientLight);
     }
 
@@ -165,7 +166,7 @@ class LevelCreator {
 
     /** The sun of the game */
     addPointLight(x,y,z, color = 0xFFFFFF, intensity = 0.3){
-        const pointLight = new THREE.PointLight(color, intensity);
+        const pointLight = new PointLight(color, intensity);
         pointLight.position.set(x,y,z);
         pointLight.castShadow = true;
         pointLight.shadow.mapSize.set(4192,4192);

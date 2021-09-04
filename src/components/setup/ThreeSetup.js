@@ -1,13 +1,13 @@
-import * as THREE from 'three';
-import { Clock } from 'three';
+// import * as THREE from 'three';
+import { Clock, PCFSoftShadowMap, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 
-const scene = new THREE.Scene();
+const scene = new Scene();
 const clock = new Clock();
-const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-const renderer = new THREE.WebGLRenderer({antialias: true});
+const renderer = new WebGLRenderer({antialias: true});
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = PCFSoftShadowMap;
 renderer.setSize(window.innerWidth, window.innerHeight);
 // renderer.outputEncoding = THREE.sRGBEncoding;
 
@@ -17,4 +17,4 @@ window.addEventListener("resize", () => {
     camera.updateProjectionMatrix();
 });
 
-export { THREE, scene, clock, renderer, camera };
+export { /*THREE,*/ scene, clock, renderer, camera };

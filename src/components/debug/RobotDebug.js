@@ -1,5 +1,6 @@
-import { THREE, scene, camera } from '../setup/ThreeSetup';
+import { scene, camera } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
+import { Box3, Vector3, Color } from 'three';
 
 import robot1 from '../../asset/models/robot1/robot_1.glb';
 
@@ -11,7 +12,7 @@ const _robotHeight = 3;
 loader.load(robot1, (gltf) => {
     _robot1Model = gltf.scene;
     // Scale
-    let boundingBox = new THREE.Box3().setFromObject(_robot1Model).getSize(new THREE.Vector3());
+    let boundingBox = new Box3().setFromObject(_robot1Model).getSize(new Vector3());
     let scaleFactor = _robotHeight / boundingBox.y;
     _robot1Model.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
@@ -27,7 +28,7 @@ class RobotDebug {
         this.group.traverse(function (child) {
             if (child.isMesh) {
                 child.material = child.material.clone(true);
-                child.material.emissive = new THREE.Color(0xff0000);
+                child.material.emissive = new Color(0xff0000);
                 child.material.emissiveIntensity = 0;
 
                 child.castShadow = true;
@@ -51,7 +52,7 @@ class RobotDebug {
                 this.wheels = this.group.getObjectByName("ruote");
 
         // Size
-        this.size = new THREE.Box3().setFromObject(this.group).getSize(new THREE.Vector3());
+        this.size = new Box3().setFromObject(this.group).getSize(new Vector3());
 
         // Animations
         this._tweenAnimations = new TWEEN.Group();

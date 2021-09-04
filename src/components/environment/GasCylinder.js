@@ -1,4 +1,3 @@
-import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 import gas_top from '../../asset/textures/gas_top.png';
 import gas_top_b from '../../asset/textures/gas_top_b.png';
@@ -7,6 +6,7 @@ import gas_side_b from '../../asset/textures/gas_side_b.png';
 import { ObjectPool } from '../Tools/ObjectPool';
 import ParticleSystem from './ParticleSystem';
 import { scene, camera } from '../setup/ThreeSetup';
+import { BoxGeometry, CylinderGeometry, DoubleSide, Mesh, MeshPhongMaterial, Object3D, Vector3 } from 'three';
 
 
 // import { setCollideable } from '../physics/CollisionDetector';
@@ -29,40 +29,40 @@ const _gascylinderRotation = Math.PI/2;
 const _gascylinderSurroundRadius = 10;
 
 
-const _gascylinderGeometry = new THREE.CylinderGeometry(_gascylinderRadius,
+const _gascylinderGeometry = new CylinderGeometry(_gascylinderRadius,
                                                         _gascylinderRadius,
                                                         _gascylinderHeight,32);
 
-// const _gascylinderSurroundGeometry = new THREE.CylinderGeometry(_gascylinderRadius+_gascylinderSurroundRadius,
+// const _gascylinderSurroundGeometry = new CylinderGeometry(_gascylinderRadius+_gascylinderSurroundRadius,
 //                                                                 _gascylinderRadius+_gascylinderSurroundRadius,
 //                                                                 _gascylinderHeight, 8);
  
-const _gascylinderSurroundGeometry = new THREE.BoxGeometry(_gascylinderRadius+_gascylinderSurroundRadius,
+const _gascylinderSurroundGeometry = new BoxGeometry(_gascylinderRadius+_gascylinderSurroundRadius,
                                                            _gascylinderHeight,
                                                            _gascylinderRadius+_gascylinderSurroundRadius);
 
 const  _gascylinderMaterials = [
-    new THREE.MeshPhongMaterial({
+    new MeshPhongMaterial({
         map: _gascylinderTextures[0],
-        side: THREE.DoubleSide,
+        side: DoubleSide,
         bumpMap: _gasCylinderBumpMaps[0],
         bumpScale  :  0.25,
     }),
-    new THREE.MeshPhongMaterial({
+    new MeshPhongMaterial({
         map: _gascylinderTextures[1],
-        side: THREE.DoubleSide,
+        side: DoubleSide,
         bumpMap: _gasCylinderBumpMaps[1],
         bumpScale  :  0.85,
     }),
-    new THREE.MeshPhongMaterial({
+    new MeshPhongMaterial({
         map: _gascylinderTextures[2],
-        side: THREE.DoubleSide,
+        side: DoubleSide,
         bumpMap: _gasCylinderBumpMaps[2],
         bumpScale  :  0.85,
     })
 ];
 
-class GasCylinder extends THREE.Mesh{
+class GasCylinder extends Mesh{
     constructor(x,y,z, rotation = Math.PI){
         super(_gascylinderGeometry, _gascylinderMaterials);
         // this.body = new PhysicsBody(5,new PhysicsShapeThree(_gascylinderGeometry),new PhysicsMaterial(1,0.5));
@@ -72,7 +72,7 @@ class GasCylinder extends THREE.Mesh{
 
         this.explosionPower = 25;
         this.closeObjects = [];
-        this.surroundObject = new THREE.Object3D();
+        this.surroundObject = new Object3D();
         this.surroundObject.geometry = _gascylinderSurroundGeometry;
         this.surroundObject.onCollision = function(collisionResult,obj,delta){
             this.closeObjects.push(obj);
@@ -121,7 +121,7 @@ class GasCylinder extends THREE.Mesh{
 
         // Pushing surrounding objects away
         for (let obj of this.closeObjects) {
-            let dir = new THREE.Vector3().subVectors(obj.position,this.position);
+            let dir = new Vector3().subVectors(obj.position,this.position);
             dir.setY(Math.random()+1).normalize().multiplyScalar(this.explosionPower);
             obj.movementEngine.velocity.copy(dir);
             if(obj.dealDamage) obj.dealDamage(30);
@@ -139,7 +139,7 @@ class GasCylinder extends THREE.Mesh{
         // dir.setY(Math.random()).normalize().multiplyScalar(this.explosionPower);
         // obj.movementEngine.velocity.copy(dir);
 
-        // let dir = new THREE.Vector3().subVectors(obj.position,this.position);
+        // let dir = new Vector3().subVectors(obj.position,this.position);
         // dir.setY(Math.random()+1).normalize().multiplyScalar(this.explosionPower);
         // obj.movementEngine.velocity.copy(dir);
 

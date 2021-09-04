@@ -1,10 +1,10 @@
-import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 import { hud } from '../player/HUD';
 
 import light from '../../asset/models/floorLight/LUCE.glb';
 
 import light_emissive from '../../asset/models/floorLight/LUCE_emissive.png';
+import { Box3, Color, CylinderGeometry, SpotLight, Vector3 } from 'three';
 
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
 const _floorLightTextureEmissive = loader.load(light_emissive);
@@ -20,12 +20,12 @@ loaderGLTF.load(light, (gltf)=>{
     _floorLightModel = gltf.scene;
     
     // Scale
-    let boundingBox = new THREE.Box3().setFromObject(_floorLightModel).getSize(new THREE.Vector3());
+    let boundingBox = new Box3().setFromObject(_floorLightModel).getSize(new Vector3());
     let scaleFactor = _floorLightHeight / boundingBox.y;
     _floorLightModel.scale.set(scaleFactor, scaleFactor, scaleFactor);
-    _floorLightSize = new THREE.Box3().setFromObject(_floorLightModel).getSize(new THREE.Vector3());
+    _floorLightSize = new Box3().setFromObject(_floorLightModel).getSize(new Vector3());
 
-    _cylinderGeometry = new THREE.CylinderGeometry(
+    _cylinderGeometry = new CylinderGeometry(
         (boundingBox.x/2),
         (boundingBox.x/2),
         boundingBox.y,32);
@@ -40,7 +40,7 @@ class FloorLight {
         this.group.traverse(function (child) {
             if (child.isMesh){
                 child.material = child.material.clone(true);
-                child.material.emissive = new THREE.Color( 0xffffff );
+                child.material.emissive = new Color( 0xffffff );
                 child.material.emissiveMap = _floorLightTextureEmissive;
                 child.material.emissiveIntensity = _floorLightEmissiveIntensity;
                 child.castShadow = true;
@@ -50,7 +50,7 @@ class FloorLight {
         this.group.geometry = _cylinderGeometry;
 
         this._intensity = intensity;
-        this.light = new THREE.SpotLight(color, intensity, distance);
+        this.light = new SpotLight(color, intensity, distance);
         
         this.lightPosition = {
             x: x,
@@ -63,7 +63,7 @@ class FloorLight {
                                 this.lightPosition.z + this.lightPosition.r);
                                 
         // Size
-        this.size = new THREE.Box3().setFromObject(this.group).getSize(new THREE.Vector3());
+        this.size = new Box3().setFromObject(this.group).getSize(new Vector3());
         this.setPosition(x,y,z);
         this.setRotation(rotation);
         

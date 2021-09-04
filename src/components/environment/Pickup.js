@@ -1,4 +1,3 @@
-import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 
 import pickup_health from '../../asset/textures/pickup_health.png';
@@ -6,7 +5,7 @@ import pickup_shield from '../../asset/textures/pickup_shield.png';
 import pickup_ammo from '../../asset/textures/pickup_ammo.png';
 
 import { ObjectPool } from '../Tools/ObjectPool';
-// import { setCollideable } from '../physics/CollisionDetector';
+import { BoxGeometry, DoubleSide, Mesh, MeshPhongMaterial } from 'three';
 
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
 const _pickupTextureHealth = loader.load(pickup_health);
@@ -15,27 +14,27 @@ const _pickupTextureAmmo = loader.load(pickup_ammo);
 
 const dimension = 0.8;
 
-const _pickupGeometry = new THREE.BoxGeometry(dimension,dimension,dimension);
-const _pickupMaterialHealth = new THREE.MeshPhongMaterial({
+const _pickupGeometry = new BoxGeometry(dimension,dimension,dimension);
+const _pickupMaterialHealth = new MeshPhongMaterial({
     map: _pickupTextureHealth,
-    side: THREE.DoubleSide,
+    side: DoubleSide,
     bumpMap: _pickupTextureHealth,
     bumpScale  :  0.25,
 });
-const _pickupMaterialShield = new THREE.MeshPhongMaterial({
+const _pickupMaterialShield = new MeshPhongMaterial({
     map: _pickupTextureShield,
-    side: THREE.DoubleSide,
+    side: DoubleSide,
     bumpMap: _pickupTextureShield,
     bumpScale  :  0.25,
 });
-const _pickupMaterialAmmo = new THREE.MeshPhongMaterial({
+const _pickupMaterialAmmo = new MeshPhongMaterial({
     map: _pickupTextureAmmo,
-    side: THREE.DoubleSide,
+    side: DoubleSide,
     bumpMap: _pickupTextureAmmo,
     bumpScale  :  0.25,
 });
 
-class Pickup extends THREE.Mesh {
+class Pickup extends Mesh {
     constructor(x,y,z, type = "health", onTouch = (player, pickup)=>{}){
         
         switch(type){

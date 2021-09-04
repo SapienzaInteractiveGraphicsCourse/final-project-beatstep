@@ -1,4 +1,4 @@
-import { Matrix4, Vector3, Vector4 } from "three";
+import { BoxBufferGeometry, Color, Matrix4, Mesh, MeshBasicMaterial, Vector3, Vector4 } from "three";
 function fixZeroPrecision(){
     if(Math.abs(this.x) < 0.0001) this.x = 0;
     if(Math.abs(this.y) < 0.0001) this.y = 0;
@@ -7,13 +7,13 @@ function fixZeroPrecision(){
 }
 Vector3.prototype.fixZeroPrecision = fixZeroPrecision;
 
-import { THREE, scene } from "../setup/ThreeSetup";
 import { MovementEngine } from "./MovementEngine";
 import { Raycaster } from "./Raycaster";
 
 
 const _tempVector = new Vector3(0, 0, 0);
-const _debugMaterial = new THREE.MeshBasicMaterial({color: new THREE.Color( 0x00ff00 ), wireframe: true});
+const _debugMaterial = new MeshBasicMaterial({color: new Color( 0x00ff00 ), wireframe: true});
+
 
 class PhysicsWorld {
 
@@ -46,14 +46,14 @@ class PhysicsWorld {
             scope.removeObject(phObject);
         }
 
-        // if(mesh instanceof THREE.Object3D) scene.add(mesh);
+        // if(mesh instanceof Object3D) scene.add(mesh);
         // else if(mesh.addToScene) mesh.addToScene(scene);
 
         if(this.debugDraw){
             let dbSize = shape.boundingBox.getSize(new Vector3()).toArray();
-            let dbGeom = new THREE.BoxBufferGeometry(...dbSize);
+            let dbGeom = new BoxBufferGeometry(...dbSize);
             dbGeom.translate(...shape.center.toArray());
-            let dbBox = new THREE.Mesh(dbGeom,_debugMaterial);
+            let dbBox = new Mesh(dbGeom,_debugMaterial);
             phObject.debugBox = dbBox;
             phObject.mesh.add(dbBox);
             this.debugBoxes.push(dbBox);
@@ -341,14 +341,14 @@ class PhysicsShape {
 // |/       |/ 
 // 0--------1
 const _cube = [
-    new THREE.Vector3(-1, -1,  1),  // 0
-    new THREE.Vector3( 1, -1,  1),  // 1
-    new THREE.Vector3(-1,  1,  1),  // 2
-    new THREE.Vector3( 1,  1,  1),  // 3
-    new THREE.Vector3(-1, -1, -1),  // 4
-    new THREE.Vector3( 1, -1, -1),  // 5
-    new THREE.Vector3(-1,  1, -1),  // 6
-    new THREE.Vector3( 1,  1, -1),  // 7
+    new Vector3(-1, -1,  1),  // 0
+    new Vector3( 1, -1,  1),  // 1
+    new Vector3(-1,  1,  1),  // 2
+    new Vector3( 1,  1,  1),  // 3
+    new Vector3(-1, -1, -1),  // 4
+    new Vector3( 1, -1, -1),  // 5
+    new Vector3(-1,  1, -1),  // 6
+    new Vector3( 1,  1, -1),  // 7
 ];
 
 const cubeFaces = [

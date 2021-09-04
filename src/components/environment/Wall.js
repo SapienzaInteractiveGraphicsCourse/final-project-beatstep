@@ -1,8 +1,8 @@
-import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 import defaultWall from '../../asset/textures/defaultWall.png';
 import metalPanel from '../../asset/textures/metalPanel.png';
 import wood from '../../asset/textures/wood.jpg';
+import { DoubleSide, Mesh, MeshPhongMaterial, NearestFilter, PlaneGeometry, RepeatWrapping } from 'three';
 
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
 const _walls = [ // [texture, ratio]
@@ -13,21 +13,21 @@ const _walls = [ // [texture, ratio]
 
 for(let [_wallTexture,ratio] of _walls){
     // Apply repetition
-    _wallTexture.wrapS = THREE.RepeatWrapping;
-    _wallTexture.wrapT = THREE.RepeatWrapping;
-    _wallTexture.magFilter = THREE.NearestFilter;
+    _wallTexture.wrapS = RepeatWrapping;
+    _wallTexture.wrapT = RepeatWrapping;
+    _wallTexture.magFilter = NearestFilter;
 }
 
-class Wall extends THREE.Mesh{
+class Wall extends Mesh{
     constructor(x,y,z,width,height,rotationRadians=0,type=0){
-        let geometry = new THREE.PlaneGeometry(width,height);
+        let geometry = new PlaneGeometry(width,height);
         let texture = _walls[type][0].clone(true);
         texture.needsUpdate = true;
         let ratio = _walls[type][1];
         texture.repeat.set( width/ratio , height/ratio );
-        let material = new THREE.MeshPhongMaterial({
+        let material = new MeshPhongMaterial({
             map: texture,
-            side: THREE.DoubleSide,
+            side: DoubleSide,
         });
         super(geometry, material);
 

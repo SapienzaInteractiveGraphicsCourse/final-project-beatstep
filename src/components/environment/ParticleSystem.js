@@ -1,7 +1,7 @@
-import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 
 import fire from '../../asset/textures/fire.png';
+import { AdditiveBlending, BufferGeometry, Color, Float32BufferAttribute, Points, ShaderMaterial, Vector3 } from 'three';
 
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
 
@@ -66,7 +66,7 @@ class LinearSpline {
 }
 
 
-class ParticleSystem extends THREE.Points {
+class ParticleSystem extends Points {
     /**
      * https://www.youtube.com/watch?v=YwfAAv3aIB8 - Cuz everything is better with 
      * particles, duh.
@@ -84,11 +84,11 @@ class ParticleSystem extends THREE.Points {
             },
         }
 
-        let material = new THREE.ShaderMaterial({
+        let material = new ShaderMaterial({
             uniforms: uniforms,
             vertexShader: _PS_VS,
             fragmentShader: _PS_FS,
-            blending: THREE.AdditiveBlending,
+            blending: AdditiveBlending,
             depthTest: true,
             depthWrite: false,
             transparent: true,
@@ -96,11 +96,11 @@ class ParticleSystem extends THREE.Points {
         });
 
         // Points system (creating buffer)
-        let geometry = new THREE.BufferGeometry();
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3));
-        geometry.setAttribute('size', new THREE.Float32BufferAttribute([], 1));
-        geometry.setAttribute('colour', new THREE.Float32BufferAttribute([], 4));
-        geometry.setAttribute('angle', new THREE.Float32BufferAttribute([], 1));
+        let geometry = new BufferGeometry();
+        geometry.setAttribute('position', new Float32BufferAttribute([], 3));
+        geometry.setAttribute('size', new Float32BufferAttribute([], 1));
+        geometry.setAttribute('colour', new Float32BufferAttribute([], 4));
+        geometry.setAttribute('angle', new Float32BufferAttribute([], 1));
 
         super(geometry, material);
         this._scene = scene;
@@ -127,8 +127,8 @@ class ParticleSystem extends THREE.Points {
             const c = a.clone();
             return c.lerp(b, t);
         });
-        this._colourSpline.addPoint(0.0, new THREE.Color(0xFFFF80));
-        this._colourSpline.addPoint(1.0, new THREE.Color(0xFF8080));
+        this._colourSpline.addPoint(0.0, new Color(0xFFFF80));
+        this._colourSpline.addPoint(1.0, new Color(0xFF8080));
         this._sizeSpline = new LinearSpline((t, a, b) => {
             return a + t * (b - a);
         });
@@ -160,13 +160,13 @@ class ParticleSystem extends THREE.Points {
         }
 
         this.geometry.setAttribute(
-            'position', new THREE.Float32BufferAttribute(positions, 3));
+            'position', new Float32BufferAttribute(positions, 3));
         this.geometry.setAttribute(
-            'size', new THREE.Float32BufferAttribute(sizes, 1));
+            'size', new Float32BufferAttribute(sizes, 1));
         this.geometry.setAttribute(
-            'colour', new THREE.Float32BufferAttribute(colours, 4));
+            'colour', new Float32BufferAttribute(colours, 4));
         this.geometry.setAttribute(
-            'angle', new THREE.Float32BufferAttribute(angles, 1));
+            'angle', new Float32BufferAttribute(angles, 1));
 
         this.geometry.attributes.position.needsUpdate = true;
         this.geometry.attributes.size.needsUpdate = true;
@@ -235,17 +235,17 @@ class ParticleSystem extends THREE.Points {
             const life = (Math.random() * 0.75 + 0.25) * this._generalLife;
             const initPos = this._generalPosition;
             this._particles.push({
-                position: new THREE.Vector3(
+                position: new Vector3(
                     initPos[0] + (Math.random() * this._generalRadius[0] - 1) * 1.0,
                     initPos[1] + (Math.random() * this._generalRadius[1] - 1) * 1.0,
                     initPos[2] + (Math.random() * this._generalRadius[2] - 1) * 1.0),
                 size: (Math.random() * 0.5 + 0.5) * this._particleSize,
-                colour: new THREE.Color(),
+                colour: new Color(),
                 alpha: 1.0,
                 life: life,
                 maxLife: life,
                 rotation: Math.random() * 2.0 * Math.PI,
-                velocity: new THREE.Vector3(...this._generalVelocity),
+                velocity: new Vector3(...this._generalVelocity),
             });
         }
     }

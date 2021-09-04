@@ -1,4 +1,4 @@
-import { THREE, scene, camera } from '../setup/ThreeSetup';
+import { scene, camera } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 
 import robot1 from '../../asset/models/robot1/robot_1.glb';
@@ -6,6 +6,7 @@ import { MovementEngine } from '../physics/MovementEngine';
 import { world } from "../physics/PhysicsWorld";
 import ParticleSystem from "../environment/ParticleSystem";
 import smoke from '../../asset/textures/smoke.png';
+import { Box3, Color, CylinderGeometry, Vector3 } from 'three';
 
 var TWEEN = require('@tweenjs/tween.js');
 
@@ -20,11 +21,11 @@ let _robotCollisionGeometry;
 loader.load(robot1, (gltf)=>{
     _robot1Model = gltf.scene;
     // Scale
-    let boundingBox = new THREE.Box3().setFromObject(_robot1Model).getSize(new THREE.Vector3());
+    let boundingBox = new Box3().setFromObject(_robot1Model).getSize(new Vector3());
     let scaleFactor = _robotHeight / boundingBox.y;
     _robot1Model.scale.set(scaleFactor, scaleFactor, scaleFactor);
     _robotSize = boundingBox.clone();
-    _robotCollisionGeometry = new THREE.CylinderGeometry(   _robotSize.x,
+    _robotCollisionGeometry = new CylinderGeometry(   _robotSize.x,
                                                             _robotSize.x,
                                                             _robotSize.y,10, 1, false);
     _robotCollisionGeometry.translate(0,_robotSize.y/2,0);
@@ -52,7 +53,7 @@ class Robot {
         this.group.traverse(function(child){
             if(child.isMesh){
                 child.material = child.material.clone(true);
-                child.material.emissive = new THREE.Color( 0xff0000 );
+                child.material.emissive = new Color( 0xff0000 );
                 child.material.emissiveIntensity = 0;
 
                 child.castShadow = true;
@@ -63,7 +64,7 @@ class Robot {
         });
 
         /** Size */
-        this.size = new THREE.Box3().setFromObject(this.group).getSize(new THREE.Vector3());
+        this.size = new Box3().setFromObject(this.group).getSize(new Vector3());
 
         /** Animations */
         this._tweenAnimations = new TWEEN.Group();
@@ -519,10 +520,10 @@ class Robot {
 
         })
         .onComplete(()=>{
-            let _zAxis = new THREE.Vector3();
+            let _zAxis = new Vector3();
 		    _zAxis.setFromMatrixColumn( this.group.matrixWorld, 2).normalize();
             _zAxis.cross(this.group.up); //.multiplyScalar(-this._idleMovement.radialDistance);
-            // let finalPosition = new THREE.Vector3().addVectors(this.group.position,_zAxis);
+            // let finalPosition = new Vector3().addVectors(this.group.position,_zAxis);
 
             this.group.movementEngine.velocity.setX(-_zAxis.x*this.velocity*0.3);
             this.group.movementEngine.velocity.setZ(-_zAxis.z*this.velocity*0.3);

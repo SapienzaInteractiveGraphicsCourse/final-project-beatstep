@@ -1,8 +1,8 @@
-  import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 import { hud } from '../player/HUD';
 
 import controlPanel from '../../asset/models/controlPanel/controlPanel.glb';
+import { Box3, BoxGeometry, Vector3 } from 'three';
 
 const loader = DefaultGeneralLoadingManager.getHandler("gltf");
 let _controlPanelModel;
@@ -26,12 +26,12 @@ class ControlPanel {
         this.group = _controlPanelModel.clone(true);
 
         // Scale
-        let boundingBox = new THREE.Box3().setFromObject(this.group).getSize(new THREE.Vector3());
+        let boundingBox = new Box3().setFromObject(this.group).getSize(new Vector3());
         let scaleFactor = height / boundingBox.y;
         this.group.scale.set(scaleFactor, scaleFactor, scaleFactor);
-        let _controlPanelSize = new THREE.Box3().setFromObject(_controlPanelModel).getSize(new THREE.Vector3());
+        let _controlPanelSize = new Box3().setFromObject(_controlPanelModel).getSize(new Vector3());
 
-        let _controlPanelCollisionGeometry = new THREE.BoxGeometry( _controlPanelSize.x,
+        let _controlPanelCollisionGeometry = new BoxGeometry( _controlPanelSize.x,
                                                                     _controlPanelSize.y,
                                                                     _controlPanelSize.z+6);
         _controlPanelCollisionGeometry.translate(0,_controlPanelSize.y/2,0);

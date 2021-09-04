@@ -1,4 +1,5 @@
-import { THREE, camera } from "../setup/ThreeSetup";
+import { BufferGeometry, LineBasicMaterial, LineSegments, Shape } from "three";
+import { camera } from "../setup/ThreeSetup";
 
 class HUD {
 
@@ -8,15 +9,15 @@ class HUD {
 
         (function(scope){
             //creating rifle scope
-            let lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+            let lineMaterial = new LineBasicMaterial({ color: 0xffffff });
             let size = 0.001;
-            let lineShape = new THREE.Shape()
+            let lineShape = new Shape()
                 .moveTo(0, -size)
                 .lineTo(0, size)
                 .moveTo(-size, 0)
                 .lineTo(size, 0);
-            let lineGeom = new THREE.BufferGeometry().setFromPoints(lineShape.getPoints());
-            scope.crosshairs = new THREE.LineSegments(lineGeom, lineMaterial);
+            let lineGeom = new BufferGeometry().setFromPoints(lineShape.getPoints());
+            scope.crosshairs = new LineSegments(lineGeom, lineMaterial);
             scope.crosshairs.position.set(0, 0, -0.11);
             scope.camera.add(scope.crosshairs);
 

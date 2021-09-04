@@ -8,6 +8,7 @@
     "watch": "webpack --watch",
     "start": "webpack serve --open",
     "build": "webpack",
+    "analize": "webpack --profile --json > stats.json",
     "host": "webpack serve --open --host 0.0.0.0 --port 3000"
   },
   "author": "Pasquale Silvestri, Marco Lo Pinto",
@@ -20,6 +21,7 @@
     "style-loader": "^2.0.0",
     "three": "^0.129.0",
     "webpack": "^5.40.0",
+    "webpack-bundle-analyzer": "^4.4.2",
     "webpack-cli": "^4.7.2",
     "webpack-dev-server": "^3.11.2"
   }

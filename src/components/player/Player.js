@@ -1,6 +1,4 @@
-import { Object3D } from "three";
-import { Euler,EventDispatcher,Vector3 } from 'three';
-import { THREE, scene } from "../setup/ThreeSetup";
+import { CylinderGeometry, MeshStandardMaterial, Object3D, Euler, EventDispatcher, Vector3, Quaternion, QuaternionKeyframeTrack, AnimationClip, AnimationMixer, LoopOnce } from "three";
 
 var TWEEN = require('@tweenjs/tween.js');
 
@@ -22,7 +20,7 @@ const rifleModel = {};
     var normalMap;
     var metalnessMap;
     var roughnessMap;
-    var material = new THREE.MeshStandardMaterial();
+    var material = new MeshStandardMaterial();
     
     const textureLoader = DefaultGeneralLoadingManager.getHandler("texture");
     texture = textureLoader.load(RifleTexture);
@@ -110,7 +108,7 @@ class Player extends Object3D{
         this.canJump = false;
 
         this.movementEngine = new MovementEngine(-25);
-        this.geometry = new THREE.CylinderGeometry(1,1,height,16);
+        this.geometry = new CylinderGeometry(1,1,height,16);
         
 
         // Setup of the input and movement controls
@@ -233,7 +231,7 @@ class Player extends Object3D{
         }
 
         function onPointerlockError(e) {
-            console.error('THREE.PointerLockControls: Unable to use Pointer Lock API');
+            console.error('Unable to use Pointer Lock API');
             console.error(e);
         }
 
@@ -311,29 +309,29 @@ class Player extends Object3D{
 
     setUpRifle(){
         let rifle = this.rifle;
-        let initAngle = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.05, Math.PI/14, 0, "XYZ"));
-        let shootAngle = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.05+(Math.PI/12), Math.PI/14, 0, "XYZ"));
+        let initAngle = new Quaternion().setFromEuler(new Euler(0.05, Math.PI/14, 0, "XYZ"));
+        let shootAngle = new Quaternion().setFromEuler(new Euler(0.05+(Math.PI/12), Math.PI/14, 0, "XYZ"));
 
         rifle.position.set(0.3, -0.25, -1);
         rifle.quaternion.set(initAngle.x, initAngle.y, initAngle.z, initAngle.w);
 
         // Load animations
-        const shootRotation = new THREE.QuaternionKeyframeTrack(
+        const shootRotation = new QuaternionKeyframeTrack(
             '.quaternion',
             [0, 0.1, 0.3],
             [initAngle.x, initAngle.y, initAngle.z, initAngle.w,
             shootAngle.x, shootAngle.y, shootAngle.z, shootAngle.w,
             initAngle.x, initAngle.y, initAngle.z, initAngle.w],
         );
-        const shootClip = new THREE.AnimationClip('shoot-1', -1, [
+        const shootClip = new AnimationClip('shoot-1', -1, [
             shootRotation
         ]);
 
         // We need one mixer for each animated object in the scene
-        this.mixer = new THREE.AnimationMixer(rifle);
+        this.mixer = new AnimationMixer(rifle);
         this.shootAnimation = this.mixer.clipAction(shootClip);
         // this.shootAnimation.clampWhenFinished = true;
-        this.shootAnimation.loop = THREE.LoopOnce;
+        this.shootAnimation.loop = LoopOnce;
         this.shootAnimation.enabled = false;
         this.repetitions = 1;
         

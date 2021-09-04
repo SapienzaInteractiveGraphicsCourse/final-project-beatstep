@@ -1,9 +1,9 @@
   
-import { THREE } from '../setup/ThreeSetup';
 import { DefaultGeneralLoadingManager } from '../Tools/GeneralLoadingManager';
 import { hud } from '../player/HUD';
 
 import door from '../../asset/models/door/doorSquared.glb';
+import { AnimationClip, AnimationMixer, Box3, BoxGeometry, LoopOnce, Vector3, VectorKeyframeTrack } from 'three';
 
 const loader = DefaultGeneralLoadingManager.getHandler("gltf");
 let _doorModel;
@@ -26,12 +26,12 @@ class Door {
         this.group = _doorModel.clone(true);
 
         // Scale
-        let boundingBox = new THREE.Box3().setFromObject(this.group).getSize(new THREE.Vector3());
+        let boundingBox = new Box3().setFromObject(this.group).getSize(new Vector3());
         let scaleFactor = height / boundingBox.y;
         this.group.scale.set(scaleFactor, scaleFactor, scaleFactor);
-        let _doorSize = new THREE.Box3().setFromObject(_doorModel).getSize(new THREE.Vector3());
+        let _doorSize = new Box3().setFromObject(_doorModel).getSize(new Vector3());
 
-        let _doorCollisionGeometry = new THREE.BoxGeometry( _doorSize.x,
+        let _doorCollisionGeometry = new BoxGeometry( _doorSize.x,
                                                             _doorSize.y,
                                                             _doorSize.z+24);
         _doorCollisionGeometry.translate(0,_doorSize.y/2,0);
@@ -42,7 +42,7 @@ class Door {
         this.door_l = this.group.getObjectByName("door_l");
 
         // Adding geometry of doors
-        let _door_l_CollisionGeometry = new THREE.BoxGeometry( _doorSize.x/4,
+        let _door_l_CollisionGeometry = new BoxGeometry( _doorSize.x/4,
             _doorSize.y/4,
             _doorSize.z);
         _door_l_CollisionGeometry.translate(0,0,0);
@@ -59,7 +59,7 @@ class Door {
         this.isOpen = false;
 
         // We need one mixer for each animated object in the scene
-        this.mixer = new THREE.AnimationMixer(this.group);
+        this.mixer = new AnimationMixer(this.group);
         // Set final position when animation ends
         this.mixer.addEventListener('finished', (e) => {
             // checking if finalCoords exists
@@ -187,25 +187,25 @@ class Door {
         let door_r_p2 = this.incrementEuler(door_r_p1, -0.8, 0,0);
         let door_l_p2 = this.incrementEuler(door_l_p1, 0.8, 0,0);
 
-        const door_r_translation = new THREE.VectorKeyframeTrack(
+        const door_r_translation = new VectorKeyframeTrack(
             'door_r.position',
             [0, 0.5],
             [...door_r_p1.toArray(),
              ...door_r_p2.toArray()],
         );
-        const door_l_translation = new THREE.VectorKeyframeTrack(
+        const door_l_translation = new VectorKeyframeTrack(
             'door_l.position',
             [0, 0.5],
             [...door_l_p1.toArray(),
              ...door_l_p2.toArray()],
         );
 
-        const clip = new THREE.AnimationClip('doorsOpen_clip', -1, [
+        const clip = new AnimationClip('doorsOpen_clip', -1, [
             door_r_translation,door_l_translation
         ]);
 
         let animation = this.mixer.clipAction(clip);
-        animation.loop = THREE.LoopOnce;
+        animation.loop = LoopOnce;
         animation.enabled = false;
         animation.clampWhenFinished = false;
         animation.finalCoords = {
@@ -227,25 +227,25 @@ class Door {
         let door_r_p1 = this.incrementEuler(door_r_p2, -0.8, 0,0);
         let door_l_p1 = this.incrementEuler(door_l_p2, 0.8, 0,0);
 
-        const door_r_translation = new THREE.VectorKeyframeTrack(
+        const door_r_translation = new VectorKeyframeTrack(
             'door_r.position',
             [0, 0.5],
             [...door_r_p1.toArray(),
              ...door_r_p2.toArray()],
         );
-        const door_l_translation = new THREE.VectorKeyframeTrack(
+        const door_l_translation = new VectorKeyframeTrack(
             'door_l.position',
             [0, 0.5],
             [...door_l_p1.toArray(),
              ...door_l_p2.toArray()],
         );
 
-        const clip = new THREE.AnimationClip('doorsClose_clip', -1, [
+        const clip = new AnimationClip('doorsClose_clip', -1, [
             door_r_translation,door_l_translation
         ]);
 
         let animation = this.mixer.clipAction(clip);
-        animation.loop = THREE.LoopOnce;
+        animation.loop = LoopOnce;
         animation.enabled = false;
         animation.clampWhenFinished = false;
         animation.finalCoords = {
@@ -261,7 +261,7 @@ class Door {
     }
 
     incrementEuler(e, dx,dy,dz){
-        return new THREE.Vector3(e.x+dx,e.y+dy,e.z+dz);
+        return new Vector3(e.x+dx,e.y+dy,e.z+dz);
     }
 
     setPosition(x,y,z){
