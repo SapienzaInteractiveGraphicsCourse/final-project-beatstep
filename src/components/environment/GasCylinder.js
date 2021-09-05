@@ -25,7 +25,7 @@ const _gascylinderRadius = 0.5;
 const _gascylinderHeight = 2;
 const _gascylinderMass = 2;
 const _gascylinderRotation = Math.PI/2;
-const _gascylinderSurroundRadius = 10;
+const _gascylinderSurroundRadius = 7;
 
 
 const _gascylinderGeometry = new CylinderGeometry(_gascylinderRadius,
@@ -39,7 +39,7 @@ const _gascylinderGeometry = new CylinderGeometry(_gascylinderRadius,
 const _gascylinderSurroundGeometry = new BoxGeometry(_gascylinderRadius+_gascylinderSurroundRadius,
                                                            _gascylinderHeight+(_gascylinderSurroundRadius/2),
                                                            _gascylinderRadius+_gascylinderSurroundRadius);
-_gascylinderSurroundGeometry.translate(0,_gascylinderSurroundRadius/2,0);
+_gascylinderSurroundGeometry.translate(0,((_gascylinderHeight+(_gascylinderSurroundRadius/2))-_gascylinderHeight)/2,0);
 
 
 const  _gascylinderMaterials = [
