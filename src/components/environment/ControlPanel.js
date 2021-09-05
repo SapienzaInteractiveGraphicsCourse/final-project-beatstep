@@ -67,7 +67,7 @@ class ControlPanel {
             }
 
             
-            if(obj.constructor.name != "Player") return
+            if(obj.name != "Player") return
             hud.caption.text = `Press E to shutdown the simulation`;
             hud.caption.owner = this;
             hud.caption.show = true;

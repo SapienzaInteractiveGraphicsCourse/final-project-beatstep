@@ -3,7 +3,6 @@ import gas_top from '../../asset/textures/gas_top.png';
 import gas_top_b from '../../asset/textures/gas_top_b.png';
 import gas_side from '../../asset/textures/gas_side.png';
 import gas_side_b from '../../asset/textures/gas_side_b.png';
-import { ObjectPool } from '../Tools/ObjectPool';
 import ParticleSystem from './ParticleSystem';
 import { scene, camera } from '../setup/ThreeSetup';
 import { BoxGeometry, CylinderGeometry, DoubleSide, Mesh, MeshPhongMaterial, Object3D, Vector3 } from 'three';
@@ -38,8 +37,10 @@ const _gascylinderGeometry = new CylinderGeometry(_gascylinderRadius,
 //                                                                 _gascylinderHeight, 8);
  
 const _gascylinderSurroundGeometry = new BoxGeometry(_gascylinderRadius+_gascylinderSurroundRadius,
-                                                           _gascylinderHeight,
+                                                           _gascylinderHeight+(_gascylinderSurroundRadius/2),
                                                            _gascylinderRadius+_gascylinderSurroundRadius);
+_gascylinderSurroundGeometry.translate(0,_gascylinderSurroundRadius/2,0);
+
 
 const  _gascylinderMaterials = [
     new MeshPhongMaterial({

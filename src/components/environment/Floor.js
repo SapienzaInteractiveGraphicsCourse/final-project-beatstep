@@ -23,6 +23,7 @@ class Floor extends Mesh{
         });
 
         super(geometry, _floorMaterial);
+        this.name = "Floor";
 
         this.receiveShadow = true;
         this.castShadow = false;

@@ -135,7 +135,7 @@ class Robot {
                 obj.position.sub(backVec);
             }
             
-            if(obj.constructor.name != "Floor"){
+            if(obj.name != "Floor"){
                 this._collided = true;
             }
 

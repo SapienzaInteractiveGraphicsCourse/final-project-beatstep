@@ -56,6 +56,7 @@ class Player extends Object3D{
 
     constructor(camera, position = [0,0,0], height = 1, canvas = null, {angularSensitivity} = {angularSensitivity: null}){
         super();
+        this.name = "Player";
         this.position.set(position[0],position[1]+(height/2),position[2]);
         this.feetPosition = new Proxy(this.position,{
             get: function(obj,key){
@@ -81,11 +82,11 @@ class Player extends Object3D{
 
         let _health = 100;
         let _shield = 0;
-        let _ammo = 50;
+        let _ammo = 150;
         
         this.topHealth = 100;
         this.topShield = 50;
-        this.topAmmo = 200;
+        this.topAmmo = 400;
         
         Object.defineProperties(this,{
             health: {
@@ -364,7 +365,7 @@ class Player extends Object3D{
             });
 
             let hit = hits[0];
-            if(hit.objectIntersected.constructor.name == "Player"){
+            if(hit.objectIntersected.name == "Player"){
                 if(hits.length > 1) hit = hits[1];
                 else hit = null;
             }

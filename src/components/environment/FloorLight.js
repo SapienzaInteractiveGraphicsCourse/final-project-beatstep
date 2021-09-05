@@ -95,7 +95,7 @@ class FloorLight {
                 obj.movementEngine.displacement.sub(backVec);
             }
             
-            if(obj.constructor.name != "Player") return
+            if(obj.name != "Player") return
             hud.caption.text = "Press E to toggle the light";
             hud.caption.owner = this;
             hud.caption.show = true;

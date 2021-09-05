@@ -74,7 +74,7 @@ class Pickup extends Mesh {
 
     onCollision(collisionResult,obj,delta){
 
-        if(obj.constructor.name != "Player") return;
+        if(obj.name != "Player") return;
 
         this.onTouch(obj,this);
 
@@ -98,7 +98,7 @@ class PickupHealth extends Pickup {
 class PickupAmmo extends Pickup {
     constructor(x,y,z){
         super(x,y,z,"ammo",(player, pickup)=>{
-            let aInc = 10;
+            let aInc = 50;
             if(player.ammo < player.topAmmo){
                 player.ammo += aInc;
                 pickup.removeFromPhysicsWorld();

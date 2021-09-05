@@ -1,6 +1,5 @@
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-// const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
     mode: 'production',
@@ -13,7 +12,6 @@ module.exports = {
             title: 'Interactive Graphics Project',
             template: './src/index.html',
         }),
-        // new BundleAnalyzerPlugin()
     ],
     module: {
         rules: [
@@ -48,7 +46,7 @@ module.exports = {
         path: path.resolve(__dirname, 'dist'),
         clean: true,
     },
-    devtool: "eval-cheap-module-source-map",
+    //devtool: "eval-cheap-module-source-map",
     devServer: {
       contentBase: './dist',
       liveReload: true,
