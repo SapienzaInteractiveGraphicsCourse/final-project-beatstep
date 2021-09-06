@@ -60,7 +60,7 @@ class Raycaster {
 
 
     /**
-     * Check if the point is inside a triangular or quadrangular face using the Same-Side Technique (https://blackpawn.com/texts/pointinpoly/)
+     * Check if the point is inside a triangular or quadrangular face using a logic inspired by the Same-Side Technique (https://blackpawn.com/texts/pointinpoly/)
      * @param {Vector3} point - The point to check
      * @param {Face} face - The face to check for
      * @param {Boolean} coplanar - A flag reassuring that the point is coplanar to the face. If false, the coplanarity is checked

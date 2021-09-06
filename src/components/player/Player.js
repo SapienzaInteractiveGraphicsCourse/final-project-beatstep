@@ -169,7 +169,6 @@ class Player extends Object3D{
     setUpControls(angularSensitivity){
 
         this.controls = new EventDispatcher();
-        this.controls.changeEvent = { type: 'change' };
         this.controls.deathEvent = { type: 'death' };
         this.controls.winEvent = { type: 'win' };
         this.controls.lockEvent = { type: 'lock' };
@@ -216,9 +215,6 @@ class Player extends Object3D{
             _euler.x = Math.max(_PI_2 - scope.controls.maxPolarAngle, Math.min(_PI_2 - scope.controls.minPolarAngle, _euler.x));
 
             scope.camera.quaternion.setFromEuler(_euler);
-
-            scope.controls.dispatchEvent(scope.controls.changeEvent);
-
         }
 
         function onPointerlockChange() {

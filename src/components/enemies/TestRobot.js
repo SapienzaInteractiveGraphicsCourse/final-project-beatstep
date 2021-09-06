@@ -19,7 +19,7 @@ loader.load(robot1, (gltf) => {
 });
 
 
-class RobotDebug {
+class TestRobot {
     constructor() {
         this.group = _robot1Model.clone(true);
 
@@ -273,4 +273,4 @@ class RobotDebug {
 
 }
 
-export default RobotDebug;
+export default TestRobot;

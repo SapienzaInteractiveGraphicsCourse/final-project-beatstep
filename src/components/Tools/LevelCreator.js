@@ -21,10 +21,10 @@ import ParticleSystem from '../environment/ParticleSystem';
 import smoke from '../../asset/textures/smoke.png';
 import { DefaultGeneralLoadingManager } from './GeneralLoadingManager';
 import ControlPanel from '../environment/ControlPanel';
-import RobotDebug from '../debug/RobotDebug';
+import TestRobot from '../enemies/TestRobot';
 import { AmbientLight, PointLight } from 'three';
-const loader = DefaultGeneralLoadingManager.getHandler("texture");
-const smokeImg = loader.load(smoke);
+// const loader = DefaultGeneralLoadingManager.getHandler("texture");
+// const smokeImg = loader.load(smoke);
 
 
 class LevelCreator {
@@ -53,8 +53,8 @@ class LevelCreator {
 
         this.objectsToUpdate.push(player);
         this.player = player;
-        window.getPlayerPos = ()=> this.player.position;
-        window.player = this.player;
+        // window.getPlayerPos = ()=> this.player.position;
+        // window.player = this.player;
     }
 
     addRobot(x,y,z, rotationRadians = 0){
@@ -67,8 +67,8 @@ class LevelCreator {
         this.objectsToUpdate.push(robot);
     }
 
-    addRobotDebug(x,y,z, rotationRadians = 0){
-        let robot = new RobotDebug();
+    addTestRobot(x,y,z, rotationRadians = 0){
+        let robot = new TestRobot();
         robot.setPosition(x,y,z);
         robot.setRotation(rotationRadians);
         scene.add(robot.group);
@@ -325,12 +325,11 @@ class LevelCreator {
 
     createDojo(){
         let wallHeight = 12;
-        let doorHeight = 5;
 
         this.addAmbientLight();
         this.addPointLight(0,40,0, 0xFFFFFF, 0.1);
 
-        this.addRobotDebug(0,0,0, -Math.PI/2);
+        this.addTestRobot(0,0,0, -Math.PI/2);
         this.addPlayer(0,0,10, 3);
 
         let dojoRadius = 16;
@@ -354,26 +353,26 @@ class LevelCreator {
         this.addFloor(0,0,0, 80,80);
     }
 
-    createTestLevel(){
-        let wallHeight = 16;
-        let doorHeight = 5;
+    // createTestLevel(){
+    //     let wallHeight = 16;
+    //     let doorHeight = 5;
 
-        this.addAmbientLight();
-        this.addPointLight(0,40,0, 0xFFFFFF, 0.1);
+    //     this.addAmbientLight();
+    //     this.addPointLight(0,40,0, 0xFFFFFF, 0.1);
 
-        this.addPlayer(0,0,30, 3);
+    //     this.addPlayer(0,0,30, 3);
 
-        this.addFloor(0,0,0, 200,200);
-        this.addWall(-10,0,0, 60,wallHeight, Math.PI/2);
+    //     this.addFloor(0,0,0, 200,200);
+    //     this.addWall(-10,0,0, 60,wallHeight, Math.PI/2);
 
-        this.addRobotDebug(0,0,-20, -Math.PI/2);
+    //     this.addTestRobot(0,0,-20, -Math.PI/2);
 
-        this.addRobot(0,0,24, -Math.PI/2);
+    //     this.addRobot(0,0,24, -Math.PI/2);
 
-        this.addGasCylinder(5,0,5, Math.PI*0.8);
+    //     this.addGasCylinder(5,0,5, Math.PI*0.8);
 
-        // this.addParticleEffect(0,2,0, 4, [8,8,8], 8, 0.5, [0,10,0], smokeImg);
-    }
+    //     this.addParticleEffect(0,2,0, 4, [8,8,8], 8, 0.5, [0,10,0], smokeImg);
+    // }
 
 }
 
