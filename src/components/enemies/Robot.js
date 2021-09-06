@@ -115,8 +115,7 @@ class Robot {
         this.velocity = 8; // in update, how fast the robot goes
         this.rotationVelocity = this.velocity; // rotation velocity of the robot
         // how much distance is tollerated to shoot to player
-        this.shootingDistanceMin = 2;
-        this.shootingDistanceMax = this.shootingDistanceMin + 9;
+        this.shootingDistanceMax = 11;
         // how much range the robot will follow the player
         this.eyeRadiusDistanceMin = this.shootingDistanceMax + 8;
         this.eyeRadiusDistanceMax = this.eyeRadiusDistanceMin + 6;
