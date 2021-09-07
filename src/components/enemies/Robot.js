@@ -62,6 +62,8 @@ class Robot {
             child.defaultPosition = eulerToJSON(child.position.clone());
             child.defaultRotation = eulerToJSON(child.rotation.clone());
         });
+        this.group.defaultPosition = eulerToJSON(this.group.position.clone());
+        this.group.defaultRotation = eulerToJSON(this.group.rotation.clone());
 
         /** Size */
         this.size = new Box3().setFromObject(this.group).getSize(new Vector3());
@@ -88,7 +90,7 @@ class Robot {
 
         /** Explosion Particle System */
         this._explosionParticles = new ParticleSystem(scene,camera, 0.6, null, ()=>{
-            this._explosionParticles = null;
+            // this._explosionParticles = null;
         });
 
         /** Movement idle informations */
@@ -156,6 +158,9 @@ class Robot {
                 child.material.emissiveIntensity = 0;
             }
         });
+        this.group.rotation.set(this.group.defaultRotation.x,
+                                this.group.defaultRotation.y,
+                                this.group.defaultRotation.z);
 
         // Reset robot animation
         let resetPositions = this.createGeneralAnimation({}, 0).onComplete(()=>{
