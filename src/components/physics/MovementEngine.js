@@ -35,8 +35,8 @@ class MovementEngine {
     }
 
     reset(){
-        this.velocity.set(...initialVelocity);
-        this.acceleration.set(...initialAcceleration);
+        this.velocity.set(...this.initialVelocity);
+        this.acceleration.set(...this.initialAcceleration);
         this.displacement.set(0,0,0);
     }
 }

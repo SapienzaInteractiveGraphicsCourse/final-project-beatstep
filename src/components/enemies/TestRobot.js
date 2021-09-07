@@ -63,6 +63,8 @@ class TestRobot {
         this.animation_shootPoseRev = this.createAnimationShootPoseReverse();
         this.animation_death = this.createAnimationDeath();
 
+        this.internalTimer = 0;
+
         this.animations = [
             this.animation_alert,
             this.animation_shootPose,
@@ -78,6 +80,15 @@ class TestRobot {
 
     }
 
+    reset(){
+        // Reset robot animation
+        let resetPositions = this.createGeneralAnimation({}, 0).onComplete(()=>{
+            /** Internal timer for Tween's animations */
+            this.internalTimer = 0;
+        });
+        this.startAnimation(resetPositions);
+    }
+
     setPosition(x, y, z) {
         // Apply position
         this.group.position.set(x, y, z);
@@ -89,8 +100,9 @@ class TestRobot {
     }
 
     update(delta) {
-        // Update every animation
-        this._tweenAnimations.update();
+        // Update animations
+        this.internalTimer += delta*1000;
+        this._tweenAnimations.update(this.internalTimer);
     }
 
     createAnimationShootPose() {
@@ -224,8 +236,8 @@ class TestRobot {
             z:this.group.defaultRotation.z
         }, 0)
         .onComplete(()=>{
-            anim.start();
-        }).start();
+            anim.start(this.internalTimer);
+        }).start(this.internalTimer);
         
     }
 
@@ -238,32 +250,32 @@ class TestRobot {
 
             if(rotationParams.group){
                 let group = new TWEEN.Tween(this.group.rotation, this._tweenAnimations)
-                .to(rotationParams.group, velocity).easing(generalEasing).start();
+                .to(rotationParams.group, velocity).easing(generalEasing).start(this.internalTimer);
             }
 
             let head = new TWEEN.Tween(this.head.rotation, this._tweenAnimations)
-            .to(rotationParams.head || this.head.defaultRotation, velocity).start();
+            .to(rotationParams.head || this.head.defaultRotation, velocity).start(this.internalTimer);
 
             let arm_dx_1 = new TWEEN.Tween(this.arm_dx_1.rotation, this._tweenAnimations)
-            .to(rotationParams.arm_dx_1 || this.arm_dx_1.defaultRotation, velocity).easing(generalEasing).start();
+            .to(rotationParams.arm_dx_1 || this.arm_dx_1.defaultRotation, velocity).easing(generalEasing).start(this.internalTimer);
 
             let arm_dx_2 = new TWEEN.Tween(this.arm_dx_2.rotation, this._tweenAnimations)
-            .to(rotationParams.arm_dx_2 || this.arm_dx_2.defaultRotation, velocity).easing(generalEasing).start();
+            .to(rotationParams.arm_dx_2 || this.arm_dx_2.defaultRotation, velocity).easing(generalEasing).start(this.internalTimer);
 
             let hand_dx = new TWEEN.Tween(this.hand_dx.rotation, this._tweenAnimations)
-            .to(rotationParams.hand_dx || this.hand_dx.defaultRotation, velocity).easing(generalEasing).start();
+            .to(rotationParams.hand_dx || this.hand_dx.defaultRotation, velocity).easing(generalEasing).start(this.internalTimer);
 
             let arm_sx_1 = new TWEEN.Tween(this.arm_sx_1.rotation, this._tweenAnimations)
-            .to(rotationParams.arm_sx_1 || this.arm_sx_1.defaultRotation, velocity).easing(generalEasing).start();
+            .to(rotationParams.arm_sx_1 || this.arm_sx_1.defaultRotation, velocity).easing(generalEasing).start(this.internalTimer);
 
             let arm_sx_2 = new TWEEN.Tween(this.arm_sx_2.rotation, this._tweenAnimations)
-            .to(rotationParams.arm_sx_2 || this.arm_sx_2.defaultRotation, velocity).easing(generalEasing).start();
+            .to(rotationParams.arm_sx_2 || this.arm_sx_2.defaultRotation, velocity).easing(generalEasing).start(this.internalTimer);
 
             let hand_sx = new TWEEN.Tween(this.hand_sx.rotation, this._tweenAnimations)
-            .to(rotationParams.hand_sx || this.hand_sx.defaultRotation, velocity).easing(generalEasing).start();
+            .to(rotationParams.hand_sx || this.hand_sx.defaultRotation, velocity).easing(generalEasing).start(this.internalTimer);
 
             let wheels_base = new TWEEN.Tween(this.wheels_base.rotation, this._tweenAnimations)
-            .to(rotationParams.wheels_base || this.wheels_base.defaultRotation, velocity).easing(generalEasing).start();
+            .to(rotationParams.wheels_base || this.wheels_base.defaultRotation, velocity).easing(generalEasing).start(this.internalTimer);
 
         });
 

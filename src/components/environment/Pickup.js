@@ -88,7 +88,7 @@ class PickupHealth extends Pickup {
             let hInc = 10;
             if(player.health < player.topHealth){
                 player.health += hInc;
-                pickup.removeFromPhysicsWorld();
+                pickup.hideFromPhysicsWorld();
                 pickup.removeFromParent();
             }
         });
@@ -101,7 +101,7 @@ class PickupAmmo extends Pickup {
             let aInc = 50;
             if(player.ammo < player.topAmmo){
                 player.ammo += aInc;
-                pickup.removeFromPhysicsWorld();
+                pickup.hideFromPhysicsWorld();
                 pickup.removeFromParent();
             }
         });
@@ -114,7 +114,7 @@ class PickupShield extends Pickup {
             let sInc = 10;
             if(player.shield < player.topShield){
                 player.shield += sInc;
-                pickup.removeFromPhysicsWorld();
+                pickup.hideFromPhysicsWorld();
                 pickup.removeFromParent();
             }
         });

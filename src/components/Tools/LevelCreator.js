@@ -23,12 +23,12 @@ import { DefaultGeneralLoadingManager } from './GeneralLoadingManager';
 import ControlPanel from '../environment/ControlPanel';
 import TestRobot from '../enemies/TestRobot';
 import { AmbientLight, PointLight } from 'three';
-// const loader = DefaultGeneralLoadingManager.getHandler("texture");
-// const smokeImg = loader.load(smoke);
+import { ObjectPool } from './ObjectPool';
 
 
 class LevelCreator {
-    constructor(){
+    constructor(params = {}){
+        this.objects = [];
         this.objectsToUpdate = [];
         this.player = null;
     }
@@ -39,6 +39,22 @@ class LevelCreator {
         this.objectsToUpdate = [];
         if(this.player) this.player.destroyObject();
         this.player = null;
+    }
+
+    resetLevel(){
+        this.player.reset();
+        for (const obj of this.objects) {
+            if(obj._levelReset) obj._levelReset();
+        }
+    }
+
+    playerInDojo(){
+        // Dojo center + 0,0,10
+        this.player.position.set(-90,0,-15 + 10);
+    }
+
+    playerInLevel(){
+        this.player.position.set(0,0,25);
     }
 
     // addFogExp2(color = 0xFFFFFF, density = 0.02){
@@ -53,7 +69,7 @@ class LevelCreator {
 
         this.objectsToUpdate.push(player);
         this.player = player;
-        // window.getPlayerPos = ()=> this.player.position;
+        window.getPlayerPos = ()=> this.player.position;
         // window.player = this.player;
     }
 
@@ -64,6 +80,16 @@ class LevelCreator {
         scene.add(robot.group);
         world.addDynamicObject(robot.group);
 
+        // Storing initial settings to reset later
+        robot._levelReset = function(){
+            robot.reset();
+            robot.setPosition(x,y,z);
+            robot.setRotation(rotationRadians);
+            robot.group.showInPhysicsWorld();
+            scene.add(robot.group);
+        }
+        this.objects.push(robot);
+
         this.objectsToUpdate.push(robot);
     }
 
@@ -72,6 +98,14 @@ class LevelCreator {
         robot.setPosition(x,y,z);
         robot.setRotation(rotationRadians);
         scene.add(robot.group);
+
+        // Storing initial settings to reset later
+        robot._levelReset = function(){
+            robot.reset();
+            robot.setPosition(x,y,z);
+            robot.setRotation(rotationRadians);
+        }
+        this.objects.push(robot);
 
         this.objectsToUpdate.push(robot);
     }
@@ -88,6 +122,14 @@ class LevelCreator {
         world.addStaticObject(door.group,null,false);
         world.addStaticObject(door.group.getObjectByName("door_l"),door.group.getObjectByName("door_l").collisionGeometry);
         world.addStaticObject(door.group.getObjectByName("door_r"),door.group.getObjectByName("door_r").collisionGeometry);
+
+        // Storing initial settings to reset later
+        door._levelReset = function(){
+            door.reset();
+            door.setPosition(x,y,z);
+            door.setRotation(rotationRadians);
+        }
+        this.objects.push(door);
 
         this.objectsToUpdate.push(door);
     }
@@ -109,6 +151,14 @@ class LevelCreator {
         floorLight.addToScene(scene);
         world.addStaticObject(floorLight.group);
 
+        // Storing initial settings to reset later
+        floorLight._levelReset = function(){
+            floorLight.reset();
+            floorLight.setPosition(x,y,z);
+            floorLight.setRotation(rotationRadians);
+        }
+        this.objects.push(floorLight);
+
         this.objectsToUpdate.push(floorLight);
     }
 
@@ -123,6 +173,13 @@ class LevelCreator {
         scene.add(pickup);
         world.addStaticObject(pickup);
 
+        // Storing initial settings to reset later
+        pickup._levelReset = function(){
+            pickup.showInPhysicsWorld();
+            scene.add(pickup);
+        }
+        this.objects.push(pickup);
+
         this.objectsToUpdate.push(pickup);
     }
 
@@ -130,6 +187,13 @@ class LevelCreator {
         let pickup = new PickupShield(x,y,z);
         scene.add(pickup);
         world.addStaticObject(pickup);
+
+        // Storing initial settings to reset later
+        pickup._levelReset = function(){
+            pickup.showInPhysicsWorld();
+            scene.add(pickup);
+        }
+        this.objects.push(pickup);
 
         this.objectsToUpdate.push(pickup);
     }
@@ -139,6 +203,13 @@ class LevelCreator {
         scene.add(pickup);
         world.addStaticObject(pickup);
 
+        // Storing initial settings to reset later
+        pickup._levelReset = function(){
+            pickup.showInPhysicsWorld();
+            scene.add(pickup);
+        }
+        this.objects.push(pickup);
+
         this.objectsToUpdate.push(pickup);
     }
 
@@ -147,6 +218,17 @@ class LevelCreator {
         scene.add(cylinder);
         world.addStaticObject(cylinder.surroundObject,null,false);
         world.addStaticObject(cylinder);
+
+        // Storing initial settings to reset later
+        cylinder._levelReset = function(){
+            cylinder.reset();
+            cylinder.setPosition(x,y,z);
+            cylinder.setRotation(rotationRadians);
+            cylinder.showInPhysicsWorld();
+            cylinder.surroundObject.showInPhysicsWorld();
+            scene.add(cylinder);
+        }
+        this.objects.push(cylinder);
 
         this.objectsToUpdate.push(cylinder);
     }
@@ -198,8 +280,8 @@ class LevelCreator {
         world.step(delta);
     }
 
-    /** Level 1 */
-    createLevel1(){
+    /** Levels */
+    createLevels(){
         let wallHeight = 16;
         let doorHeight = 5;
 
@@ -207,11 +289,11 @@ class LevelCreator {
         this.addPointLight(0,40,0, 0xFFFFFF, 0.1);
         // this.addFogExp2();
 
+        // this.addPlayer(0,0,25, 3);
         this.addPlayer(0,0,25, 3);
-        // this.addPlayer(31,0,46, 3);
 
-        this.addFloor(0,0,0, 200,200);
-        this.addFloor(0,wallHeight,0, 200,200); // ceiling = floor on higher level
+        this.addFloor(40,0,0, 120,200);
+        this.addFloor(40,wallHeight,0, 120,200); // ceiling = floor on higher level
 
         /* Room 1 */
 
@@ -321,16 +403,19 @@ class LevelCreator {
         this.addRobot(82,0,50, 0);
         this.addRobot(40,0,56, 0);
         this.addRobot(55,0,50, 0);
+
+        /** Dojo */
+        this.createDojoPart(-90,0,-15);
     }
 
-    createDojo(){
+    createDojoPart(cx,cy,cz){
         let wallHeight = 12;
+        let wallType = 1;
+        
+        // this.addPointLight(0+cx,4+cy,0+cz, 0xFFFFFF, 0.1);
 
-        this.addAmbientLight();
-        this.addPointLight(0,40,0, 0xFFFFFF, 0.1);
-
-        this.addTestRobot(0,0,0, -Math.PI/2);
-        this.addPlayer(0,0,10, 3);
+        this.addTestRobot(0+cx,0+cy,0+cz, -Math.PI/2);
+        // this.addPlayer(0,0,10, 3);
 
         let dojoRadius = 16;
         let dojoParts = 8;
@@ -339,19 +424,50 @@ class LevelCreator {
         for(let angle = 0; angle < 2*Math.PI; angle+=incrementAngle){
             let x = Math.sin(angle)*dojoRadius;
             let z = Math.cos(angle)*dojoRadius;
-            this.addWall(x,0,z, wallSize,wallHeight, angle, 2);
+            this.addWall(x+cx,0+cy,z+cz, wallSize,wallHeight, angle, wallType);
 
             if(angle == incrementAngle || angle == incrementAngle*(dojoParts-1)){
-                this.addFloorLight(x-2*Math.sign(x),0,z-2*Math.sign(z), angle + Math.PI);
+                this.addFloorLight(x-2*Math.sign(x)+cx, 0+cy, z-2*Math.sign(z)+cz, angle + Math.PI);
             }
         }
 
-        this.addPickupAmmo(4,0,-10);
-        this.addPickupHealth(0,0,-10);
-        this.addPickupShield(-4,0,-10);
+        this.addPickupAmmo(4+cx,0+cy,-10+cz);
+        this.addPickupHealth(0+cx,0+cy,-10+cz);
+        this.addPickupShield(-4+cx,0+cy,-10+cz);
 
-        this.addFloor(0,0,0, 80,80);
+        this.addFloor(0+cx,0+cy,0+cz, 80,80);
     }
+
+    // createDojo(cx = 0,cy = 0,cz = 0){
+    //     let wallHeight = 12;
+    //     let wallType = 1;
+        
+    //     this.addAmbientLight();
+    //     this.addPointLight(0+cx,4+cy,0+cz, 0xFFFFFF, 0.1);
+
+    //     this.addTestRobot(0+cx,0+cy,0+cz, -Math.PI/2);
+    //     this.addPlayer(0+cx,0+cy,10+cz, 3);
+
+    //     let dojoRadius = 16;
+    //     let dojoParts = 8;
+    //     let incrementAngle = 2*Math.PI/dojoParts;
+    //     let wallSize = 16.58 * dojoRadius/20;
+    //     for(let angle = 0; angle < 2*Math.PI; angle+=incrementAngle){
+    //         let x = Math.sin(angle)*dojoRadius;
+    //         let z = Math.cos(angle)*dojoRadius;
+    //         this.addWall(x+cx,0+cy,z+cz, wallSize,wallHeight, angle, wallType);
+
+    //         if(angle == incrementAngle || angle == incrementAngle*(dojoParts-1)){
+    //             this.addFloorLight(x-2*Math.sign(x)+cx, 0+cy, z-2*Math.sign(z)+cz, angle + Math.PI);
+    //         }
+    //     }
+
+    //     this.addPickupAmmo(4+cx,0+cy,-10+cz);
+    //     this.addPickupHealth(0+cx,0+cy,-10+cz);
+    //     this.addPickupShield(-4+cx,0+cy,-10+cz);
+
+    //     this.addFloor(0+cx,0+cy,0+cz, 80,80);
+    // }
 
     // createTestLevel(){
     //     let wallHeight = 16;

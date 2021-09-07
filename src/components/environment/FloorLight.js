@@ -66,14 +66,6 @@ class FloorLight {
         this.size = new Box3().setFromObject(this.group).getSize(new Vector3());
         this.setPosition(x,y,z);
         this.setRotation(rotation);
-        
-        // Interaction text
-        // TODO: put in HUD
-        // this._tipLight = document.createElement("p");
-        // this._tipLight.innerText = "Press E to toggle the light";
-        // this._tipLight.classList.add("tip");
-        // this._tipLight.classList.add("hidden");
-        // document.body.appendChild(this._tipLight);
 
         // Interaction + Collision
         this._canBeInteracted = false;
@@ -104,6 +96,10 @@ class FloorLight {
 
         }).bind(this);
 
+    }
+
+    reset(){
+        if(this.group.children[0].material.emissiveIntensity == 0) this.toggleLight();
     }
 
     toggleLight(){

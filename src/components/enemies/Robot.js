@@ -150,6 +150,56 @@ class Robot {
 
     }
 
+    reset(pos,rot){
+        this.group.traverse(function(child){
+            if(child.isMesh){
+                child.material.emissiveIntensity = 0;
+            }
+        });
+
+        // Reset robot animation
+        let resetPositions = this.createGeneralAnimation({}, 0).onComplete(()=>{
+            /** Internal timer for Tween's animations */
+            this.internalTimer = 0;
+        });
+        this.startAnimation(resetPositions);
+
+        /** Shoot Particle System */
+        this._shootExplosion.reset();
+
+        /** Explosion Particle System */
+        this._explosionParticles.reset();
+
+        /** Movement idle informations */
+        this._idleMovement = {
+            duration: 1000*4,
+            isIdleAnimated: false, // if there is and idle animation right now
+            radialDistance: 3,
+        };
+
+        /** Properties to interact */
+        this.isFollowing = false;
+        this.isInShooting = false;
+        this.isShootingProjectiles = false;
+        this.isDead = false;
+        this.shootingCooldown = 0;
+
+        this.angryDuration = 0; 
+        
+        this.health = 100; // when 0, death animation and explode
+
+        /** Adding collision detection */
+        this.group.movementEngine.reset();
+        this._collided = false;
+
+        /** Events for collision detection */
+        this._emissiveIntensityDamage = 0;
+
+        
+        if(pos) this.group.position.set(...pos);
+        if(rot) this.group.rotation.set(...rot);
+    }
+
     setPosition(x,y,z){
         // Apply position
         this.group.position.set(x,y,z);
@@ -445,7 +495,7 @@ class Robot {
         // })
         chest2.onComplete(()=>{
             // Disappear robot
-            this.group.removeFromPhysicsWorld();
+            this.group.hideFromPhysicsWorld();
             this.group.removeFromParent();
             // Start explosion particles
             this._explosionParticles.setGeneralPosition(this.group.position.x,this.group.position.y,this.group.position.z);

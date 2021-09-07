@@ -114,8 +114,8 @@ class GasCylinder extends Mesh{
         if(this.isExploding) return;
         this.isExploding = true;
         // Disappear
-        this.removeFromPhysicsWorld();
-        this.surroundObject.removeFromPhysicsWorld();
+        this.hideFromPhysicsWorld();
+        this.surroundObject.hideFromPhysicsWorld();
         this.removeFromParent();
         // Adding Particles
         this._explosionParticles.setGeneralPosition(this.position.x,this.position.y,this.position.z);

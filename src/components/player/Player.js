@@ -440,7 +440,7 @@ class Player extends Object3D{
     }
 
     reset(pos){
-        this.camera.position.set(0,height/2,-0.2);
+        this.camera.position.set(0,this.height/2,-0.2);
         this.camera.quaternion.copy(this.quaternion);
 
         this.health = 100;
@@ -449,10 +449,6 @@ class Player extends Object3D{
 
         this.canJump = false;
         this.movementEngine.reset();
-
-        hud.healthBar.setPercentage(_health/this.topHealth*100);
-        hud.shieldBar.setPercentage(_shield/this.topShield*100);
-        hud.ammoBar.setPercentage(_ammo/this.topAmmo*100);
 
         this.rifleExplosion.reset();
 

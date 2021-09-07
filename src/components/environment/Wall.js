@@ -7,7 +7,6 @@ import { DoubleSide, Mesh, MeshPhongMaterial, NearestFilter, PlaneGeometry, Repe
 const loader = DefaultGeneralLoadingManager.getHandler("texture");
 const _walls = [ // [texture, ratio]
     [loader.load(defaultWall),10],
-    [loader.load(metalPanel),4],
     [loader.load(wood),4],
 ];
 

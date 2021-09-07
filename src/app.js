@@ -22,7 +22,7 @@ DefaultGeneralLoadingManager.addOnLoad(() => {
     document.body.removeChild(document.querySelector(".splash"));
     mainMenu.addToPage();
 
-    levels.createLevel1();
+    levels.createLevels();
     console.log("Level created");
     renderer.render(scene, camera);
     console.log("Level rendered");
@@ -30,13 +30,10 @@ DefaultGeneralLoadingManager.addOnLoad(() => {
 
 function startGame(n){
 
-    //levels.clearLevel();
-    if(n==1){
-        levels.clearLevel();
-        levels.createDojo();
-    }
-    //else
-        //levels.createLevel1();
+    if(n==1)
+        levels.playerInDojo();
+    else
+        levels.playerInLevel();
 
     mainMenu.removeFromPage();
     document.body.appendChild(renderer.domElement);
@@ -100,11 +97,7 @@ function winGame(){
 function restartGame(currentMenu){
     currentMenu.removeFromPage();
     mainMenu.addToPage();
-    levels.clearLevel();
-    levels.createLevel1();
-    console.log("Level created");
-    renderer.render(scene, camera);
-    console.log("Level rendered");
+    levels.resetLevel();
 }
 
 function animate () {
