@@ -45,6 +45,12 @@ class PhysicsWorld {
         mesh.removeFromPhysicsWorld = function(){
             scope.removeObject(phObject);
         }
+        mesh.hideFromPhysicsWorld = function(){
+            phObject.hidden = true;
+        }
+        mesh.showInPhysicsWorld = function(){
+            phObject.hidden = false;
+        }
 
         // if(mesh instanceof Object3D) scene.add(mesh);
         // else if(mesh.addToScene) mesh.addToScene(scene);
@@ -95,6 +101,7 @@ class PhysicsWorld {
         
         for (let i = 0; i < this.dynamicObjects.length; i++) {
             let obj = this.dynamicObjects[i];
+            if(obj.hidden) continue;
             // Updating physics movement
             obj.mesh.movementEngine.update(delta);
 
@@ -102,6 +109,7 @@ class PhysicsWorld {
 
             // Collision with static objects
             for (let staticObj of this.staticObjects) {
+                if(staticObj.hidden) continue;
                 // If the bounding boxes are intersecting, we check for a precise collision, otherwise quick skip
                 if(boundingBox.intersectsBox(staticObj.getBoundingBox())){
                     let collisionResult = SAT.checkCollision(obj,staticObj);
@@ -114,7 +122,8 @@ class PhysicsWorld {
 
             // Collision with remaining dynamic objects
             for (let c = i+1; c < this.dynamicObjects.length; c++) {
-                let dynObj = this.dynamicObjects[c]; 
+                let dynObj = this.dynamicObjects[c];
+                if(dynObj.hidden) continue;
                 // If the bounding boxes are intersecting, we check for a precise collision, otherwise quick skip
                 if(boundingBox.intersectsBox(dynObj.getBoundingBox())){
                     let collisionResult = SAT.checkCollision(obj,dynObj);
@@ -133,6 +142,7 @@ class PhysicsWorld {
     raycast(origin, direction, distance){
         let intersections = [];
         for (let obj of this.dynamicObjects) {
+            if(obj.hidden) continue;
             // If the object is further than the ray's length, ignore this object
             if(obj.boundingBox.distanceToPoint(origin) > distance) continue;
 
@@ -145,6 +155,7 @@ class PhysicsWorld {
         }
 
         for (let obj of this.staticObjects) {
+            if(obj.hidden) continue;
             // If the object is further than the ray's length, ignore this object
             if(obj.boundingBox.distanceToPoint(origin) > distance) continue;
 
@@ -162,6 +173,7 @@ class PhysicsWorld {
     raycastPrecise(origin, direction, distance){
         let intersections = [];
         for (let obj of this.dynamicObjects) {
+            if(obj.hidden) continue;
             // If the object is not raycastable, skip it
             if(!obj.raycastable) continue;
             // If the object is further than the ray's length, ignore this object
@@ -176,6 +188,7 @@ class PhysicsWorld {
         }
 
         for (let obj of this.staticObjects) {
+            if(obj.hidden) continue;
             // If the object is not raycastable, skip it
             if(!obj.raycastable) continue;
             // If the object is further than the ray's length, ignore this object
@@ -202,6 +215,7 @@ class PhysicsObject{
         this.shape = shape;
         this.boundingBox = this.shape.boundingBox.clone();
         this.boundingShape = new BoundingPhysicsShape(this.shape.geometry);
+        this.hidden = false;
 
         if(this.mesh.onCollision) this.onCollision = this.mesh.onCollision.bind(this.mesh);
         else this.onCollision = () => {};
