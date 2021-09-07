@@ -4,6 +4,7 @@ import { hud } from '../player/HUD';
 
 import door from '../../asset/models/door/doorSquared.glb';
 import { AnimationClip, AnimationMixer, Box3, BoxGeometry, LoopOnce, Vector3, VectorKeyframeTrack } from 'three';
+import TWEEN from '@tweenjs/tween.js';
 
 const loader = DefaultGeneralLoadingManager.getHandler("gltf");
 let _doorModel;
@@ -40,6 +41,10 @@ class Door {
 
         this.door_r = this.group.getObjectByName("door_r");
         this.door_l = this.group.getObjectByName("door_l");
+        
+        let eulerToJSON = (e) => ({x:e.x,y:e.y,z:e.z});
+        this.door_r.defaultPosition = eulerToJSON(this.door_r.position.clone());
+        this.door_l.defaultPosition = eulerToJSON(this.door_l.position.clone());
 
         // Adding geometry of doors
         let _door_l_CollisionGeometry = new BoxGeometry( _doorSize.x/4,
@@ -58,34 +63,25 @@ class Door {
 
         this.isOpen = false;
 
-        // We need one mixer for each animated object in the scene
-        this.mixer = new AnimationMixer(this.group);
-        // Set final position when animation ends
-        this.mixer.addEventListener('finished', (e) => {
-            // checking if finalCoords exists
-            if(e.action.finalCoords){
-                e.action.stop();
-                if(e.action.finalCoords.positions)
-                    for(let objPosition of e.action.finalCoords.positions){
-                        objPosition.obj.position.set(...objPosition.value.toArray());
-                    }
-                if(e.action.finalCoords.rotations)
-                    for(let objRotation of e.action.finalCoords.rotations){
-                        objRotation.obj.quaternion.set(...objRotation.value.toArray());
-                    }
-            }
-
-        });
-
+        /** Animations */
+        this._tweenAnimations = new TWEEN.Group();
         this.animation_openDoors = this.createOpenAnimation();
         this.animation_closeDoors = this.createCloseAnimation();
+        /** Internal timer for Tween's animations */
+        this.internalTimer = 0;
 
         // Interaction
         this._canBeInteracted = false;
         document.addEventListener("keydown", ((event) => {
             if(this._canBeInteracted && event.key.toLowerCase() === "e") { // press e
-                if(!this.isOpen) this.openDoor();
-                else this.closeDoor();
+                if(!this.isOpen){ 
+                    this.isOpen = true;
+                    this.startAnimation(this.animation_openDoors);
+                }
+                else{
+                    this.isOpen = false;
+                    this.startAnimation(this.animation_closeDoors);
+                }
             }
         }).bind(this));
 
@@ -115,7 +111,12 @@ class Door {
     reset(){
         this.isOpen = false;
         this._canBeInteracted = false;
-        // TODO: CHANGE FROM MIXER TO TWEEN!
+        // Reset door animation
+        let resetPositions = this.createGeneralTranslationDoor({}, 0).onComplete(()=>{
+            /** Internal timer for Tween's animations */
+            this.internalTimer = 0;
+        });
+        this.startAnimation(resetPositions);
     }
 
     addToScene(scene){
@@ -133,8 +134,9 @@ class Door {
     }
 
     update(delta){
-        // Update every animation
-        this.mixer.update(delta);
+        // Update animations
+        this.internalTimer += delta*1000;
+        this._tweenAnimations.update(this.internalTimer);
         // Reset the caption if this object is the owner
         this._canBeInteracted = false;
         if(hud.caption.owner == this)
@@ -143,94 +145,45 @@ class Door {
     }
 
     startAnimation(anim) {
-        if(anim){
-            anim.reset();
-            anim.play();
-        }
+        if (!anim) return;
+        this._tweenAnimations.removeAll();
+        anim.start(this.internalTimer);
     }
 
     createOpenAnimation(){
-        let door_r_p1 = this.door_r.position.clone();
-        let door_l_p1 = this.door_l.position.clone();
-        
-        let door_r_p2 = this.incrementEuler(door_r_p1, -0.8, 0,0);
-        let door_l_p2 = this.incrementEuler(door_l_p1, 0.8, 0,0);
-
-        const door_r_translation = new VectorKeyframeTrack(
-            'door_r.position',
-            [0, 0.5],
-            [...door_r_p1.toArray(),
-             ...door_r_p2.toArray()],
-        );
-        const door_l_translation = new VectorKeyframeTrack(
-            'door_l.position',
-            [0, 0.5],
-            [...door_l_p1.toArray(),
-             ...door_l_p2.toArray()],
-        );
-
-        const clip = new AnimationClip('doorsOpen_clip', -1, [
-            door_r_translation,door_l_translation
-        ]);
-
-        let animation = this.mixer.clipAction(clip);
-        animation.loop = LoopOnce;
-        animation.enabled = false;
-        animation.clampWhenFinished = false;
-        animation.finalCoords = {
-            positions: [
-                {obj:this.door_r,value:door_r_p2},
-                {obj:this.door_l,value:door_l_p2}
-            ],
-            rotations: [],
-        };
-
-        return animation;
+        return this.createGeneralTranslationDoor({
+            door_r: {
+                x:this.door_r.defaultPosition.x-0.8,
+                y:this.door_r.defaultPosition.y,
+                z:this.door_r.defaultPosition.z,
+            },
+            door_l: {
+                x:this.door_l.defaultPosition.x+0.8,
+                y:this.door_l.defaultPosition.y,
+                z:this.door_l.defaultPosition.z,
+            },
+        },500);
 
     }
 
     createCloseAnimation(){
-        let door_r_p2 = this.door_r.position.clone();
-        let door_l_p2 = this.door_l.position.clone();
-
-        let door_r_p1 = this.incrementEuler(door_r_p2, -0.8, 0,0);
-        let door_l_p1 = this.incrementEuler(door_l_p2, 0.8, 0,0);
-
-        const door_r_translation = new VectorKeyframeTrack(
-            'door_r.position',
-            [0, 0.5],
-            [...door_r_p1.toArray(),
-             ...door_r_p2.toArray()],
-        );
-        const door_l_translation = new VectorKeyframeTrack(
-            'door_l.position',
-            [0, 0.5],
-            [...door_l_p1.toArray(),
-             ...door_l_p2.toArray()],
-        );
-
-        const clip = new AnimationClip('doorsClose_clip', -1, [
-            door_r_translation,door_l_translation
-        ]);
-
-        let animation = this.mixer.clipAction(clip);
-        animation.loop = LoopOnce;
-        animation.enabled = false;
-        animation.clampWhenFinished = false;
-        animation.finalCoords = {
-            positions: [
-                {obj:this.door_r,value:door_r_p2},
-                {obj:this.door_l,value:door_l_p2}
-            ],
-            rotations: [],
-        };
-
-        return animation;
+        return this.createGeneralTranslationDoor({},500);
 
     }
 
-    incrementEuler(e, dx,dy,dz){
-        return new Vector3(e.x+dx,e.y+dy,e.z+dz);
+    createGeneralTranslationDoor(translationParams, generalVelocityMilliseconds = 1000, generalEasing = TWEEN.Easing.Linear.None){
+        let velocity = generalVelocityMilliseconds;
+        
+        let door_r = new TWEEN.Tween(this.door_r.position, this._tweenAnimations)
+        .to(translationParams.door_r || this.door_r.defaultPosition, velocity).easing(generalEasing)
+        .onStart(()=>{
+
+            let door_l = new TWEEN.Tween(this.door_l.position, this._tweenAnimations)
+            .to(translationParams.door_l || this.door_l.defaultPosition, velocity).start(this.internalTimer);
+
+        });
+
+        return door_r;
     }
 
     setPosition(x,y,z){
