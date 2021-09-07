@@ -46,7 +46,7 @@ module.exports = {
         path: path.resolve(__dirname, 'dist'),
         clean: true,
     },
-    devtool: "eval-cheap-module-source-map",
+    // devtool: "eval-cheap-module-source-map",
     devServer: {
       contentBase: './dist',
       liveReload: true,
