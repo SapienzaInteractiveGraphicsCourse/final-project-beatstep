@@ -42,19 +42,23 @@ class LevelCreator {
     }
 
     resetLevel(){
-        this.player.reset();
+        // this.player.reset();
         for (const obj of this.objects) {
             if(obj._levelReset) obj._levelReset();
         }
     }
 
     playerInDojo(){
-        // Dojo center + 0,0,10
-        this.player.position.set(-90,0,-15 + 10);
+        // Dojo center + 0,0,10        
+        this.player.reset([-90,0,-15 + 10]);
+        // this.player.position.set(-90,0,-15 + 10);
+        this.player.controls.attach();
     }
 
     playerInLevel(){
-        this.player.position.set(0,0,25);
+        this.player.reset([0,0,25]);
+        // this.player.position.set(0,0,25);
+        this.player.controls.attach();
     }
 
     // addFogExp2(color = 0xFFFFFF, density = 0.02){
@@ -70,7 +74,7 @@ class LevelCreator {
         this.objectsToUpdate.push(player);
         this.player = player;
         window.getPlayerPos = ()=> this.player.position;
-        // window.player = this.player;
+        window.player = this.player;
     }
 
     addRobot(x,y,z, rotationRadians = 0){

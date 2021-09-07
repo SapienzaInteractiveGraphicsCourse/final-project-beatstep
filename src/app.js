@@ -20,12 +20,11 @@ let inPause = false;
 
 DefaultGeneralLoadingManager.addOnLoad(() => {    
     document.body.removeChild(document.querySelector(".splash"));
-    mainMenu.addToPage();
 
     levels.createLevels();
-    console.log("Level created");
     renderer.render(scene, camera);
-    console.log("Level rendered");
+    
+    mainMenu.addToPage();
 });
 
 function startGame(n){
