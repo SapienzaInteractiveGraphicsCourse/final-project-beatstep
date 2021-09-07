@@ -80,7 +80,10 @@ class GasCylinder extends Mesh{
         }.bind(this);
         this.add(this.surroundObject);
 
-        this._explosionParticles = null;
+        this._explosionParticles = new ParticleSystem(scene,camera, 0.6, null, ()=>{
+            this.isExploding = false;
+        });
+        this.isExploding = false;
 
         this.setPosition(x,y,z);
         this.setRotation(rotation);
@@ -108,17 +111,15 @@ class GasCylinder extends Mesh{
     }
 
     explode(){
-        if(this._explosionParticles !== null) return;
+        if(this.isExploding) return;
+        this.isExploding = true;
         // Disappear
         this.removeFromPhysicsWorld();
         this.surroundObject.removeFromPhysicsWorld();
         this.removeFromParent();
         // Adding Particles
-        this._explosionParticles = new ParticleSystem(scene,camera, 0.6, null, ()=>{
-            this._explosionParticles = null;
-        });
         this._explosionParticles.setGeneralPosition(this.position.x,this.position.y,this.position.z);
-        this._explosionParticles.start();
+        this._explosionParticles.restart();
 
         // Pushing surrounding objects away
         for (let obj of this.closeObjects) {
@@ -150,6 +151,15 @@ class GasCylinder extends Mesh{
 
     hit(){
         this.explode();
+    }
+
+    reset(pos,rot){
+        this.closeObjects = [];
+        this._explosionParticles.reset();
+        this.isExploding = false;
+
+        if(pos) this.setPosition(...pos);
+        if(rot) this.setRotation(...rot);
     }
 
 }

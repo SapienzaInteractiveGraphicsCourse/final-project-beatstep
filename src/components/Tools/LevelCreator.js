@@ -37,7 +37,7 @@ class LevelCreator {
         scene.remove.apply(scene, scene.children);
         world.clearWorld();
         this.objectsToUpdate = [];
-        this.player.destroyObject();
+        if(this.player) this.player.destroyObject();
         this.player = null;
     }
 

@@ -436,7 +436,33 @@ class Player extends Object3D{
     destroyObject(){
         this.controls.detach();
         this.rifle.removeFromParent();
-        this.rifleExplosion.removeFromParent();
+        this.rifleExplosion.reset();
+    }
+
+    reset(pos){
+        this.camera.position.set(0,height/2,-0.2);
+        this.camera.quaternion.copy(this.quaternion);
+
+        this.health = 100;
+        this.shield = 0;
+        this.ammo = 150;
+
+        this.canJump = false;
+        this.movementEngine.reset();
+
+        hud.healthBar.setPercentage(_health/this.topHealth*100);
+        hud.shieldBar.setPercentage(_shield/this.topShield*100);
+        hud.ammoBar.setPercentage(_ammo/this.topAmmo*100);
+
+        this.rifleExplosion.reset();
+
+        this.internalTimer = 0;
+        this.animationGroup.update(Infinity);
+        this.deathAnim.alreadyPlayed = false;
+
+        if(pos){
+            this.position.set(...pos);
+        }
     }
 
 }

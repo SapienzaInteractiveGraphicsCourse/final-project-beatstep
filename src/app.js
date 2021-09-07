@@ -21,14 +21,22 @@ let inPause = false;
 DefaultGeneralLoadingManager.addOnLoad(() => {    
     document.body.removeChild(document.querySelector(".splash"));
     mainMenu.addToPage();
+
+    levels.createLevel1();
+    console.log("Level created");
+    renderer.render(scene, camera);
+    console.log("Level rendered");
 });
 
 function startGame(n){
 
-    if(n==1)
+    //levels.clearLevel();
+    if(n==1){
+        levels.clearLevel();
         levels.createDojo();
-    else
-        levels.createLevel1();
+    }
+    //else
+        //levels.createLevel1();
 
     mainMenu.removeFromPage();
     document.body.appendChild(renderer.domElement);
@@ -93,6 +101,10 @@ function restartGame(currentMenu){
     currentMenu.removeFromPage();
     mainMenu.addToPage();
     levels.clearLevel();
+    levels.createLevel1();
+    console.log("Level created");
+    renderer.render(scene, camera);
+    console.log("Level rendered");
 }
 
 function animate () {
@@ -104,6 +116,7 @@ function animate () {
     requestAnimationFrame(animate);
     let delta = clock.getDelta();
     // delta = 0.02;
+    if(delta > 0.1) delta = 0.1;
 
     if(!inPause){
         renderer.render(scene, camera);
