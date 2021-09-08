@@ -15,7 +15,7 @@ import { DefaultGeneralLoadingManager } from './components/Tools/GeneralLoadingM
 import LevelCreator from './components/Tools/LevelCreator';
 let levels = new LevelCreator();
 
-let exitAnimate = false;
+let animateId = null;
 let inPause = false;
 
 DefaultGeneralLoadingManager.addOnLoad(() => {    
@@ -79,7 +79,7 @@ function deathGame(){
     document.exitPointerLock();
     deathMenu.addToPage();
     setTimeout(()=>{
-        exitAnimate = true;
+        stopAnimate();
     },4000);
 }
 
@@ -91,21 +91,19 @@ function winGame(){
     levels.player.hud.hide();
     document.exitPointerLock();
     winMenu.addToPage()
+    stopAnimate();
 }
 
 function restartGame(currentMenu){
     currentMenu.removeFromPage();
+    stopAnimate();
     mainMenu.addToPage();
     levels.resetLevel();
 }
 
 function animate () {
-    if(exitAnimate == true){
-        exitAnimate = false;
-        return;
-    }
 
-    requestAnimationFrame(animate);
+    animateId = requestAnimationFrame(animate);
     let delta = clock.getDelta();
     // delta = 0.02;
     if(delta > 0.1) delta = 0.1;
@@ -115,3 +113,10 @@ function animate () {
         levels.step(delta);
     }
 };
+
+function stopAnimate(){
+    if(animateId){
+        cancelAnimationFrame(animateId);
+        animateId = null;
+    }
+}
