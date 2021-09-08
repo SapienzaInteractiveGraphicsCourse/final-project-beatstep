@@ -15,8 +15,11 @@
         background-size: 200% 200%;
         animation: gradient 3s ease infinite;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
+        color: white;
+        font-family: sans-serif;
     }
 
     .loader {
@@ -26,6 +29,12 @@
         width: 100px;
         height: 100px;
         animation: spin 2s linear infinite;
+        margin-bottom: 30px;
+    }
+
+    #loading_message{
+        visibility: hidden;
+        text-align: center;
     }
 
     @keyframes gradient {
@@ -43,4 +52,15 @@
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
-    }</style><script defer="defer" src="app.bundle.js"></script></head><body><div class="splash"><div class="loader"></div></div></body></html>
+    }</style><script defer="defer" src="app.bundle.js"></script></head><body><div class="splash"><div class="loader"></div><span id="loading_message">Loading is taking a bit long, please wait ...</span></div><script>setTimeout(()=>{
+            let span = document.querySelector("#loading_message");
+            if(span){
+                span.style.visibility = "visible";
+                setTimeout(()=>{
+                    let span = document.querySelector("#loading_message");
+                    if(span){
+                        span.innerHTML = "Wow, we're sorry for the waiting, might be the network.<br />Don't worry though, everything is still working, just loading :)"
+                    }
+                },25000)
+            }
+        },5000)</script></body></html>
